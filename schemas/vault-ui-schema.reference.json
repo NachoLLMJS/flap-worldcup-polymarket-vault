@@ -1,0 +1,762 @@
+{
+  "vaultType": "WorldCupPolymarketVault",
+  "description": "World Cup-only vault for Flap tax revenue, WorldCupViewer settlement checks, configurable market countdown timestamps, and Polymarket market metadata, and Guardian-only emergency recovery. Polymarket execution is off-chain/metadata-only in this MVP.",
+  "methods": [
+    {
+      "name": "description",
+      "description": "Dynamic vault status: revenue held plus latest World Cup settlement state.",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "summary",
+          "fieldType": "string",
+          "description": "Human-readable vault status",
+          "decimals": 0
+        }
+      ],
+      "approvals": [],
+      "isInputArray": false,
+      "isOutputArray": false,
+      "isWriteMethod": false
+    },
+    {
+      "name": "taxToken",
+      "description": "Read the configured Flap tax token address for this vault.",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "taxToken",
+          "fieldType": "address",
+          "description": "Configured tax token address",
+          "decimals": 0
+        }
+      ],
+      "approvals": [],
+      "isInputArray": false,
+      "isOutputArray": false,
+      "isWriteMethod": false
+    },
+    {
+      "name": "guardian",
+      "description": "Read the immutable Flap Guardian/backup operator address.",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "guardian",
+          "fieldType": "address",
+          "description": "Guardian address that can always operate the vault",
+          "decimals": 0
+        }
+      ],
+      "approvals": [],
+      "isInputArray": false,
+      "isOutputArray": false,
+      "isWriteMethod": false
+    },
+    {
+      "name": "worldCupViewer",
+      "description": "Read the WorldCupViewer contract address used as the BSC settlement truth source.",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "worldCupViewer",
+          "fieldType": "address",
+          "description": "WorldCupViewer contract address",
+          "decimals": 0
+        }
+      ],
+      "approvals": [],
+      "isInputArray": false,
+      "isOutputArray": false,
+      "isWriteMethod": false
+    },
+    {
+      "name": "operator",
+      "description": "Read the current day-to-day operator address.",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "operator",
+          "fieldType": "address",
+          "description": "Current operator address",
+          "decimals": 0
+        }
+      ],
+      "approvals": [],
+      "isInputArray": false,
+      "isOutputArray": false,
+      "isWriteMethod": false
+    },
+    {
+      "name": "totalRevenueReceived",
+      "description": "Read the cumulative BNB amount received through the payable receive hook.",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "amountWei",
+          "fieldType": "uint256",
+          "description": "Total BNB revenue received, in wei",
+          "decimals": 0
+        }
+      ],
+      "approvals": [],
+      "isInputArray": false,
+      "isOutputArray": false,
+      "isWriteMethod": false
+    },
+    {
+      "name": "lastSettlementMatchId",
+      "description": "Read the match/group/champion ID from the latest stored settlement refresh.",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "matchId",
+          "fieldType": "uint256",
+          "description": "Latest settlement match ID",
+          "decimals": 0
+        }
+      ],
+      "approvals": [],
+      "isInputArray": false,
+      "isOutputArray": false,
+      "isWriteMethod": false
+    },
+    {
+      "name": "lastSettlementTeamId",
+      "description": "Read the team ID from the latest stored settlement refresh.",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "teamId",
+          "fieldType": "uint256",
+          "description": "Latest settlement team ID",
+          "decimals": 0
+        }
+      ],
+      "approvals": [],
+      "isInputArray": false,
+      "isOutputArray": false,
+      "isWriteMethod": false
+    },
+    {
+      "name": "lastSettlementTeamName",
+      "description": "Read the team name from the latest stored settlement refresh.",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "teamName",
+          "fieldType": "string",
+          "description": "Latest settlement team name",
+          "decimals": 0
+        }
+      ],
+      "approvals": [],
+      "isInputArray": false,
+      "isOutputArray": false,
+      "isWriteMethod": false
+    },
+    {
+      "name": "lastSettlementResolved",
+      "description": "Read whether the latest stored settlement refresh was resolved.",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "isResolved",
+          "fieldType": "bool",
+          "description": "Whether the latest settlement result is resolved",
+          "decimals": 0
+        }
+      ],
+      "approvals": [],
+      "isInputArray": false,
+      "isOutputArray": false,
+      "isWriteMethod": false
+    },
+    {
+      "name": "getWorldCupWinner",
+      "description": "Read the current 2026 FIFA World Cup champion result from Flap WorldCupViewer.",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "matchId",
+          "fieldType": "uint256",
+          "description": "WorldCupViewer match ID",
+          "decimals": 0
+        },
+        {
+          "name": "matchName",
+          "fieldType": "string",
+          "description": "Human-readable match name",
+          "decimals": 0
+        },
+        {
+          "name": "isResolved",
+          "fieldType": "bool",
+          "description": "Whether the oracle/viewer has settled this result",
+          "decimals": 0
+        },
+        {
+          "name": "teamId",
+          "fieldType": "uint256",
+          "description": "Winning team ID; 0 pending, 49 others, 50 draw",
+          "decimals": 0
+        },
+        {
+          "name": "teamName",
+          "fieldType": "string",
+          "description": "Winning team name, tie message, others, or empty while pending",
+          "decimals": 0
+        }
+      ],
+      "approvals": [],
+      "isInputArray": false,
+      "isOutputArray": false,
+      "isWriteMethod": false
+    },
+    {
+      "name": "getGroupWinner",
+      "description": "Read a Group A-L winner from Flap WorldCupViewer. Group A starts at matchId 2; Group L is 13.",
+      "inputs": [
+        {
+          "name": "matchId",
+          "fieldType": "uint256",
+          "description": "WorldCupViewer group match ID, 2 through 13",
+          "decimals": 0
+        }
+      ],
+      "outputs": [
+        {
+          "name": "matchId",
+          "fieldType": "uint256",
+          "description": "WorldCupViewer match ID",
+          "decimals": 0
+        },
+        {
+          "name": "matchName",
+          "fieldType": "string",
+          "description": "Human-readable match name",
+          "decimals": 0
+        },
+        {
+          "name": "isResolved",
+          "fieldType": "bool",
+          "description": "Whether the oracle/viewer has settled this result",
+          "decimals": 0
+        },
+        {
+          "name": "teamId",
+          "fieldType": "uint256",
+          "description": "Winning team ID; 0 pending, 49 others, 50 draw",
+          "decimals": 0
+        },
+        {
+          "name": "teamName",
+          "fieldType": "string",
+          "description": "Winning team name, tie message, others, or empty while pending",
+          "decimals": 0
+        }
+      ],
+      "approvals": [],
+      "isInputArray": false,
+      "isOutputArray": false,
+      "isWriteMethod": false
+    },
+    {
+      "name": "getMatchResult",
+      "description": "Read any WorldCupViewer match result by matchId.",
+      "inputs": [
+        {
+          "name": "matchId",
+          "fieldType": "uint256",
+          "description": "WorldCupViewer match ID",
+          "decimals": 0
+        }
+      ],
+      "outputs": [
+        {
+          "name": "matchId",
+          "fieldType": "uint256",
+          "description": "WorldCupViewer match ID",
+          "decimals": 0
+        },
+        {
+          "name": "matchName",
+          "fieldType": "string",
+          "description": "Human-readable match name",
+          "decimals": 0
+        },
+        {
+          "name": "isResolved",
+          "fieldType": "bool",
+          "description": "Whether the oracle/viewer has settled this result",
+          "decimals": 0
+        },
+        {
+          "name": "teamId",
+          "fieldType": "uint256",
+          "description": "Winning team ID; 0 pending, 49 others, 50 draw",
+          "decimals": 0
+        },
+        {
+          "name": "teamName",
+          "fieldType": "string",
+          "description": "Winning team name, tie message, others, or empty while pending",
+          "decimals": 0
+        }
+      ],
+      "approvals": [],
+      "isInputArray": false,
+      "isOutputArray": false,
+      "isWriteMethod": false
+    },
+    {
+      "name": "getTeamName",
+      "description": "Resolve a WorldCupViewer team ID into a team name. Reserved: 49 = others, 50 = draw.",
+      "inputs": [
+        {
+          "name": "teamId",
+          "fieldType": "uint256",
+          "description": "WorldCupViewer team ID",
+          "decimals": 0
+        }
+      ],
+      "outputs": [
+        {
+          "name": "teamName",
+          "fieldType": "string",
+          "description": "Team name or reserved label",
+          "decimals": 0
+        }
+      ],
+      "approvals": [],
+      "isInputArray": false,
+      "isOutputArray": false,
+      "isWriteMethod": false
+    },
+    {
+      "name": "marketCount",
+      "description": "Return how many World Cup Polymarket mappings are stored.",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "count",
+          "fieldType": "uint256",
+          "description": "Number of market mappings",
+          "decimals": 0
+        }
+      ],
+      "approvals": [],
+      "isInputArray": false,
+      "isOutputArray": false,
+      "isWriteMethod": false
+    },
+    {
+      "name": "getMarket",
+      "description": "Read one stored Polymarket market mapping.",
+      "inputs": [
+        {
+          "name": "index",
+          "fieldType": "uint256",
+          "description": "Market mapping index",
+          "decimals": 0
+        }
+      ],
+      "outputs": [
+        {
+          "name": "matchId",
+          "fieldType": "uint256",
+          "description": "WorldCupViewer match/group/champion ID",
+          "decimals": 0
+        },
+        {
+          "name": "teamId",
+          "fieldType": "uint256",
+          "description": "WorldCupViewer team ID tied to this market",
+          "decimals": 0
+        },
+        {
+          "name": "polymarketConditionId",
+          "fieldType": "bytes32",
+          "description": "Polymarket condition ID metadata",
+          "decimals": 0
+        },
+        {
+          "name": "marketSlug",
+          "fieldType": "string",
+          "description": "Polymarket market slug or URL path",
+          "decimals": 0
+        },
+        {
+          "name": "label",
+          "fieldType": "string",
+          "description": "Human-readable market label/thesis",
+          "decimals": 0
+        },
+        {
+          "name": "matchStartTime",
+          "fieldType": "time",
+          "description": "Configurable Unix timestamp for scheduled match start; 0 if unknown",
+          "decimals": 0
+        },
+        {
+          "name": "bettingCloseTime",
+          "fieldType": "time",
+          "description": "Configurable Unix timestamp when betting UI should lock; 0 if unknown",
+          "decimals": 0
+        },
+        {
+          "name": "settlementEarliestTime",
+          "fieldType": "time",
+          "description": "Configurable earliest timestamp to attempt refreshSettlement; 0 if unknown",
+          "decimals": 0
+        },
+        {
+          "name": "active",
+          "fieldType": "bool",
+          "description": "Whether this mapping is currently active",
+          "decimals": 0
+        }
+      ],
+      "approvals": [],
+      "isInputArray": false,
+      "isOutputArray": false,
+      "isWriteMethod": false
+    },
+    {
+      "name": "getMarkets",
+      "description": "Read a paginated list of Polymarket market mappings.",
+      "inputs": [
+        {
+          "name": "offset",
+          "fieldType": "uint256",
+          "description": "First index to return",
+          "decimals": 0
+        },
+        {
+          "name": "limit",
+          "fieldType": "uint256",
+          "description": "Maximum items to return",
+          "decimals": 0
+        }
+      ],
+      "outputs": [
+        {
+          "name": "matchId",
+          "fieldType": "uint256",
+          "description": "WorldCupViewer match/group/champion ID",
+          "decimals": 0
+        },
+        {
+          "name": "teamId",
+          "fieldType": "uint256",
+          "description": "WorldCupViewer team ID tied to this market",
+          "decimals": 0
+        },
+        {
+          "name": "polymarketConditionId",
+          "fieldType": "bytes32",
+          "description": "Polymarket condition ID metadata",
+          "decimals": 0
+        },
+        {
+          "name": "marketSlug",
+          "fieldType": "string",
+          "description": "Polymarket market slug or URL path",
+          "decimals": 0
+        },
+        {
+          "name": "label",
+          "fieldType": "string",
+          "description": "Human-readable market label/thesis",
+          "decimals": 0
+        },
+        {
+          "name": "matchStartTime",
+          "fieldType": "time",
+          "description": "Configurable Unix timestamp for scheduled match start; 0 if unknown",
+          "decimals": 0
+        },
+        {
+          "name": "bettingCloseTime",
+          "fieldType": "time",
+          "description": "Configurable Unix timestamp when betting UI should lock; 0 if unknown",
+          "decimals": 0
+        },
+        {
+          "name": "settlementEarliestTime",
+          "fieldType": "time",
+          "description": "Configurable earliest timestamp to attempt refreshSettlement; 0 if unknown",
+          "decimals": 0
+        },
+        {
+          "name": "active",
+          "fieldType": "bool",
+          "description": "Whether this mapping is currently active",
+          "decimals": 0
+        }
+      ],
+      "approvals": [],
+      "isInputArray": false,
+      "isOutputArray": true,
+      "isWriteMethod": false
+    },
+    {
+      "name": "getMarketTiming",
+      "description": "Read the configurable countdown timestamps for one market. WorldCupViewer does not provide start/deadline times, so these values are operator-maintained metadata until an official schedule source is wired.",
+      "inputs": [
+        {
+          "name": "index",
+          "fieldType": "uint256",
+          "description": "Market mapping index",
+          "decimals": 0
+        }
+      ],
+      "outputs": [
+        {
+          "name": "matchStartTime",
+          "fieldType": "time",
+          "description": "Configurable Unix timestamp for scheduled match start; 0 if unknown",
+          "decimals": 0
+        },
+        {
+          "name": "bettingCloseTime",
+          "fieldType": "time",
+          "description": "Configurable Unix timestamp when betting UI should lock; 0 if unknown",
+          "decimals": 0
+        },
+        {
+          "name": "settlementEarliestTime",
+          "fieldType": "time",
+          "description": "Configurable earliest timestamp to attempt refreshSettlement; 0 if unknown",
+          "decimals": 0
+        }
+      ],
+      "approvals": [],
+      "isInputArray": false,
+      "isOutputArray": false,
+      "isWriteMethod": false
+    },
+    {
+      "name": "setOperator",
+      "description": "Operator/Guardian: update the day-to-day operator. Guardian access is non-revocable backup control.",
+      "inputs": [
+        {
+          "name": "newOperator",
+          "fieldType": "address",
+          "description": "New non-zero operator address",
+          "decimals": 0
+        }
+      ],
+      "outputs": [],
+      "approvals": [],
+      "isInputArray": false,
+      "isOutputArray": false,
+      "isWriteMethod": true
+    },
+    {
+      "name": "upsertMarket",
+      "description": "Operator/Guardian: add or update a World Cup-only Polymarket mapping plus configurable countdown timestamps. This does not trade and does not fake official match times.",
+      "inputs": [
+        {
+          "name": "index",
+          "fieldType": "uint256",
+          "description": "Existing index to update, or marketCount() to append",
+          "decimals": 0
+        },
+        {
+          "name": "matchId",
+          "fieldType": "uint256",
+          "description": "WorldCupViewer match/group/champion ID",
+          "decimals": 0
+        },
+        {
+          "name": "teamId",
+          "fieldType": "uint256",
+          "description": "WorldCupViewer team ID",
+          "decimals": 0
+        },
+        {
+          "name": "polymarketConditionId",
+          "fieldType": "bytes32",
+          "description": "Polymarket condition ID metadata",
+          "decimals": 0
+        },
+        {
+          "name": "marketSlug",
+          "fieldType": "string",
+          "description": "Polymarket market slug or URL path",
+          "decimals": 0
+        },
+        {
+          "name": "label",
+          "fieldType": "string",
+          "description": "UI label or short thesis",
+          "decimals": 0
+        },
+        {
+          "name": "matchStartTime",
+          "fieldType": "time",
+          "description": "Configurable Unix timestamp for scheduled match start; 0 if unknown",
+          "decimals": 0
+        },
+        {
+          "name": "bettingCloseTime",
+          "fieldType": "time",
+          "description": "Configurable Unix timestamp when betting UI should lock; 0 if unknown",
+          "decimals": 0
+        },
+        {
+          "name": "settlementEarliestTime",
+          "fieldType": "time",
+          "description": "Configurable earliest timestamp to attempt refreshSettlement; 0 if unknown",
+          "decimals": 0
+        },
+        {
+          "name": "active",
+          "fieldType": "bool",
+          "description": "Enable/disable this mapping",
+          "decimals": 0
+        }
+      ],
+      "outputs": [],
+      "approvals": [],
+      "isInputArray": false,
+      "isOutputArray": false,
+      "isWriteMethod": true
+    },
+    {
+      "name": "refreshSettlement",
+      "description": "Operator/Guardian: query WorldCupViewer and store the latest settlement snapshot for a match/group/champion, usually after settlementEarliestTime or a scheduled trigger.",
+      "inputs": [
+        {
+          "name": "matchId",
+          "fieldType": "uint256",
+          "description": "1 for champion, 2-13 for groups, or any WorldCupViewer match ID",
+          "decimals": 0
+        }
+      ],
+      "outputs": [
+        {
+          "name": "matchId",
+          "fieldType": "uint256",
+          "description": "WorldCupViewer match ID",
+          "decimals": 0
+        },
+        {
+          "name": "matchName",
+          "fieldType": "string",
+          "description": "Human-readable match name",
+          "decimals": 0
+        },
+        {
+          "name": "isResolved",
+          "fieldType": "bool",
+          "description": "Whether the oracle/viewer has settled this result",
+          "decimals": 0
+        },
+        {
+          "name": "teamId",
+          "fieldType": "uint256",
+          "description": "Winning team ID; 0 pending, 49 others, 50 draw",
+          "decimals": 0
+        },
+        {
+          "name": "teamName",
+          "fieldType": "string",
+          "description": "Winning team name, tie message, others, or empty while pending",
+          "decimals": 0
+        }
+      ],
+      "approvals": [],
+      "isInputArray": false,
+      "isOutputArray": false,
+      "isWriteMethod": true
+    },
+    {
+      "name": "recoverNative",
+      "description": "Guardian emergency only: recover BNB/tax revenue held by the vault if funds are stuck or the vault must be shut down. This must not bypass user claims in a future escrow version.",
+      "inputs": [
+        {
+          "name": "recipient",
+          "fieldType": "address",
+          "description": "Recipient that receives recovered BNB",
+          "decimals": 0
+        },
+        {
+          "name": "amountWei",
+          "fieldType": "uint256",
+          "description": "Amount of BNB to recover, in wei",
+          "decimals": 0
+        }
+      ],
+      "outputs": [],
+      "approvals": [],
+      "isInputArray": false,
+      "isOutputArray": false,
+      "isWriteMethod": true
+    },
+    {
+      "name": "recoverTaxToken",
+      "description": "Guardian emergency only: recover the configured Flap tax token from this vault if funds are stuck or the vault must be shut down. This only recovers taxToken, not arbitrary assets, and must not bypass user claims in a future escrow version.",
+      "inputs": [
+        {
+          "name": "recipient",
+          "fieldType": "address",
+          "description": "Recipient that receives recovered tax tokens",
+          "decimals": 0
+        },
+        {
+          "name": "amount",
+          "fieldType": "uint256",
+          "description": "Amount of taxToken to recover",
+          "decimals": 0
+        }
+      ],
+      "outputs": [],
+      "approvals": [],
+      "isInputArray": false,
+      "isOutputArray": false,
+      "isWriteMethod": true
+    }
+  ],
+  "vaultDataSchema": {
+    "description": "Launch WorldCupPolymarketVault with BSC WorldCupViewer, Guardian backup control, optional operator, and optional tax token address. Polymarket fields remain metadata; this factory must not imply direct Polymarket trading.",
+    "fields": [
+      {
+        "name": "taxToken",
+        "fieldType": "address",
+        "description": "Flap tax token address, or zero address if unknown at form time",
+        "decimals": 0
+      },
+      {
+        "name": "guardian",
+        "fieldType": "address",
+        "description": "Required Flap Guardian address with non-revocable backup operator permissions",
+        "decimals": 0
+      },
+      {
+        "name": "worldCupViewer",
+        "fieldType": "address",
+        "description": "Required BSC WorldCupViewer address used for settlement reads",
+        "decimals": 0
+      },
+      {
+        "name": "operator",
+        "fieldType": "address",
+        "description": "Optional initial day-to-day operator; zero address falls back to launcher",
+        "decimals": 0
+      }
+    ],
+    "isArray": false,
+    "factoryNotes": "Factory stub should decode these same four launch fields, require non-zero Guardian and WorldCupViewer, deploy WorldCupPolymarketVault, and emit the vault address plus Guardian/operator/viewer. The launch UI must label Polymarket as metadata/off-chain execution only, not direct vault trading. Guardian is the only address allowed to call recoverNative/recoverTaxToken emergency recovery functions."
+  },
+  "factory": {
+    "name": "WorldCupPolymarketVaultFactoryStub",
+    "notes": [
+      "Decode vaultData as (taxToken, guardian, worldCupViewer, operator).",
+      "Require non-zero guardian and worldCupViewer before launch.",
+      "Keep guardian as permanent backup operator; operator can rotate but cannot remove guardian authority.",
+      "Do not claim or fake direct Polymarket trading; store Polymarket identifiers as metadata only."
+    ]
+  }
+}

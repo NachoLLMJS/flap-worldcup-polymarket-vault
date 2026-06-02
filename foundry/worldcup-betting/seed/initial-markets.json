@@ -1,0 +1,2416 @@
+[
+  {
+    "marketId": 1,
+    "viewerMatchId": 1,
+    "label": "Match 1: 2026 FIFA World Cup Winner",
+    "type": "TournamentWinner",
+    "outcomes": [
+      {
+        "teamId": 29,
+        "name": "Spain"
+      },
+      {
+        "teamId": 33,
+        "name": "France"
+      },
+      {
+        "teamId": 45,
+        "name": "England"
+      },
+      {
+        "teamId": 37,
+        "name": "Argentina"
+      },
+      {
+        "teamId": 9,
+        "name": "Brazil"
+      },
+      {
+        "teamId": 41,
+        "name": "Portugal"
+      },
+      {
+        "teamId": 17,
+        "name": "Germany"
+      },
+      {
+        "teamId": 21,
+        "name": "Netherlands"
+      },
+      {
+        "teamId": 36,
+        "name": "Norway"
+      },
+      {
+        "teamId": 25,
+        "name": "Belgium"
+      },
+      {
+        "teamId": 13,
+        "name": "USA"
+      },
+      {
+        "teamId": 10,
+        "name": "Morocco"
+      },
+      {
+        "teamId": 44,
+        "name": "Colombia"
+      },
+      {
+        "teamId": 22,
+        "name": "Japan"
+      },
+      {
+        "teamId": 32,
+        "name": "Uruguay"
+      },
+      {
+        "teamId": 46,
+        "name": "Croatia"
+      },
+      {
+        "teamId": 1,
+        "name": "Mexico"
+      },
+      {
+        "teamId": 8,
+        "name": "Switzerland"
+      },
+      {
+        "teamId": 20,
+        "name": "Ecuador"
+      },
+      {
+        "teamId": 34,
+        "name": "Senegal"
+      },
+      {
+        "teamId": 15,
+        "name": "Australia"
+      },
+      {
+        "teamId": 5,
+        "name": "Canada"
+      },
+      {
+        "teamId": 12,
+        "name": "Scotland"
+      },
+      {
+        "teamId": 3,
+        "name": "South Korea"
+      },
+      {
+        "teamId": 14,
+        "name": "Paraguay"
+      },
+      {
+        "teamId": 19,
+        "name": "Ivory Coast"
+      },
+      {
+        "teamId": 26,
+        "name": "Egypt"
+      },
+      {
+        "teamId": 27,
+        "name": "Iran"
+      },
+      {
+        "teamId": 47,
+        "name": "Ghana"
+      },
+      {
+        "teamId": 38,
+        "name": "Algeria"
+      },
+      {
+        "teamId": 24,
+        "name": "Tunisia"
+      },
+      {
+        "teamId": 39,
+        "name": "Austria"
+      },
+      {
+        "teamId": 28,
+        "name": "New Zealand"
+      },
+      {
+        "teamId": 11,
+        "name": "Haiti"
+      },
+      {
+        "teamId": 40,
+        "name": "Jordan"
+      },
+      {
+        "teamId": 18,
+        "name": "Curaçao"
+      },
+      {
+        "teamId": 43,
+        "name": "Uzbekistan"
+      },
+      {
+        "teamId": 2,
+        "name": "South Africa"
+      },
+      {
+        "teamId": 30,
+        "name": "Cape Verde"
+      },
+      {
+        "teamId": 7,
+        "name": "Qatar"
+      },
+      {
+        "teamId": 31,
+        "name": "Saudi Arabia"
+      },
+      {
+        "teamId": 49,
+        "name": "Others"
+      }
+    ],
+    "source": "WorldCupViewer docs: use getWorldCupWinner() for tournament champion; do not use getMatchResult(1).",
+    "openTime": 0,
+    "closeTime": 1784486700,
+    "resolveAfter": 1784502000,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 2,
+    "viewerMatchId": 2,
+    "label": "Match 2: Group A Winner",
+    "type": "GroupWinner",
+    "outcomes": [
+      {
+        "teamId": 1,
+        "name": "Mexico"
+      },
+      {
+        "teamId": 2,
+        "name": "South Africa"
+      },
+      {
+        "teamId": 3,
+        "name": "South Korea"
+      },
+      {
+        "teamId": 4,
+        "name": "Czechia"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Group A winner, resolve via getGroupMatchWinners(2).",
+    "openTime": 0,
+    "closeTime": 1783107200,
+    "resolveAfter": 1783193600,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 3,
+    "viewerMatchId": 3,
+    "label": "Match 3: Group B Winner",
+    "type": "GroupWinner",
+    "outcomes": [
+      {
+        "teamId": 5,
+        "name": "Canada"
+      },
+      {
+        "teamId": 6,
+        "name": "Bosnia and Herzegovina"
+      },
+      {
+        "teamId": 7,
+        "name": "Qatar"
+      },
+      {
+        "teamId": 8,
+        "name": "Switzerland"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Group B winner, resolve via getGroupMatchWinners(3).",
+    "openTime": 0,
+    "closeTime": 1783110800,
+    "resolveAfter": 1783197200,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 4,
+    "viewerMatchId": 4,
+    "label": "Match 4: Group C Winner",
+    "type": "GroupWinner",
+    "outcomes": [
+      {
+        "teamId": 9,
+        "name": "Brazil"
+      },
+      {
+        "teamId": 10,
+        "name": "Morocco"
+      },
+      {
+        "teamId": 11,
+        "name": "Haiti"
+      },
+      {
+        "teamId": 12,
+        "name": "Scotland"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Group C winner, resolve via getGroupMatchWinners(4).",
+    "openTime": 0,
+    "closeTime": 1783114400,
+    "resolveAfter": 1783200800,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 5,
+    "viewerMatchId": 5,
+    "label": "Match 5: Group D Winner",
+    "type": "GroupWinner",
+    "outcomes": [
+      {
+        "teamId": 13,
+        "name": "USA"
+      },
+      {
+        "teamId": 14,
+        "name": "Paraguay"
+      },
+      {
+        "teamId": 15,
+        "name": "Australia"
+      },
+      {
+        "teamId": 16,
+        "name": "Türkiye"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Group D winner, resolve via getGroupMatchWinners(5).",
+    "openTime": 0,
+    "closeTime": 1783118000,
+    "resolveAfter": 1783204400,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 6,
+    "viewerMatchId": 6,
+    "label": "Match 6: Group E Winner",
+    "type": "GroupWinner",
+    "outcomes": [
+      {
+        "teamId": 17,
+        "name": "Germany"
+      },
+      {
+        "teamId": 18,
+        "name": "Curaçao"
+      },
+      {
+        "teamId": 19,
+        "name": "Ivory Coast"
+      },
+      {
+        "teamId": 20,
+        "name": "Ecuador"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Group E winner, resolve via getGroupMatchWinners(6).",
+    "openTime": 0,
+    "closeTime": 1783121600,
+    "resolveAfter": 1783208000,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 7,
+    "viewerMatchId": 7,
+    "label": "Match 7: Group F Winner",
+    "type": "GroupWinner",
+    "outcomes": [
+      {
+        "teamId": 21,
+        "name": "Netherlands"
+      },
+      {
+        "teamId": 22,
+        "name": "Japan"
+      },
+      {
+        "teamId": 23,
+        "name": "Sweden"
+      },
+      {
+        "teamId": 24,
+        "name": "Tunisia"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Group F winner, resolve via getGroupMatchWinners(7).",
+    "openTime": 0,
+    "closeTime": 1783125200,
+    "resolveAfter": 1783211600,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 8,
+    "viewerMatchId": 8,
+    "label": "Match 8: Group G Winner",
+    "type": "GroupWinner",
+    "outcomes": [
+      {
+        "teamId": 25,
+        "name": "Belgium"
+      },
+      {
+        "teamId": 26,
+        "name": "Egypt"
+      },
+      {
+        "teamId": 27,
+        "name": "Iran"
+      },
+      {
+        "teamId": 28,
+        "name": "New Zealand"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Group G winner, resolve via getGroupMatchWinners(8).",
+    "openTime": 0,
+    "closeTime": 1783128800,
+    "resolveAfter": 1783215200,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 9,
+    "viewerMatchId": 9,
+    "label": "Match 9: Group H Winner",
+    "type": "GroupWinner",
+    "outcomes": [
+      {
+        "teamId": 29,
+        "name": "Spain"
+      },
+      {
+        "teamId": 30,
+        "name": "Cape Verde"
+      },
+      {
+        "teamId": 31,
+        "name": "Saudi Arabia"
+      },
+      {
+        "teamId": 32,
+        "name": "Uruguay"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Group H winner, resolve via getGroupMatchWinners(9).",
+    "openTime": 0,
+    "closeTime": 1783132400,
+    "resolveAfter": 1783218800,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 10,
+    "viewerMatchId": 10,
+    "label": "Match 10: Group I Winner",
+    "type": "GroupWinner",
+    "outcomes": [
+      {
+        "teamId": 33,
+        "name": "France"
+      },
+      {
+        "teamId": 34,
+        "name": "Senegal"
+      },
+      {
+        "teamId": 35,
+        "name": "Iraq"
+      },
+      {
+        "teamId": 36,
+        "name": "Norway"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Group I winner, resolve via getGroupMatchWinners(10).",
+    "openTime": 0,
+    "closeTime": 1783136000,
+    "resolveAfter": 1783222400,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 11,
+    "viewerMatchId": 11,
+    "label": "Match 11: Group J Winner",
+    "type": "GroupWinner",
+    "outcomes": [
+      {
+        "teamId": 37,
+        "name": "Argentina"
+      },
+      {
+        "teamId": 38,
+        "name": "Algeria"
+      },
+      {
+        "teamId": 39,
+        "name": "Austria"
+      },
+      {
+        "teamId": 40,
+        "name": "Jordan"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Group J winner, resolve via getGroupMatchWinners(11).",
+    "openTime": 0,
+    "closeTime": 1783139600,
+    "resolveAfter": 1783226000,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 12,
+    "viewerMatchId": 12,
+    "label": "Match 12: Group K Winner",
+    "type": "GroupWinner",
+    "outcomes": [
+      {
+        "teamId": 41,
+        "name": "Portugal"
+      },
+      {
+        "teamId": 42,
+        "name": "DR Congo"
+      },
+      {
+        "teamId": 43,
+        "name": "Uzbekistan"
+      },
+      {
+        "teamId": 44,
+        "name": "Colombia"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Group K winner, resolve via getGroupMatchWinners(12).",
+    "openTime": 0,
+    "closeTime": 1783143200,
+    "resolveAfter": 1783229600,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 13,
+    "viewerMatchId": 13,
+    "label": "Match 13: Group L Winner",
+    "type": "GroupWinner",
+    "outcomes": [
+      {
+        "teamId": 45,
+        "name": "England"
+      },
+      {
+        "teamId": 46,
+        "name": "Croatia"
+      },
+      {
+        "teamId": 47,
+        "name": "Ghana"
+      },
+      {
+        "teamId": 48,
+        "name": "Panama"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Group L winner, resolve via getGroupMatchWinners(13).",
+    "openTime": 0,
+    "closeTime": 1783146800,
+    "resolveAfter": 1783233200,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 14,
+    "viewerMatchId": 14,
+    "label": "Match 14: Mexico vs South Africa",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 1,
+        "name": "Mexico"
+      },
+      {
+        "teamId": 2,
+        "name": "South Africa"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Mexico vs South Africa, resolve via getMatchResult(14); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781203200,
+    "resolveAfter": 1781208600,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 15,
+    "viewerMatchId": 15,
+    "label": "Match 15: South Korea vs Czechia",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 3,
+        "name": "South Korea"
+      },
+      {
+        "teamId": 4,
+        "name": "Czechia"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: South Korea vs Czechia, resolve via getMatchResult(15); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781210400,
+    "resolveAfter": 1781215800,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 16,
+    "viewerMatchId": 16,
+    "label": "Match 16: Canada vs Bosnia and Herzegovina",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 5,
+        "name": "Canada"
+      },
+      {
+        "teamId": 6,
+        "name": "Bosnia and Herzegovina"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Canada vs Bosnia and Herzegovina, resolve via getMatchResult(16); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781217600,
+    "resolveAfter": 1781223000,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 17,
+    "viewerMatchId": 17,
+    "label": "Match 17: USA vs Paraguay",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 13,
+        "name": "USA"
+      },
+      {
+        "teamId": 14,
+        "name": "Paraguay"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: USA vs Paraguay, resolve via getMatchResult(17); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781224800,
+    "resolveAfter": 1781230200,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 18,
+    "viewerMatchId": 18,
+    "label": "Match 18: Qatar vs Switzerland",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 7,
+        "name": "Qatar"
+      },
+      {
+        "teamId": 8,
+        "name": "Switzerland"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Qatar vs Switzerland, resolve via getMatchResult(18); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781232000,
+    "resolveAfter": 1781237400,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 19,
+    "viewerMatchId": 19,
+    "label": "Match 19: Brazil vs Morocco",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 9,
+        "name": "Brazil"
+      },
+      {
+        "teamId": 10,
+        "name": "Morocco"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Brazil vs Morocco, resolve via getMatchResult(19); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781239200,
+    "resolveAfter": 1781244600,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 20,
+    "viewerMatchId": 20,
+    "label": "Match 20: Haiti vs Scotland",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 11,
+        "name": "Haiti"
+      },
+      {
+        "teamId": 12,
+        "name": "Scotland"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Haiti vs Scotland, resolve via getMatchResult(20); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781246400,
+    "resolveAfter": 1781251800,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 21,
+    "viewerMatchId": 21,
+    "label": "Match 21: Australia vs Türkiye",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 15,
+        "name": "Australia"
+      },
+      {
+        "teamId": 16,
+        "name": "Türkiye"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Australia vs Türkiye, resolve via getMatchResult(21); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781253600,
+    "resolveAfter": 1781259000,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 22,
+    "viewerMatchId": 22,
+    "label": "Match 22: Germany vs Curaçao",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 17,
+        "name": "Germany"
+      },
+      {
+        "teamId": 18,
+        "name": "Curaçao"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Germany vs Curaçao, resolve via getMatchResult(22); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781260800,
+    "resolveAfter": 1781266200,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 23,
+    "viewerMatchId": 23,
+    "label": "Match 23: Netherlands vs Japan",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 21,
+        "name": "Netherlands"
+      },
+      {
+        "teamId": 22,
+        "name": "Japan"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Netherlands vs Japan, resolve via getMatchResult(23); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781268000,
+    "resolveAfter": 1781273400,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 24,
+    "viewerMatchId": 24,
+    "label": "Match 24: Ivory Coast vs Ecuador",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 19,
+        "name": "Ivory Coast"
+      },
+      {
+        "teamId": 20,
+        "name": "Ecuador"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Ivory Coast vs Ecuador, resolve via getMatchResult(24); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781275200,
+    "resolveAfter": 1781280600,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 25,
+    "viewerMatchId": 25,
+    "label": "Match 25: Sweden vs Tunisia",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 23,
+        "name": "Sweden"
+      },
+      {
+        "teamId": 24,
+        "name": "Tunisia"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Sweden vs Tunisia, resolve via getMatchResult(25); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781282400,
+    "resolveAfter": 1781287800,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 26,
+    "viewerMatchId": 26,
+    "label": "Match 26: Spain vs Cape Verde",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 29,
+        "name": "Spain"
+      },
+      {
+        "teamId": 30,
+        "name": "Cape Verde"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Spain vs Cape Verde, resolve via getMatchResult(26); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781289600,
+    "resolveAfter": 1781295000,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 27,
+    "viewerMatchId": 27,
+    "label": "Match 27: Belgium vs Egypt",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 25,
+        "name": "Belgium"
+      },
+      {
+        "teamId": 26,
+        "name": "Egypt"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Belgium vs Egypt, resolve via getMatchResult(27); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781296800,
+    "resolveAfter": 1781302200,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 28,
+    "viewerMatchId": 28,
+    "label": "Match 28: Saudi Arabia vs Uruguay",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 31,
+        "name": "Saudi Arabia"
+      },
+      {
+        "teamId": 32,
+        "name": "Uruguay"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Saudi Arabia vs Uruguay, resolve via getMatchResult(28); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781304000,
+    "resolveAfter": 1781309400,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 29,
+    "viewerMatchId": 29,
+    "label": "Match 29: Iran vs New Zealand",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 27,
+        "name": "Iran"
+      },
+      {
+        "teamId": 28,
+        "name": "New Zealand"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Iran vs New Zealand, resolve via getMatchResult(29); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781311200,
+    "resolveAfter": 1781316600,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 30,
+    "viewerMatchId": 30,
+    "label": "Match 30: France vs Senegal",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 33,
+        "name": "France"
+      },
+      {
+        "teamId": 34,
+        "name": "Senegal"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: France vs Senegal, resolve via getMatchResult(30); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781318400,
+    "resolveAfter": 1781323800,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 31,
+    "viewerMatchId": 31,
+    "label": "Match 31: Iraq vs Norway",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 35,
+        "name": "Iraq"
+      },
+      {
+        "teamId": 36,
+        "name": "Norway"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Iraq vs Norway, resolve via getMatchResult(31); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781325600,
+    "resolveAfter": 1781331000,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 32,
+    "viewerMatchId": 32,
+    "label": "Match 32: Argentina vs Algeria",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 37,
+        "name": "Argentina"
+      },
+      {
+        "teamId": 38,
+        "name": "Algeria"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Argentina vs Algeria, resolve via getMatchResult(32); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781332800,
+    "resolveAfter": 1781338200,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 33,
+    "viewerMatchId": 33,
+    "label": "Match 33: Austria vs Jordan",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 39,
+        "name": "Austria"
+      },
+      {
+        "teamId": 40,
+        "name": "Jordan"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Austria vs Jordan, resolve via getMatchResult(33); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781340000,
+    "resolveAfter": 1781345400,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 34,
+    "viewerMatchId": 34,
+    "label": "Match 34: Portugal vs DR Congo",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 41,
+        "name": "Portugal"
+      },
+      {
+        "teamId": 42,
+        "name": "DR Congo"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Portugal vs DR Congo, resolve via getMatchResult(34); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781347200,
+    "resolveAfter": 1781352600,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 35,
+    "viewerMatchId": 35,
+    "label": "Match 35: England vs Croatia",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 45,
+        "name": "England"
+      },
+      {
+        "teamId": 46,
+        "name": "Croatia"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: England vs Croatia, resolve via getMatchResult(35); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781354400,
+    "resolveAfter": 1781359800,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 36,
+    "viewerMatchId": 36,
+    "label": "Match 36: Ghana vs Panama",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 47,
+        "name": "Ghana"
+      },
+      {
+        "teamId": 48,
+        "name": "Panama"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Ghana vs Panama, resolve via getMatchResult(36); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781361600,
+    "resolveAfter": 1781367000,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 37,
+    "viewerMatchId": 37,
+    "label": "Match 37: Uzbekistan vs Colombia",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 43,
+        "name": "Uzbekistan"
+      },
+      {
+        "teamId": 44,
+        "name": "Colombia"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Uzbekistan vs Colombia, resolve via getMatchResult(37); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781368800,
+    "resolveAfter": 1781374200,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 38,
+    "viewerMatchId": 38,
+    "label": "Match 38: Czechia vs South Africa",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 4,
+        "name": "Czechia"
+      },
+      {
+        "teamId": 2,
+        "name": "South Africa"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Czechia vs South Africa, resolve via getMatchResult(38); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781376000,
+    "resolveAfter": 1781381400,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 39,
+    "viewerMatchId": 39,
+    "label": "Match 39: Switzerland vs Bosnia and Herzegovina",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 8,
+        "name": "Switzerland"
+      },
+      {
+        "teamId": 6,
+        "name": "Bosnia and Herzegovina"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Switzerland vs Bosnia and Herzegovina, resolve via getMatchResult(39); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781383200,
+    "resolveAfter": 1781388600,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 40,
+    "viewerMatchId": 40,
+    "label": "Match 40: Canada vs Qatar",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 5,
+        "name": "Canada"
+      },
+      {
+        "teamId": 7,
+        "name": "Qatar"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Canada vs Qatar, resolve via getMatchResult(40); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781390400,
+    "resolveAfter": 1781395800,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 41,
+    "viewerMatchId": 41,
+    "label": "Match 41: Mexico vs South Korea",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 1,
+        "name": "Mexico"
+      },
+      {
+        "teamId": 3,
+        "name": "South Korea"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Mexico vs South Korea, resolve via getMatchResult(41); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781397600,
+    "resolveAfter": 1781403000,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 42,
+    "viewerMatchId": 42,
+    "label": "Match 42: USA vs Australia",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 13,
+        "name": "USA"
+      },
+      {
+        "teamId": 15,
+        "name": "Australia"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: USA vs Australia, resolve via getMatchResult(42); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781404800,
+    "resolveAfter": 1781410200,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 43,
+    "viewerMatchId": 43,
+    "label": "Match 43: Scotland vs Morocco",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 12,
+        "name": "Scotland"
+      },
+      {
+        "teamId": 10,
+        "name": "Morocco"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Scotland vs Morocco, resolve via getMatchResult(43); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781412000,
+    "resolveAfter": 1781417400,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 44,
+    "viewerMatchId": 44,
+    "label": "Match 44: Brazil vs Haiti",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 9,
+        "name": "Brazil"
+      },
+      {
+        "teamId": 11,
+        "name": "Haiti"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Brazil vs Haiti, resolve via getMatchResult(44); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781419200,
+    "resolveAfter": 1781424600,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 45,
+    "viewerMatchId": 45,
+    "label": "Match 45: Türkiye vs Paraguay",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 16,
+        "name": "Türkiye"
+      },
+      {
+        "teamId": 14,
+        "name": "Paraguay"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Türkiye vs Paraguay, resolve via getMatchResult(45); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781426400,
+    "resolveAfter": 1781431800,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 46,
+    "viewerMatchId": 46,
+    "label": "Match 46: Netherlands vs Sweden",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 21,
+        "name": "Netherlands"
+      },
+      {
+        "teamId": 23,
+        "name": "Sweden"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Netherlands vs Sweden, resolve via getMatchResult(46); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781433600,
+    "resolveAfter": 1781439000,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 47,
+    "viewerMatchId": 47,
+    "label": "Match 47: Germany vs Ivory Coast",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 17,
+        "name": "Germany"
+      },
+      {
+        "teamId": 19,
+        "name": "Ivory Coast"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Germany vs Ivory Coast, resolve via getMatchResult(47); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781440800,
+    "resolveAfter": 1781446200,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 48,
+    "viewerMatchId": 48,
+    "label": "Match 48: Ecuador vs Curaçao",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 20,
+        "name": "Ecuador"
+      },
+      {
+        "teamId": 18,
+        "name": "Curaçao"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Ecuador vs Curaçao, resolve via getMatchResult(48); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781448000,
+    "resolveAfter": 1781453400,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 49,
+    "viewerMatchId": 49,
+    "label": "Match 49: Tunisia vs Japan",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 24,
+        "name": "Tunisia"
+      },
+      {
+        "teamId": 22,
+        "name": "Japan"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Tunisia vs Japan, resolve via getMatchResult(49); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781455200,
+    "resolveAfter": 1781460600,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 50,
+    "viewerMatchId": 50,
+    "label": "Match 50: Spain vs Saudi Arabia",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 29,
+        "name": "Spain"
+      },
+      {
+        "teamId": 31,
+        "name": "Saudi Arabia"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Spain vs Saudi Arabia, resolve via getMatchResult(50); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781462400,
+    "resolveAfter": 1781467800,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 51,
+    "viewerMatchId": 51,
+    "label": "Match 51: Belgium vs Iran",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 25,
+        "name": "Belgium"
+      },
+      {
+        "teamId": 27,
+        "name": "Iran"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Belgium vs Iran, resolve via getMatchResult(51); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781469600,
+    "resolveAfter": 1781475000,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 52,
+    "viewerMatchId": 52,
+    "label": "Match 52: Uruguay vs Cape Verde",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 32,
+        "name": "Uruguay"
+      },
+      {
+        "teamId": 30,
+        "name": "Cape Verde"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Uruguay vs Cape Verde, resolve via getMatchResult(52); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781476800,
+    "resolveAfter": 1781482200,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 53,
+    "viewerMatchId": 53,
+    "label": "Match 53: New Zealand vs Egypt",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 28,
+        "name": "New Zealand"
+      },
+      {
+        "teamId": 26,
+        "name": "Egypt"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: New Zealand vs Egypt, resolve via getMatchResult(53); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781484000,
+    "resolveAfter": 1781489400,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 54,
+    "viewerMatchId": 54,
+    "label": "Match 54: Argentina vs Austria",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 37,
+        "name": "Argentina"
+      },
+      {
+        "teamId": 39,
+        "name": "Austria"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Argentina vs Austria, resolve via getMatchResult(54); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781491200,
+    "resolveAfter": 1781496600,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 55,
+    "viewerMatchId": 55,
+    "label": "Match 55: France vs Iraq",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 33,
+        "name": "France"
+      },
+      {
+        "teamId": 35,
+        "name": "Iraq"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: France vs Iraq, resolve via getMatchResult(55); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781498400,
+    "resolveAfter": 1781503800,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 56,
+    "viewerMatchId": 56,
+    "label": "Match 56: Norway vs Senegal",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 36,
+        "name": "Norway"
+      },
+      {
+        "teamId": 34,
+        "name": "Senegal"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Norway vs Senegal, resolve via getMatchResult(56); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781505600,
+    "resolveAfter": 1781511000,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 57,
+    "viewerMatchId": 57,
+    "label": "Match 57: Jordan vs Algeria",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 40,
+        "name": "Jordan"
+      },
+      {
+        "teamId": 38,
+        "name": "Algeria"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Jordan vs Algeria, resolve via getMatchResult(57); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781512800,
+    "resolveAfter": 1781518200,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 58,
+    "viewerMatchId": 58,
+    "label": "Match 58: Portugal vs Uzbekistan",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 41,
+        "name": "Portugal"
+      },
+      {
+        "teamId": 43,
+        "name": "Uzbekistan"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Portugal vs Uzbekistan, resolve via getMatchResult(58); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781520000,
+    "resolveAfter": 1781525400,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 59,
+    "viewerMatchId": 59,
+    "label": "Match 59: England vs Ghana",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 45,
+        "name": "England"
+      },
+      {
+        "teamId": 47,
+        "name": "Ghana"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: England vs Ghana, resolve via getMatchResult(59); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781527200,
+    "resolveAfter": 1781532600,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 60,
+    "viewerMatchId": 60,
+    "label": "Match 60: Panama vs Croatia",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 48,
+        "name": "Panama"
+      },
+      {
+        "teamId": 46,
+        "name": "Croatia"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Panama vs Croatia, resolve via getMatchResult(60); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781534400,
+    "resolveAfter": 1781539800,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 61,
+    "viewerMatchId": 61,
+    "label": "Match 61: Colombia vs DR Congo",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 44,
+        "name": "Colombia"
+      },
+      {
+        "teamId": 42,
+        "name": "DR Congo"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Colombia vs DR Congo, resolve via getMatchResult(61); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781541600,
+    "resolveAfter": 1781547000,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 62,
+    "viewerMatchId": 62,
+    "label": "Match 62: Bosnia and Herzegovina vs Qatar",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 6,
+        "name": "Bosnia and Herzegovina"
+      },
+      {
+        "teamId": 7,
+        "name": "Qatar"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Bosnia and Herzegovina vs Qatar, resolve via getMatchResult(62); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781548800,
+    "resolveAfter": 1781554200,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 63,
+    "viewerMatchId": 63,
+    "label": "Match 63: Switzerland vs Canada",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 8,
+        "name": "Switzerland"
+      },
+      {
+        "teamId": 5,
+        "name": "Canada"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Switzerland vs Canada, resolve via getMatchResult(63); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781556000,
+    "resolveAfter": 1781561400,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 64,
+    "viewerMatchId": 64,
+    "label": "Match 64: Morocco vs Haiti",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 10,
+        "name": "Morocco"
+      },
+      {
+        "teamId": 11,
+        "name": "Haiti"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Morocco vs Haiti, resolve via getMatchResult(64); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781563200,
+    "resolveAfter": 1781568600,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 65,
+    "viewerMatchId": 65,
+    "label": "Match 65: Scotland vs Brazil",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 12,
+        "name": "Scotland"
+      },
+      {
+        "teamId": 9,
+        "name": "Brazil"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Scotland vs Brazil, resolve via getMatchResult(65); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781570400,
+    "resolveAfter": 1781575800,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 66,
+    "viewerMatchId": 66,
+    "label": "Match 66: Czechia vs Mexico",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 4,
+        "name": "Czechia"
+      },
+      {
+        "teamId": 1,
+        "name": "Mexico"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Czechia vs Mexico, resolve via getMatchResult(66); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781577600,
+    "resolveAfter": 1781583000,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 67,
+    "viewerMatchId": 67,
+    "label": "Match 67: South Africa vs South Korea",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 2,
+        "name": "South Africa"
+      },
+      {
+        "teamId": 3,
+        "name": "South Korea"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: South Africa vs South Korea, resolve via getMatchResult(67); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781584800,
+    "resolveAfter": 1781590200,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 68,
+    "viewerMatchId": 68,
+    "label": "Match 68: Curaçao vs Ivory Coast",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 18,
+        "name": "Curaçao"
+      },
+      {
+        "teamId": 19,
+        "name": "Ivory Coast"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Curaçao vs Ivory Coast, resolve via getMatchResult(68); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781592000,
+    "resolveAfter": 1781597400,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 69,
+    "viewerMatchId": 69,
+    "label": "Match 69: Ecuador vs Germany",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 20,
+        "name": "Ecuador"
+      },
+      {
+        "teamId": 17,
+        "name": "Germany"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Ecuador vs Germany, resolve via getMatchResult(69); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781599200,
+    "resolveAfter": 1781604600,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 70,
+    "viewerMatchId": 70,
+    "label": "Match 70: Japan vs Sweden",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 22,
+        "name": "Japan"
+      },
+      {
+        "teamId": 23,
+        "name": "Sweden"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Japan vs Sweden, resolve via getMatchResult(70); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781606400,
+    "resolveAfter": 1781611800,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 71,
+    "viewerMatchId": 71,
+    "label": "Match 71: Tunisia vs Netherlands",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 24,
+        "name": "Tunisia"
+      },
+      {
+        "teamId": 21,
+        "name": "Netherlands"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Tunisia vs Netherlands, resolve via getMatchResult(71); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781613600,
+    "resolveAfter": 1781619000,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 72,
+    "viewerMatchId": 72,
+    "label": "Match 72: Türkiye vs USA",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 16,
+        "name": "Türkiye"
+      },
+      {
+        "teamId": 13,
+        "name": "USA"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Türkiye vs USA, resolve via getMatchResult(72); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781620800,
+    "resolveAfter": 1781626200,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 73,
+    "viewerMatchId": 73,
+    "label": "Match 73: Paraguay vs Australia",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 14,
+        "name": "Paraguay"
+      },
+      {
+        "teamId": 15,
+        "name": "Australia"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Paraguay vs Australia, resolve via getMatchResult(73); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781628000,
+    "resolveAfter": 1781633400,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 74,
+    "viewerMatchId": 74,
+    "label": "Match 74: Senegal vs Iraq",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 34,
+        "name": "Senegal"
+      },
+      {
+        "teamId": 35,
+        "name": "Iraq"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Senegal vs Iraq, resolve via getMatchResult(74); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781635200,
+    "resolveAfter": 1781640600,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 75,
+    "viewerMatchId": 75,
+    "label": "Match 75: Norway vs France",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 36,
+        "name": "Norway"
+      },
+      {
+        "teamId": 33,
+        "name": "France"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Norway vs France, resolve via getMatchResult(75); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781642400,
+    "resolveAfter": 1781647800,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 76,
+    "viewerMatchId": 76,
+    "label": "Match 76: Cape Verde vs Saudi Arabia",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 30,
+        "name": "Cape Verde"
+      },
+      {
+        "teamId": 31,
+        "name": "Saudi Arabia"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Cape Verde vs Saudi Arabia, resolve via getMatchResult(76); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781649600,
+    "resolveAfter": 1781655000,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 77,
+    "viewerMatchId": 77,
+    "label": "Match 77: Uruguay vs Spain",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 32,
+        "name": "Uruguay"
+      },
+      {
+        "teamId": 29,
+        "name": "Spain"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Uruguay vs Spain, resolve via getMatchResult(77); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781656800,
+    "resolveAfter": 1781662200,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 78,
+    "viewerMatchId": 78,
+    "label": "Match 78: Egypt vs Iran",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 26,
+        "name": "Egypt"
+      },
+      {
+        "teamId": 27,
+        "name": "Iran"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Egypt vs Iran, resolve via getMatchResult(78); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781664000,
+    "resolveAfter": 1781669400,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 79,
+    "viewerMatchId": 79,
+    "label": "Match 79: New Zealand vs Belgium",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 28,
+        "name": "New Zealand"
+      },
+      {
+        "teamId": 25,
+        "name": "Belgium"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: New Zealand vs Belgium, resolve via getMatchResult(79); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781671200,
+    "resolveAfter": 1781676600,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 80,
+    "viewerMatchId": 80,
+    "label": "Match 80: Croatia vs Ghana",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 46,
+        "name": "Croatia"
+      },
+      {
+        "teamId": 47,
+        "name": "Ghana"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Croatia vs Ghana, resolve via getMatchResult(80); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781678400,
+    "resolveAfter": 1781683800,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 81,
+    "viewerMatchId": 81,
+    "label": "Match 81: Panama vs England",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 48,
+        "name": "Panama"
+      },
+      {
+        "teamId": 45,
+        "name": "England"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Panama vs England, resolve via getMatchResult(81); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781685600,
+    "resolveAfter": 1781691000,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 82,
+    "viewerMatchId": 82,
+    "label": "Match 82: Colombia vs Portugal",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 44,
+        "name": "Colombia"
+      },
+      {
+        "teamId": 41,
+        "name": "Portugal"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Colombia vs Portugal, resolve via getMatchResult(82); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781692800,
+    "resolveAfter": 1781698200,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 83,
+    "viewerMatchId": 83,
+    "label": "Match 83: DR Congo vs Uzbekistan",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 42,
+        "name": "DR Congo"
+      },
+      {
+        "teamId": 43,
+        "name": "Uzbekistan"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: DR Congo vs Uzbekistan, resolve via getMatchResult(83); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781700000,
+    "resolveAfter": 1781705400,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 84,
+    "viewerMatchId": 84,
+    "label": "Match 84: Jordan vs Argentina",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 40,
+        "name": "Jordan"
+      },
+      {
+        "teamId": 37,
+        "name": "Argentina"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Jordan vs Argentina, resolve via getMatchResult(84); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781707200,
+    "resolveAfter": 1781712600,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  },
+  {
+    "marketId": 85,
+    "viewerMatchId": 85,
+    "label": "Match 85: Algeria vs Austria",
+    "type": "MatchWinner",
+    "outcomes": [
+      {
+        "teamId": 38,
+        "name": "Algeria"
+      },
+      {
+        "teamId": 39,
+        "name": "Austria"
+      },
+      {
+        "teamId": 50,
+        "name": "Draw"
+      }
+    ],
+    "source": "WorldCupViewer reference data: Algeria vs Austria, resolve via getMatchResult(85); draw outcome is reserved teamId 50.",
+    "openTime": 0,
+    "closeTime": 1781714400,
+    "resolveAfter": 1781719800,
+    "feeBps": 100,
+    "feeRecipient": "0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e"
+  }
+]

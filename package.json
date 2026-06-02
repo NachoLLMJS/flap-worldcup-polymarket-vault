@@ -1,0 +1,37 @@
+{
+  "name": "flap-worldcup-polymarket-vault",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "validate:schema": "node scripts/validate-ui-schema.mjs",
+    "test:worldcup": "node scripts/test-worldcup-product-regression.mjs",
+    "compile:solc": "node scripts/compile-solc.mjs",
+    "compile:clone-factory": "node scripts/compile-clone-factory.mjs",
+    "deploy:bsc": "node scripts/deploy-bsc.mjs",
+    "deploy:clone-factory:bsc": "node scripts/deploy-clone-factory-bsc.mjs",
+    "deploy:betting:bsc": "node foundry/worldcup-betting/scripts/deploy-betting-bsc.mjs"
+  },
+  "dependencies": {
+    "@privy-io/react-auth": "^3.28.0",
+    "@solana-program/memo": "^0.11.1",
+    "@solana-program/system": "^0.12.2",
+    "@solana-program/token": "^0.13.0",
+    "@solana/kit": "^6.9.0",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "react": "^19.2.7",
+    "react-aria": "^3.49.0",
+    "react-dom": "^19.2.7",
+    "typescript": "^6.0.3",
+    "viem": "^2.52.0",
+    "vite": "^8.0.16"
+  },
+  "devDependencies": {
+    "solc": "^0.8.30"
+  }
+}

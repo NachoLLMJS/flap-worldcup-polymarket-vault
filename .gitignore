@@ -32,3 +32,4 @@ cache/
 out/
 artifacts/
 typechain-types/
+.vercel

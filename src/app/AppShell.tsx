@@ -1,14 +1,62 @@
 import { useState } from 'react';
 import { BETTING_VAULT_ADDRESS } from '../lib/env';
 import { marketFixtures } from '../data/markets';
-import type { Pick } from '../features/markets/types';
+import type { MarketFixture, Outcome, Pick } from '../features/markets/types';
 import { ConnectWalletButton } from '../features/wallet/WalletButton';
 import { WalletPanel } from '../features/wallet/WalletPanel';
 import { BettingSlip } from '../features/betting/BettingSlip';
 
+function isoCodeFromFlagEmoji(flag: string) {
+  const regionalIndicators = Array.from(flag).filter((character) => {
+    const codePoint = character.codePointAt(0) ?? 0;
+    return codePoint >= 0x1f1e6 && codePoint <= 0x1f1ff;
+  });
+  if (regionalIndicators.length !== 2) return null;
+  return regionalIndicators
+    .map((character) => String.fromCharCode((character.codePointAt(0) ?? 0) - 0x1f1e6 + 97))
+    .join('');
+}
+
+function flagImageCode(outcome: Outcome) {
+  const manualCodes: Record<string, string> = {
+    England: 'gb-eng',
+    Scotland: 'gb-sct',
+  };
+  return manualCodes[outcome.name] ?? isoCodeFromFlagEmoji(outcome.flag);
+}
+
+function FlagIcon({ outcome }: { outcome: Outcome }) {
+  if (outcome.teamId === 50 || outcome.name === 'Draw') {
+    return (
+      <span className="countryFlag symbolic" aria-label="Draw">
+        <span>↔</span>
+      </span>
+    );
+  }
+  const code = flagImageCode(outcome);
+  const src = code ? `https://flagcdn.com/w80/${code}.png` : '';
+  return (
+    <span className="countryFlag" aria-label={`${outcome.name} flag`}>
+      {src ? <img src={src} alt="" loading="lazy" referrerPolicy="no-referrer" /> : <span>{outcome.flag}</span>}
+    </span>
+  );
+}
+
 export function AppShell({ configReady }: { configReady: boolean }) {
   const [pick, setPick] = useState<Pick | null>(null);
+  const [activeType, setActiveType] = useState<MarketFixture['type']>('Match Winner');
   const liveReady = Boolean(configReady && BETTING_VAULT_ADDRESS);
+  const marketTypes: Array<{ type: MarketFixture['type']; label: string; helper: string }> = [
+    { type: 'Match Winner', label: 'Matches', helper: '1 / X / 2 rows for every listed game' },
+    { type: 'Group Winner', label: 'Groups', helper: 'Group A-L winner markets' },
+    { type: 'Tournament Winner', label: 'Tournament', helper: 'One outright board, compact and scrollable' },
+  ];
+  const activeMarkets = marketFixtures.filter((market) => market.type === activeType);
+  const activeCopy = marketTypes.find((item) => item.type === activeType)?.helper;
+
+  function chooseMarketType(type: MarketFixture['type']) {
+    setActiveType(type);
+  }
 
   return (
     <>
@@ -39,7 +87,7 @@ export function AppShell({ configReady }: { configReady: boolean }) {
                 View markets
               </a>
               <a className="btn" href="#wallet">
-                Connect wallet
+                Create wallet
               </a>
             </div>
             <div className="facts">
@@ -52,8 +100,8 @@ export function AppShell({ configReady }: { configReady: boolean }) {
                 <span>markets</span>
               </div>
               <div className="fact">
-                <b>BSC</b>
-                <span>native BNB</span>
+                <b>3</b>
+                <span>market categories</span>
               </div>
               <div className="fact">
                 <b>Buy / Sell</b>
@@ -66,17 +114,77 @@ export function AppShell({ configReady }: { configReady: boolean }) {
 
         <section id="markets">
           <div className="sectionHead">
-            <h2>World Cup markets.</h2>
+            <h2>Markets by category.</h2>
             <p>
-              85 markets from the current WorldCupViewer reference data: tournament winner, Group A-L winners, and
-              every listed match winner. Settlement uses <code>getWorldCupWinner()</code>,{' '}
-              <code>getGroupMatchWinners()</code>, or <code>getMatchResult()</code>.
+              Nothing is mixed together now: match winners, group winners, and the tournament outright live in separate
+              sportsbook-style tabs. The betting buttons still use the same marketId, viewerMatchId and teamId data.
             </p>
           </div>
+          <div className="marketConsole">
+            <div className="marketTabs" role="tablist" aria-label="Market categories">
+              {marketTypes.map((item) => {
+                const count = marketFixtures.filter((market) => market.type === item.type).length;
+                return (
+                  <button
+                    className={`marketTab ${activeType === item.type ? 'active' : ''}`}
+                    type="button"
+                    role="tab"
+                    aria-selected={activeType === item.type}
+                    key={item.type}
+                    onClick={() => chooseMarketType(item.type)}
+                  >
+                    <span>{item.label}</span>
+                    <b>{count}</b>
+                    <small>{item.helper}</small>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="marketSummary">
+              <div>
+                <span>Showing</span>
+                <b>
+                  {activeMarkets.length} {activeType.toLowerCase()} market{activeMarkets.length === 1 ? '' : 's'}
+                </b>
+              </div>
+              <div>
+                <span>Settlement</span>
+                <b>
+                  {activeType === 'Tournament Winner'
+                    ? 'getWorldCupWinner()'
+                    : activeType === 'Group Winner'
+                      ? 'getGroupMatchWinners()'
+                      : 'getMatchResult()'}
+                </b>
+              </div>
+            </div>
+          </div>
           <div className="marketLayout">
-            <div className="marketBoard">
-              {marketFixtures.map((market) => (
-                <article className="marketCard" key={market.marketId}>
+            <div>
+              <div className="marketModeHeader">
+                <span>{activeType}</span>
+                <p>{activeCopy}</p>
+              </div>
+              <div
+                className={`marketBoard ${
+                  activeType === 'Tournament Winner'
+                    ? 'outrightBoard'
+                    : activeType === 'Group Winner'
+                      ? 'groupBoard'
+                      : 'matchBoard'
+                }`}
+              >
+                {activeMarkets.map((market) => (
+                  <article
+                    className={`marketCard ${
+                      activeType === 'Tournament Winner'
+                        ? 'outrightCard'
+                        : activeType === 'Group Winner'
+                          ? 'groupCard'
+                          : 'matchCard'
+                    }`}
+                    key={market.marketId}
+                  >
                   <div className="marketTop">
                     <span>WorldCupViewer M{market.viewerMatchId}</span>
                     <span>{market.type}</span>
@@ -85,7 +193,15 @@ export function AppShell({ configReady }: { configReady: boolean }) {
                     <h3>{market.title}</h3>
                     <p>{market.close}</p>
                   </div>
-                  <div className="outcomeGrid">
+                  <div
+                    className={`outcomeGrid ${
+                      activeType === 'Tournament Winner'
+                        ? 'outrightGrid'
+                        : activeType === 'Match Winner'
+                          ? 'matchOddsGrid'
+                          : ''
+                    }`}
+                  >
                     {market.outcomes.map((outcome) => (
                       <button
                         className={`betBtn ${
@@ -98,15 +214,20 @@ export function AppShell({ configReady }: { configReady: boolean }) {
                         onClick={() => setPick({ market, outcome })}
                       >
                         <span className="outcomeMain">
-                          <span className="countryFlag">{outcome.flag}</span>
+                          <FlagIcon outcome={outcome} />
                           <span>{outcome.name}</span>
                         </span>
-                        <small>teamId {outcome.teamId}</small>
+                        <small>
+                          {activeType === 'Match Winner' && outcome.name === 'Draw'
+                            ? 'Draw · teamId 50'
+                            : `teamId ${outcome.teamId}`}
+                        </small>
                       </button>
                     ))}
                   </div>
                 </article>
               ))}
+              </div>
             </div>
             <BettingSlip pick={pick} configReady={configReady} />
           </div>

@@ -26,7 +26,7 @@ function ConnectedPrivyButton() {
   if (!authenticated)
     return (
       <button className="btn primary connectButton" type="button" onClick={login}>
-        Connect
+        Create wallet
       </button>
     );
   return (

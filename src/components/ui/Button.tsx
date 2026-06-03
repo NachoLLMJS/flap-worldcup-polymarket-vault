@@ -1,5 +1,4 @@
-import { forwardRef, useRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
-import { useButton } from 'react-aria';
+import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
 import { cn } from '../../lib/cn';
 
 type Intent = 'primary' | 'secondary' | 'ghost' | 'danger';
@@ -47,22 +46,11 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   },
   forwardedRef,
 ) {
-  const innerRef = useRef<HTMLButtonElement>(null);
-  const ref = (forwardedRef as React.RefObject<HTMLButtonElement>) ?? innerRef;
   const isDisabled = disabled || loading;
-
-  const { buttonProps } = useButton(
-    {
-      isDisabled,
-      onPress: rest.onClick ? () => undefined : undefined,
-    },
-    ref as React.RefObject<HTMLButtonElement>,
-  );
 
   return (
     <button
-      ref={ref}
-      {...buttonProps}
+      ref={forwardedRef}
       {...rest}
       disabled={isDisabled}
       className={cn(

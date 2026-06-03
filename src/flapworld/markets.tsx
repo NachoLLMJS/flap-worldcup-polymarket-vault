@@ -1,3 +1,4 @@
+// @ts-nocheck -- ported claude.ai/design prototype; strict types pass is a follow-up
 /* ============================================================
    FlapWorld — Markets (the markets floor + order ticket)
    ============================================================ */

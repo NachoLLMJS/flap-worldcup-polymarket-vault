@@ -135,6 +135,19 @@ function Identicon({ seed='', size=44, radius=12, className='' }){
   );
 }
 
+/* ---------- avatar: X (Twitter) profile photo when present, else identicon ---------- */
+function Avatar({ wallet, size=44, radius=12, className='' }){
+  const url = wallet && wallet.avatar;
+  if (url) {
+    return (
+      <img src={url} alt={wallet.handle ? '@'+wallet.handle : 'profile'} referrerPolicy="no-referrer" className={className}
+        style={{ width:size, height:size, borderRadius:radius, objectFit:'cover', display:'block', flex:'0 0 auto', boxShadow:'inset 0 0 0 1px rgba(255,255,255,0.12)' }}
+        onError={(e)=>{ e.currentTarget.style.display='none'; }}/>
+    );
+  }
+  return <Identicon seed={(wallet && wallet.address) || ''} size={size} radius={radius} className={className}/>;
+}
+
 /* ---------- connect wallet ---------- */
 function ConnectButton({ wallet, onConnect, onDisconnect, size='md' }){
   const { t } = useT();
@@ -146,7 +159,7 @@ function ConnectButton({ wallet, onConnect, onDisconnect, size='md' }){
     <div className="relative">
       <button onClick={()=>setOpen(o=>!o)}
         className="inline-flex items-center gap-2 rounded-xl bg-ink-800 px-3 h-11 ring-1 ring-white/12 hover:ring-white/25 transition">
-        <Identicon seed={wallet.address} size={26} radius={8}/>
+        <Avatar wallet={wallet} size={26} radius={8}/>
         <span className="text-left leading-tight">
           <span className="block text-xs font-semibold text-white">{wallet.ens}</span>
           <span className="block font-mono text-[10px] text-acid tnum">{wallet.balance.toFixed(3)} BNB</span>
@@ -159,7 +172,7 @@ function ConnectButton({ wallet, onConnect, onDisconnect, size='md' }){
           <div className="absolute right-0 z-50 mt-2 w-60 rounded-2xl bg-ink-850 p-2 ring-1 ring-white/12 shadow-2xl">
             <div className="px-3 py-2.5">
               <div className="flex items-center gap-2.5">
-                <Identicon seed={wallet.address} size={34} radius={9}/>
+                <Avatar wallet={wallet} size={34} radius={9}/>
                 <div className="min-w-0">
                   <div className="truncate text-sm font-semibold text-white">{wallet.ens}</div>
                   <div className="font-mono text-[11px] text-white/45">{wallet.short}</div>
@@ -244,5 +257,5 @@ function CatTag({ cat }){
 
 export {
   Icon, BnbMark, FlagChip, OutcomeMark, Logo, Btn, LangToggle, ConnectButton, Identicon,
-  StatusBadge, Countdown, CatTag, useNow, fmtDelta,
+  StatusBadge, Countdown, CatTag, useNow, fmtDelta, Avatar,
 };

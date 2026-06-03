@@ -4,7 +4,7 @@
    ============================================================ */
 import { useState } from 'react';
 import { useT, marketTitle, teamName } from './i18n';
-import { Icon, Identicon, Btn, OutcomeMark, CatTag, Countdown, useNow } from './components';
+import { Icon, Avatar, Btn, OutcomeMark, CatTag, Countdown, useNow } from './components';
 import { ALL_MARKETS, marketStatus } from './data';
 
 /* ---------- helpers ---------- */
@@ -98,7 +98,7 @@ function ProfileHeader({ wallet, stats, onDisconnect }){
         <span className="text-xs font-bold uppercase tracking-[0.2em] text-acid">{t('pf_kicker')}</span>
         <div className="mt-3 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4">
-            <Identicon seed={wallet.address} size={64} radius={16}/>
+            <Avatar wallet={wallet} size={64} radius={16}/>
             <div className="min-w-0">
               <div className="flex items-center gap-2.5">
                 <h1 className="font-display text-3xl text-white sm:text-4xl">{wallet.ens}</h1>
@@ -138,7 +138,7 @@ function TraderCard({ wallet, stats }){
 
       <div className="relative flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Identicon seed={wallet.address} size={40} radius={11}/>
+          <Avatar wallet={wallet} size={40} radius={11}/>
           <div>
             <div className="text-sm font-bold text-white leading-tight">{wallet.ens}</div>
             <div className="font-mono text-[11px] text-white/40">{wallet.short}</div>

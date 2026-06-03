@@ -56,6 +56,9 @@ assert.doesNotMatch(main, /Syncing wallet…|Wallet missing/, 'web must not stay
 assert.match(main, /PolyFlap/, 'web must use the final product name PolyFlap');
 assert.doesNotMatch(main, /Chinese-style|World Cup Dragon Vault|红票|钱包未开光|Dragon wallet ready|Vault UI Schema|fee route/i, 'public web copy must remove stale Chinese/dragon/schema/fee-route framing');
 assert.match(main, /Buy \/ Sell|Sell \/ withdraw|withdrawBet/, 'web must expose buy and sell/withdraw actions');
+assert.match(main, /href="#profile"/, 'header must include a Profile nav entry');
+assert.match(main, /mode="profile"/, 'profile section must render the profile wallet container');
+assert.match(main, /BNB balance|Wallet withdraw|Open positions|polyflap\.betActivity\.v1/, 'profile must hold balance, withdraw, and active betting activity surfaces');
 assert.match(main, /World Cup markets|\{marketFixtures\.length\}/, 'web must expose all current WorldCupViewer reference-data markets, not only a tiny preview');
 assert.match(main, /getWorldCupWinner\(\).*getGroupMatchWinners\(\).*getMatchResult\(\)/s, 'web copy must explain which live WorldCupViewer methods settle each market type');
 assert.equal(seedMarkets.length, 85, 'seed must include all 85 WorldCupViewer reference-data markets');

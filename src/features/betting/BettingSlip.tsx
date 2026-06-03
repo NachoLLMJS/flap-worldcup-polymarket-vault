@@ -6,6 +6,7 @@ import { BSC_CHAIN_ID, BETTING_VAULT_ADDRESS, PROTOCOL_FEE_BPS } from '../../lib
 import { pickBscWallet, type BscWalletLike } from '../wallet/walletHelpers';
 import type { Pick } from '../markets/types';
 import { bettingAbi } from './abi';
+import { recordBetActivity } from './activity';
 
 export function BettingSlip({ pick, configReady }: { pick: Pick | null; configReady: boolean }) {
   if (!configReady) return <StaticSlip pick={pick} reason="Privy env missing" />;
@@ -73,6 +74,16 @@ function LiveBettingSlip({ pick }: { pick: Pick | null }) {
               functionName: 'withdrawBet',
               args: [BigInt(pick.market.marketId), BigInt(pick.outcome.teamId), value],
             });
+      recordBetActivity({
+        action,
+        marketId: pick.market.marketId,
+        marketTitle: pick.market.title,
+        outcomeName: pick.outcome.name,
+        outcomeFlag: pick.outcome.flag,
+        teamId: pick.outcome.teamId,
+        amountBnb: amount,
+        txHash: hash,
+      });
       setStatus(`${action === 'buy' ? 'Buy' : 'Sell'} sent: ${hash}`);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : `${action} failed`);

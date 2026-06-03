@@ -68,6 +68,7 @@ export function AppShell({ configReady }: { configReady: boolean }) {
         <div className="navlinks">
           <a href="#markets">Markets</a>
           <a href="#wallet">Wallet</a>
+          <a href="#profile">Profile</a>
         </div>
         <ConnectWalletButton configReady={configReady} />
       </nav>
@@ -242,6 +243,17 @@ export function AppShell({ configReady }: { configReady: boolean }) {
             </p>
           </div>
           <WalletPanel configReady={configReady} />
+        </section>
+
+        <section id="profile">
+          <div className="sectionHead">
+            <h2>Profile.</h2>
+            <p>
+              Your connected Privy profile, BSC wallet, BNB balance, active betting activity and BNB withdraw controls live
+              here now, separated from the market board.
+            </p>
+          </div>
+          <WalletPanel configReady={configReady} mode="profile" />
         </section>
       </main>
     </>

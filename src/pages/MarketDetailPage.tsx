@@ -2,8 +2,11 @@ import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Badge, Card } from '../components/ui';
+import { Countdown } from '../components/Countdown';
 import { OutcomeChip } from '../features/markets/components/OutcomeChip';
 import { BetSlip } from '../features/betting/BetSlip';
+import { PoolBar } from '../features/betting/components/PoolBar';
+import { useMarketChain } from '../features/betting/useMarketChain';
 import { useMarket } from '../features/markets/useMarkets';
 import { marketKind, type Outcome } from '../features/markets/types';
 import { MARKET_KIND_LABELS } from '../features/markets/helpers';
@@ -13,6 +16,7 @@ export function MarketDetailPage() {
   const params = useParams();
   const marketId = Number(params.marketId);
   const market = useMarket(Number.isFinite(marketId) ? marketId : undefined);
+  const chain = useMarketChain(market?.marketId);
   const [selected, setSelected] = useState<Outcome | null>(null);
 
   if (!market) {
@@ -47,14 +51,19 @@ export function MarketDetailPage() {
               </span>
             </div>
             <h1 className="font-display text-3xl font-medium leading-tight text-fg sm:text-4xl">{title}</h1>
-            <p className="text-sm text-fg-muted">{market.close}</p>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-fg-muted">
+              <span>{market.close}</span>
+              {chain.data && chain.data.status === 'open' && chain.data.closeTime > 0 && (
+                <span className="font-mono tabular-nums">
+                  {t('markets.closesAt')}: <Countdown to={chain.data.closeTime} className="text-fg" />
+                </span>
+              )}
+            </div>
           </div>
 
           <Card variant="default" padding="lg">
             <h2 className="font-display text-lg font-medium text-fg">Outcomes</h2>
-            <p className="mt-1 text-sm text-fg-subtle">
-              Tap an outcome, then set your stake in the slip.
-            </p>
+            <p className="mt-1 text-sm text-fg-subtle">Tap an outcome, then set your stake in the slip.</p>
             <div className="mt-5 flex flex-wrap gap-2">
               {market.outcomes.map((o) => (
                 <OutcomeChip
@@ -66,6 +75,15 @@ export function MarketDetailPage() {
               ))}
             </div>
           </Card>
+
+          {chain.data && (
+            <Card variant="default" padding="lg">
+              <h2 className="font-display text-lg font-medium text-fg">{t('markets.pool')}</h2>
+              <div className="mt-4">
+                <PoolBar market={market} chain={chain.data} />
+              </div>
+            </Card>
+          )}
         </div>
 
         {/* Slip */}

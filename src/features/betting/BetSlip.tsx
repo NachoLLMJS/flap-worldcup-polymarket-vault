@@ -1,18 +1,13 @@
-import { useMemo, useState } from 'react';
-import { usePrivy, useWallets } from '@privy-io/react-auth';
-import { createWalletClient, custom, parseEther } from 'viem';
-import { bsc } from 'viem/chains';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Card, Input, Tooltip } from '../../components/ui';
 import { AnimatedNumber } from '../../components/AnimatedNumber';
-import { TxToast } from '../../components/TxToast';
-import { BSC_CHAIN_ID, BETTING_VAULT_ADDRESS, PROTOCOL_FEE_BPS, isPrivyConfigured } from '../../lib/env';
-import { pickBscWallet, type BscWalletLike } from '../wallet/walletHelpers';
+import { TxToast, type TxToastState } from '../../components/TxToast';
+import { PROTOCOL_FEE_BPS, isPrivyConfigured } from '../../lib/env';
 import { OutcomeChip } from '../markets/components/OutcomeChip';
 import type { MarketFixture, Outcome } from '../markets/types';
-import { bettingAbi } from './abi';
-
-type TxState = 'idle' | 'submitting' | 'success' | 'error';
+import { useBettingActions } from './useBettingActions';
+import { useMarketChain, type MarketChainData } from './useMarketChain';
 
 export interface BetSlipProps {
   market: MarketFixture;
@@ -29,14 +24,16 @@ export function BetSlip(props: BetSlipProps) {
 }
 
 function StaticBetSlip(props: BetSlipProps) {
+  const chain = useMarketChain(props.market.marketId);
   return (
     <BetSlipView
       {...props}
+      chain={chain.data}
       authenticated={false}
-      canSign={false}
-      walletReady={false}
-      tx="idle"
-      message={null}
+      ready={false}
+      toast="idle"
+      hash={null}
+      errorMsg={null}
       onConnect={() => undefined}
       onPlaceBet={() => undefined}
     />
@@ -44,73 +41,55 @@ function StaticBetSlip(props: BetSlipProps) {
 }
 
 function ConnectedBetSlip(props: BetSlipProps) {
-  const { authenticated, login } = usePrivy();
-  const { ready: walletsReady, wallets } = useWallets();
-  const bscWallet = useMemo(() => pickBscWallet(wallets as BscWalletLike[]), [wallets]);
-  const [tx, setTx] = useState<TxState>('idle');
-  const [message, setMessage] = useState<string | null>(null);
+  const actions = useBettingActions();
+  const chain = useMarketChain(props.market.marketId);
 
-  const canSign = authenticated && Boolean(bscWallet) && Boolean(BETTING_VAULT_ADDRESS);
-
-  async function onPlaceBet(amount: string) {
-    if (!props.outcome || !bscWallet || !BETTING_VAULT_ADDRESS) return;
-    setTx('submitting');
-    setMessage(null);
-    try {
-      await bscWallet.switchChain?.(BSC_CHAIN_ID);
-      const provider = await bscWallet.getEthereumProvider?.();
-      if (!provider) throw new Error('Wallet provider not ready');
-      const client = createWalletClient({ chain: bsc, transport: custom(provider) });
-      const [account] = await client.getAddresses();
-      const hash = await client.writeContract({
-        account,
-        address: BETTING_VAULT_ADDRESS,
-        abi: bettingAbi,
-        functionName: 'placeBet',
-        args: [BigInt(props.market.marketId), BigInt(props.outcome.teamId)],
-        value: parseEther(amount),
-      });
-      setTx('success');
-      setMessage(hash);
-    } catch (error) {
-      setTx('error');
-      setMessage(error instanceof Error ? error.message : 'failed');
-    }
-  }
+  const toast: TxToastState =
+    actions.status.state === 'awaiting-signature' || actions.status.state === 'mining'
+      ? 'submitting'
+      : actions.status.state === 'success'
+        ? 'success'
+        : actions.status.state === 'error'
+          ? 'error'
+          : 'idle';
 
   return (
     <BetSlipView
       {...props}
-      authenticated={authenticated}
-      canSign={canSign}
-      walletReady={walletsReady}
-      tx={tx}
-      message={message}
-      onConnect={login}
-      onPlaceBet={onPlaceBet}
+      chain={chain.data}
+      authenticated={actions.authenticated}
+      ready={actions.ready}
+      toast={toast}
+      hash={actions.status.hash}
+      errorMsg={actions.status.error}
+      onConnect={actions.login}
+      onPlaceBet={(amount) => {
+        if (props.outcome) void actions.placeBet(props.market.marketId, props.outcome.teamId, amount);
+      }}
     />
   );
 }
 
 interface ViewProps extends BetSlipProps {
+  chain: MarketChainData | null;
   authenticated: boolean;
-  canSign: boolean;
-  walletReady: boolean;
-  tx: TxState;
-  message: string | null;
+  ready: boolean;
+  toast: TxToastState;
+  hash: `0x${string}` | null;
+  errorMsg: string | null;
   onConnect: () => void;
   onPlaceBet: (amount: string) => void;
 }
 
 function BetSlipView({
-  market: _market,
   outcome,
   className,
+  chain,
   authenticated,
-  canSign,
-  walletReady,
-  tx,
-  message,
+  ready,
+  toast,
+  hash,
+  errorMsg,
   onConnect,
   onPlaceBet,
 }: ViewProps) {
@@ -121,13 +100,24 @@ function BetSlipView({
   const valid = Number.isFinite(amountNum) && amountNum > 0;
   const fee = valid ? (amountNum * PROTOCOL_FEE_BPS) / 10000 : 0;
   const net = valid ? amountNum - fee : 0;
-  const disabled = !outcome || !valid || tx === 'submitting' || !walletReady || !canSign;
+
+  const marketOpen = !chain || chain.status === 'open';
+  const submitting = toast === 'submitting';
+  const disabled = !outcome || !valid || submitting || !ready || !marketOpen;
+
+  // Rough payout estimate: if you win, you take a proportional share of the
+  // whole pool. estimate = net * (total + net) / (outcomePool + net)
+  const selectedPool = outcome && chain ? Number((chain.pools[outcome.teamId] ?? 0n) / 10n ** 12n) / 1e6 : 0;
+  const estPayout =
+    outcome && chain && net > 0
+      ? net * ((chain.totalPoolBnb + net) / (selectedPool + net))
+      : 0;
 
   return (
     <Card variant="elevated" padding="lg" className={['w-full', className].filter(Boolean).join(' ')}>
       <div className="flex items-center justify-between">
         <h3 className="font-display text-lg font-medium text-fg">{t('betting.placeBet')}</h3>
-        <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-fg-subtle">BSC · BNB</span>
+        {chain && <StatusPill status={chain.status} />}
       </div>
 
       <div className="mt-4 flex flex-col gap-1.5">
@@ -154,14 +144,7 @@ function BetSlipView({
       </label>
 
       <div className="mt-4 flex flex-col gap-2 rounded-lg border border-border-subtle bg-bg p-4">
-        <Row
-          label={t('betting.amount')}
-          value={
-            <>
-              <AnimatedNumber value={valid ? amountNum : 0} /> BNB
-            </>
-          }
-        />
+        <Row label={t('betting.amount')} value={<><AnimatedNumber value={valid ? amountNum : 0} /> BNB</>} />
         <Row
           label={
             <Tooltip content={t('betting.feeNote')}>
@@ -170,44 +153,57 @@ function BetSlipView({
               </span>
             </Tooltip>
           }
-          value={
-            <>
-              -<AnimatedNumber value={fee} /> BNB
-            </>
-          }
+          value={<>-<AnimatedNumber value={fee} /> BNB</>}
         />
         <div className="my-1 border-t border-border-subtle" />
-        <Row
-          label={t('betting.netStake')}
-          strong
-          value={
-            <>
-              <AnimatedNumber value={net} /> BNB
-            </>
-          }
-        />
+        <Row label={t('betting.netStake')} strong value={<><AnimatedNumber value={net} /> BNB</>} />
+        {estPayout > 0 && (
+          <Row
+            label={t('betting.potentialWin')}
+            value={<span className="text-accent"><AnimatedNumber value={estPayout} /> BNB</span>}
+          />
+        )}
       </div>
 
       <p className="mt-3 text-xs leading-relaxed text-fg-subtle">{t('betting.feeNote')}</p>
 
       <div className="mt-4">
         {!authenticated ? (
-          <Button intent={isPrivyConfigured ? 'primary' : 'secondary'} fullWidth size="lg" disabled={!isPrivyConfigured} onClick={onConnect}>
+          <Button
+            intent={isPrivyConfigured ? 'primary' : 'secondary'}
+            fullWidth
+            size="lg"
+            disabled={!isPrivyConfigured}
+            onClick={onConnect}
+          >
             {t('wallet.connect')}
           </Button>
         ) : (
-          <Button intent="primary" fullWidth size="lg" loading={tx === 'submitting'} disabled={disabled} onClick={() => onPlaceBet(amount)}>
-            {t('betting.placeBet')}
+          <Button intent="primary" fullWidth size="lg" loading={submitting} disabled={disabled} onClick={() => onPlaceBet(amount)}>
+            {marketOpen ? t('betting.placeBet') : t('betting.status.closed')}
           </Button>
         )}
       </div>
 
-      <TxToast
-        state={tx}
-        hash={tx === 'success' ? message : null}
-        message={tx === 'error' ? message : null}
-      />
+      <TxToast state={toast} hash={toast === 'success' ? hash : null} message={toast === 'error' ? errorMsg : null} />
     </Card>
+  );
+}
+
+function StatusPill({ status }: { status: MarketChainData['status'] }) {
+  const { t } = useTranslation();
+  const map = {
+    open: 'text-success',
+    locked: 'text-warning',
+    resolved: 'text-info',
+    cancelled: 'text-danger',
+    draft: 'text-fg-subtle',
+  } as const;
+  const key = status === 'draft' ? 'pending' : status;
+  return (
+    <span className={`font-mono text-[10px] uppercase tracking-[0.08em] ${map[status]}`}>
+      {t(`betting.status.${key}`)}
+    </span>
   );
 }
 
@@ -215,11 +211,7 @@ function Row({ label, value, strong }: { label: React.ReactNode; value: React.Re
   return (
     <div className="flex items-center justify-between gap-3">
       <span className={'text-sm ' + (strong ? 'font-medium text-fg' : 'text-fg-muted')}>{label}</span>
-      <span
-        className={
-          'font-mono tabular-nums ' + (strong ? 'text-base font-medium text-fg' : 'text-sm text-fg-muted')
-        }
-      >
+      <span className={'font-mono tabular-nums ' + (strong ? 'text-base font-medium text-fg' : 'text-sm text-fg-muted')}>
         {value}
       </span>
     </div>

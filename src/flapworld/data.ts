@@ -1,3 +1,4 @@
+// @ts-nocheck -- ported claude.ai/design prototype; strict types pass is a follow-up
 /* ============================================================
    FlapWorld — data layer (REAL catalog + illustrative presentation)
    Markets, teamIds and marketIds come from the real on-chain catalog

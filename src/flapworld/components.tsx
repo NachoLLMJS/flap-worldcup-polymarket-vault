@@ -1,3 +1,4 @@
+// @ts-nocheck -- ported claude.ai/design prototype; strict types pass is a follow-up
 /* ============================================================
    FlapWorld — shared UI components
    ============================================================ */

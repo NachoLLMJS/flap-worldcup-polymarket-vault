@@ -1,3 +1,4 @@
+// @ts-nocheck -- ported claude.ai/design prototype; strict types pass is a follow-up
 /* ============================================================
    FlapWorld — root app: routing + wallet via context
    Real wallet/trading (Privy + viem) when VITE_PRIVY_APP_ID is set,

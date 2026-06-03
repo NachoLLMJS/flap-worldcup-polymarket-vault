@@ -31,10 +31,10 @@ export function HomePage() {
             <Badge intent="accent" size="md" dot>
               {isPrivyConfigured ? 'Live on BNB Chain' : 'World Cup 2026 · BNB Chain'}
             </Badge>
-            <h1 className="font-display text-5xl font-medium leading-[1.02] tracking-tight text-fg sm:text-6xl md:text-7xl">
+            <h1 className="font-display text-5xl font-semibold leading-[1.0] tracking-[-0.03em] text-fg sm:text-6xl md:text-7xl">
               Own a piece of
               <br />
-              <span className="bg-gradient-to-br from-gold-bright via-gold to-gold-deep bg-clip-text text-transparent">
+              <span className="font-editorial text-[1.06em] font-light italic bg-gradient-to-br from-gold-bright via-gold to-gold-deep bg-clip-text text-transparent">
                 football history.
               </span>
             </h1>

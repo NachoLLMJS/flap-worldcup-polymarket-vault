@@ -11,9 +11,9 @@ export interface CardProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 const variantClasses: Record<Variant, string> = {
-  default: 'bg-[--color-bg-elevated] border border-[--color-border]',
-  elevated: 'bg-[--color-bg-elevated] border border-[--color-border] shadow-[--shadow-lg]',
-  outline: 'bg-transparent border border-[--color-border]',
+  default: 'bg-bg-elevated border border-border',
+  elevated: 'bg-bg-elevated border border-border shadow-lg',
+  outline: 'bg-transparent border border-border',
   ghost: 'bg-transparent',
 };
 
@@ -32,11 +32,11 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
     <div
       ref={ref}
       className={cn(
-        'rounded-[--radius-xl]',
+        'rounded-xl',
         variantClasses[variant],
         paddingClasses[padding],
         interactive &&
-          'transition-[transform,box-shadow,border-color] duration-[--duration-base] ease-[--ease-out-quint] hover:border-[--color-border-strong] hover:shadow-[--shadow-xl] hover:-translate-y-0.5 cursor-pointer',
+          'transition-[transform,box-shadow,border-color] duration-200 ease-out-quint hover:border-border-strong hover:shadow-xl hover:-translate-y-0.5 cursor-pointer',
         className,
       )}
       {...rest}

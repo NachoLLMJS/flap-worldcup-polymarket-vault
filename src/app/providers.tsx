@@ -1,16 +1,15 @@
 import { PrivyProvider } from '@privy-io/react-auth';
+import { RouterProvider } from 'react-router-dom';
 import { bsc } from 'viem/chains';
-import { PRIVY_APP_ID, PRIVY_CLIENT_ID } from '../lib/env';
-import { AppShell } from './AppShell';
+import { PRIVY_APP_ID, PRIVY_CLIENT_ID, isPrivyConfigured } from '../lib/env';
+import { router } from './router';
 
-/** Rendered when Privy is not configured: the UI still shows the market floor
- *  and fee preview but disables signing honestly. */
-export function ConfigNeededApp() {
-  return <AppShell configReady={false} />;
-}
+/** App root. Mounts the router, wrapped in PrivyProvider only when configured.
+ *  Without VITE_PRIVY_APP_ID the app still renders fully (read-only) and shows
+ *  honest disabled wallet/betting states. */
+export function App() {
+  if (!isPrivyConfigured) return <RouterProvider router={router} />;
 
-/** Rendered when VITE_PRIVY_APP_ID is present: wraps the app in PrivyProvider. */
-export function PrivyReadyApp() {
   return (
     <PrivyProvider
       appId={PRIVY_APP_ID!}
@@ -20,14 +19,14 @@ export function PrivyReadyApp() {
         supportedChains: [bsc],
         appearance: {
           theme: 'dark',
-          accentColor: '#ff3434',
+          accentColor: '#9a2d3a',
           showWalletLoginFirst: false,
         },
         loginMethods: ['google', 'twitter', 'email', 'wallet'],
         embeddedWallets: { ethereum: { createOnLogin: 'users-without-wallets' } },
       }}
     >
-      <AppShell configReady />
+      <RouterProvider router={router} />
     </PrivyProvider>
   );
 }

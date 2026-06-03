@@ -14,7 +14,7 @@ gsap.registerPlugin(ScrollTrigger);
 const HERO_VIDEO_SRC = '/uploads/16651367-hd_1920_1080_60fps.mp4';
 /* When the real frame1->frame2 pull-back render lands, flip to true to
    scrub video.currentTime by scroll progress (needs a pinned section). */
-const HERO_SCROLL_SCRUB = true;
+const HERO_SCROLL_SCRUB = false;
 
 /* ---------- reveal wrapper ----------
    IMPORTANT: content is visible by default. We never gate visibility on a

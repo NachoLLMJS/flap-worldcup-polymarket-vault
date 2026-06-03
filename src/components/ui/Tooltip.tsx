@@ -41,9 +41,9 @@ export function Tooltip({ content, children, placement = 'top', delay = 150, cla
           role="tooltip"
           className={cn(
             'absolute left-1/2 -translate-x-1/2 z-50 whitespace-nowrap pointer-events-none',
-            'px-2.5 py-1.5 text-xs rounded-[--radius-sm]',
-            'bg-[--color-bg-higher] border border-[--color-border] text-[--color-fg]',
-            'shadow-[--shadow-lg]',
+            'px-2.5 py-1.5 text-xs rounded-sm',
+            'bg-bg-higher border border-border text-fg',
+            'shadow-lg',
             placement === 'top' ? 'bottom-full mb-2' : 'top-full mt-2',
           )}
         >

@@ -7,7 +7,7 @@ import { TEAM } from './data';
 const STRINGS = {
   en: {
     nav_home:'Home', nav_markets:'Markets', nav_portfolio:'Portfolio', nav_about:'About',
-    connect:'Connect wallet', connected:'Connected', disconnect:'Disconnect',
+    connect:'Create wallet', connected:'Connected', disconnect:'Disconnect',
     soon_badge:'Soon',
 
     // hero
@@ -90,7 +90,7 @@ const STRINGS = {
   },
   zh: {
     nav_home:'首页', nav_markets:'市场', nav_portfolio:'持仓', nav_about:'关于',
-    connect:'连接钱包', connected:'已连接', disconnect:'断开',
+    connect:'创建钱包', connected:'已连接', disconnect:'断开',
     soon_badge:'即将',
 
     hero_kicker:'2026 世界杯 · BNB Chain (BSC)',

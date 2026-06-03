@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Badge, Button } from '../components/ui';
 import { HeroBackdrop } from '../components/HeroBackdrop';
 import { ScrollReveal } from '../components/ScrollReveal';
+import { EditorialBreak } from '../components/EditorialBreak';
 import { Magnetic } from '../components/Magnetic';
 import { CountUp } from '../components/CountUp';
 import { Flag } from '../components/Flag';
@@ -109,6 +110,9 @@ export function HomePage() {
         </ScrollReveal>
         <MarketGrid markets={featured} />
       </section>
+
+      {/* Oversized editorial moment */}
+      <EditorialBreak />
 
       {/* Fee transparency teaser */}
       <ScrollReveal className="py-12">

@@ -163,6 +163,15 @@ function BetSlipView({
             value={<span className="text-accent"><AnimatedNumber value={estPayout} /> BNB</span>}
           />
         )}
+        {/* Net vs fee split bar — makes the 1% tangible */}
+        <div className="mt-2 flex h-1.5 w-full overflow-hidden rounded-full bg-bg-higher" title="99% to the pool · 1% platform fee">
+          <div className="h-full rounded-l-full bg-success" style={{ width: '99%' }} />
+          <div className="h-full rounded-r-full bg-accent" style={{ width: '1%' }} />
+        </div>
+        <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.06em]">
+          <span className="text-success">99% pool</span>
+          <span className="text-accent">1% fee</span>
+        </div>
       </div>
 
       <p className="mt-3 text-xs leading-relaxed text-fg-subtle">{t('betting.feeNote')}</p>

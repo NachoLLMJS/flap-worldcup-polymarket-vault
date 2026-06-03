@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { Flag } from '../../../components/Flag';
 import type { MarketFixture } from '../../markets/types';
@@ -31,13 +32,16 @@ export function PoolBar({ market, chain }: { market: MarketFixture; chain: Marke
         <span className="uppercase tracking-[0.06em] text-fg-subtle">{t('markets.pool')}</span>
         <span className="font-mono tabular-nums text-fg">{chain.totalPoolBnb.toFixed(4)} BNB</span>
       </div>
-      <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-bg-higher">
+      <div className="flex h-2.5 w-full gap-0.5 overflow-hidden rounded-full bg-bg-higher">
         {ranked.map(({ outcome, share }, i) =>
           share > 0 ? (
-            <div
+            <motion.div
               key={outcome.teamId}
-              className={`${TRACK_COLORS[i % TRACK_COLORS.length]} h-full`}
-              style={{ width: `${Math.max(share * 100, 1)}%` }}
+              className={`${TRACK_COLORS[i % TRACK_COLORS.length]} h-full first:rounded-l-full last:rounded-r-full`}
+              initial={{ width: 0 }}
+              whileInView={{ width: `${Math.max(share * 100, 1)}%` }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.9, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
               title={`${outcome.name} ${(share * 100).toFixed(1)}%`}
             />
           ) : null,

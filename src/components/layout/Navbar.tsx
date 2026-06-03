@@ -42,6 +42,25 @@ export function Navbar() {
           <WalletMenu />
         </div>
       </nav>
+
+      {/* Mobile nav row */}
+      <nav className="flex items-center gap-1 overflow-x-auto border-t border-border-subtle px-4 py-2 md:hidden">
+        {links.map((link) => (
+          <NavLink
+            key={link.to}
+            to={link.to}
+            className={({ isActive }) =>
+              cn(
+                'shrink-0 rounded-md px-3 py-1.5 text-sm font-medium transition-colors duration-200',
+                isActive ? 'bg-bg-elevated text-fg' : 'text-fg-muted hover:text-fg',
+              )
+            }
+          >
+            {t(link.key)}
+          </NavLink>
+        ))}
+        <LangSwitch className="ml-auto shrink-0 sm:hidden" />
+      </nav>
     </header>
   );
 }

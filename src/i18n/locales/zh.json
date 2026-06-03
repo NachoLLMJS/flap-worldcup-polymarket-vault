@@ -1,0 +1,69 @@
+{
+  "brand": {
+    "name": "FlapWorld",
+    "tagline": "BNB Chain 上的 2026 世界杯预测市场"
+  },
+  "nav": {
+    "home": "首页",
+    "markets": "市场",
+    "portfolio": "我的仓位",
+    "about": "关于"
+  },
+  "common": {
+    "loading": "加载中…",
+    "error": "出现错误",
+    "retry": "重试",
+    "cancel": "取消",
+    "confirm": "确认",
+    "close": "关闭",
+    "copy": "复制",
+    "copied": "已复制",
+    "viewOnBscScan": "在 BscScan 查看"
+  },
+  "wallet": {
+    "connect": "连接钱包",
+    "disconnect": "断开连接",
+    "connecting": "连接中…",
+    "balance": "余额",
+    "address": "地址",
+    "switchToBsc": "切换到 BNB Chain",
+    "fund": "充值"
+  },
+  "markets": {
+    "all": "全部市场",
+    "tournament": "总冠军",
+    "group": "小组冠军",
+    "match": "比赛胜者",
+    "search": "搜索球队",
+    "sortBy": "排序",
+    "closesAt": "截止",
+    "pool": "奖池",
+    "empty": "没有符合条件的市场"
+  },
+  "betting": {
+    "amount": "金额",
+    "platformFee": "平台手续费",
+    "netStake": "净下注金额",
+    "placeBet": "下注",
+    "withdraw": "撤回",
+    "claim": "领取",
+    "refund": "退款",
+    "potentialWin": "潜在收益",
+    "feeNote": "下注时收取 1% 平台手续费。剩余金额进入市场奖池。",
+    "withdrawNote": "市场截止前撤回仅返还净下注金额。手续费不予退还。",
+    "status": {
+      "open": "开放中",
+      "closed": "已截止",
+      "resolved": "已结算",
+      "cancelled": "已取消",
+      "pending": "待定"
+    }
+  },
+  "tx": {
+    "pending": "交易确认中…",
+    "success": "交易已确认",
+    "rejected": "交易被拒绝",
+    "failed": "交易失败",
+    "insufficient": "BNB 余额不足"
+  }
+}

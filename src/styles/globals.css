@@ -125,3 +125,33 @@ body {
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }
+
+/* Stadium-floodlight god rays for the hero backdrop. */
+.fw-godrays {
+  background-image:
+    conic-gradient(from 210deg at 18% -10%, transparent 0deg, oklch(82% 0.13 85 / 0.10) 8deg, transparent 16deg),
+    conic-gradient(from 200deg at 38% -10%, transparent 0deg, oklch(82% 0.13 85 / 0.07) 6deg, transparent 14deg),
+    conic-gradient(from 160deg at 64% -10%, transparent 0deg, oklch(58% 0.18 25 / 0.10) 7deg, transparent 15deg),
+    conic-gradient(from 150deg at 84% -10%, transparent 0deg, oklch(82% 0.13 85 / 0.08) 6deg, transparent 13deg);
+  mix-blend-mode: screen;
+  filter: blur(6px);
+  animation: fw-rays 12s ease-in-out infinite alternate;
+  opacity: 0.8;
+}
+
+@keyframes fw-rays {
+  0% {
+    opacity: 0.55;
+    transform: translateY(0) scaleY(1);
+  }
+  100% {
+    opacity: 0.9;
+    transform: translateY(-1.5%) scaleY(1.04);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fw-godrays {
+    animation: none;
+  }
+}

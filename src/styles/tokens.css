@@ -36,6 +36,12 @@
   --color-sand: oklch(85% 0.08 80);
   --color-sand-soft: oklch(85% 0.08 80 / 0.14);
 
+  /* Gold — World Cup trophy luxury accent */
+  --color-gold: oklch(82% 0.13 85);
+  --color-gold-bright: oklch(90% 0.11 92);
+  --color-gold-deep: oklch(66% 0.13 70);
+  --color-gold-soft: oklch(82% 0.13 85 / 0.16);
+
   /* Semantic */
   --color-success: oklch(72% 0.16 145);
   --color-success-soft: oklch(72% 0.16 145 / 0.16);

@@ -32,6 +32,9 @@ Thumbs.db
 .commit-msg.txt
 .pr*-body.md
 
+# raw generated source assets (keep only optimized webp in public/hero)
+public/hero/hero-trophy.png
+
 # Solidity/build caches
 cache/
 out/

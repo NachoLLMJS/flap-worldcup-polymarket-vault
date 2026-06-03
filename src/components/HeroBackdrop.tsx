@@ -1,26 +1,39 @@
-import { MeshGradient } from '@paper-design/shaders-react';
 import { cn } from '../lib/cn';
 
-/** Animated mesh-gradient backdrop for the hero. Sits behind content,
- *  non-interactive, low opacity. Pixel count capped for perf (DPR control). */
+/** Cinematic hero backdrop built on a generated, art-directed photo (golden
+ *  trophy under stadium floodlights). Full-bleed, behind content, with a
+ *  left-weighted scrim so the headline stays legible and a bottom fade into
+ *  the page background. */
 export function HeroBackdrop({ className }: { className?: string }) {
   return (
-    <div
-      aria-hidden
-      className={cn('pointer-events-none absolute inset-x-0 top-0 -z-10 h-[680px] overflow-hidden', className)}
-    >
-      <MeshGradient
-        colors={['#1a110f', '#9a2d3a', '#1a110f', '#d9b88a']}
-        distortion={0.8}
-        swirl={0.6}
-        speed={0.3}
-        maxPixelCount={1280 * 720}
-        width="100%"
-        height={680}
-        style={{ opacity: 0.4 }}
+    <div aria-hidden className={cn('pointer-events-none absolute inset-x-0 top-0 -z-10 h-[680px] overflow-hidden', className)}>
+      <picture>
+        <source media="(max-width: 768px)" srcSet="/hero/hero-768.webp" />
+        <source media="(max-width: 1280px)" srcSet="/hero/hero-1280.webp" />
+        <img
+          src="/hero/hero-1920.webp"
+          alt=""
+          className="h-full w-full object-cover object-[70%_center]"
+          fetchPriority="high"
+        />
+      </picture>
+
+      {/* Left-weighted scrim for headline legibility */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            'linear-gradient(90deg, oklch(14% 0.015 30 / 0.94) 0%, oklch(14% 0.015 30 / 0.78) 32%, oklch(14% 0.015 30 / 0.30) 60%, transparent 80%)',
+        }}
       />
-      {/* Fade the bottom into the page background for a clean seam. */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-bg" />
+      {/* Top + bottom fade to seam into the page */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            'linear-gradient(180deg, oklch(14% 0.015 30 / 0.55) 0%, transparent 22%, transparent 62%, oklch(14% 0.015 30) 100%)',
+        }}
+      />
     </div>
   );
 }

@@ -48,6 +48,7 @@
     "vite": "^8.0.16"
   },
   "devDependencies": {
+    "sharp": "^0.34.5",
     "solc": "^0.8.30"
   }
 }

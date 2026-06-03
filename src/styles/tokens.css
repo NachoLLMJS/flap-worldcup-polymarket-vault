@@ -1,0 +1,75 @@
+/* FlapWorld design tokens — Mexico 86 Revival
+   Dark luxury palette: carbón cálido + rojo borgoña editorial + crema arena.
+   All colors in OKLCH for perceptual uniformity. */
+
+@theme {
+  /* Fonts */
+  --font-display: 'Fraunces Variable', 'Fraunces', ui-serif, Georgia, serif;
+  --font-sans: 'Inter Variable', 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', 'Cascadia Code', Menlo, monospace;
+
+  /* Surfaces — warm charcoal stack */
+  --color-bg: oklch(14% 0.015 30);
+  --color-bg-elevated: oklch(18% 0.02 30);
+  --color-bg-higher: oklch(22% 0.025 30);
+  --color-bg-overlay: oklch(10% 0.01 30 / 0.72);
+
+  /* Borders */
+  --color-border: oklch(28% 0.03 30);
+  --color-border-strong: oklch(38% 0.04 30);
+  --color-border-subtle: oklch(22% 0.02 30);
+
+  /* Text */
+  --color-fg: oklch(95% 0.02 80);
+  --color-fg-muted: oklch(72% 0.04 80);
+  --color-fg-subtle: oklch(55% 0.04 80);
+  --color-fg-inverse: oklch(12% 0.01 30);
+
+  /* Accent — borgoña editorial */
+  --color-accent: oklch(58% 0.18 25);
+  --color-accent-hover: oklch(63% 0.20 25);
+  --color-accent-pressed: oklch(52% 0.16 25);
+  --color-accent-soft: oklch(58% 0.18 25 / 0.16);
+  --color-accent-fg: oklch(98% 0.02 80);
+
+  /* Secondary — crema arena */
+  --color-sand: oklch(85% 0.08 80);
+  --color-sand-soft: oklch(85% 0.08 80 / 0.14);
+
+  /* Semantic */
+  --color-success: oklch(72% 0.16 145);
+  --color-success-soft: oklch(72% 0.16 145 / 0.16);
+  --color-warning: oklch(80% 0.15 70);
+  --color-warning-soft: oklch(80% 0.15 70 / 0.16);
+  --color-danger: oklch(65% 0.22 28);
+  --color-danger-soft: oklch(65% 0.22 28 / 0.16);
+  --color-info: oklch(70% 0.13 230);
+  --color-info-soft: oklch(70% 0.13 230 / 0.16);
+
+  /* Radii */
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* Shadows — warm tinted */
+  --shadow-sm: 0 1px 2px 0 oklch(8% 0.01 30 / 0.4);
+  --shadow-md: 0 4px 8px -2px oklch(8% 0.01 30 / 0.5), 0 2px 4px -2px oklch(8% 0.01 30 / 0.4);
+  --shadow-lg: 0 12px 24px -6px oklch(8% 0.01 30 / 0.55), 0 6px 12px -4px oklch(8% 0.01 30 / 0.45);
+  --shadow-xl: 0 24px 48px -12px oklch(8% 0.01 30 / 0.65);
+  --shadow-glow: 0 0 32px -8px oklch(58% 0.18 25 / 0.45);
+
+  /* Easings */
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out-quint: cubic-bezier(0.83, 0, 0.17, 1);
+  --ease-portal: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Durations */
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 320ms;
+  --duration-cinema: 720ms;
+}

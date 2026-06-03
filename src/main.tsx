@@ -3,7 +3,9 @@ import {createRoot} from 'react-dom/client';
 import {PrivyProvider, useConnectWallet, useCreateWallet, usePrivy, useWallets} from '@privy-io/react-auth';
 import {createWalletClient, custom, parseEther} from 'viem';
 import {bsc} from 'viem/chains';
+import './styles/globals.css';
 import './styles.css';
+import './i18n';
 
 const PRIVY_APP_ID = import.meta.env.VITE_PRIVY_APP_ID as string | undefined;
 const PRIVY_CLIENT_ID = import.meta.env.VITE_PRIVY_CLIENT_ID as string | undefined;

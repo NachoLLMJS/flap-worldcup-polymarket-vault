@@ -14,7 +14,7 @@ import { PrivyProvider, usePrivy, useWallets } from '@privy-io/react-auth';
 import { bsc } from 'viem/chains';
 import { createPublicClient, createWalletClient, custom, http, parseEther, formatEther } from 'viem';
 import { PRIVY_APP_ID, PRIVY_CLIENT_ID, BETTING_VAULT_ADDRESS, BSC_RPC_URL, BSC_CHAIN_ID } from '../lib/env';
-import { pickBscWallet, type BscWalletLike } from '../features/wallet/walletHelpers';
+import { pickBscWallet, pickTwitterProfile, type BscWalletLike } from '../features/wallet/walletHelpers';
 import { bettingAbi } from './abi';
 import { readBetActivity, recordBetActivity } from '../features/betting/activity';
 import { FEE_RATE, TEAM, ALL_MARKETS, MATCHES, GROUP_MARKETS, TOURNAMENT_MARKET } from './data';
@@ -158,11 +158,16 @@ function LiveWalletProvider({ children }: { children: React.ReactNode }){
     }
   }, [authenticated, address]); // eslint-disable-line
 
-  // live mode shows the REAL address (no invented .bnb handle on a money app)
-  const wallet = useMemo(()=> (authenticated && address)
-    ? { address, short: shortAddr(address), ens: shortAddr(address), balance, since: sinceFrom(address) }
-    : null,
-  [authenticated, address, balance]);
+  // live mode: X (Twitter) name + profile photo when the login is via X,
+  // otherwise the real address (no invented handle on a money app).
+  const wallet = useMemo(()=>{
+    if (!(authenticated && address)) return null;
+    const tw = pickTwitterProfile(user);
+    const avatar = tw && tw.profilePictureUrl ? tw.profilePictureUrl.replace('_normal','_400x400') : undefined;
+    const handle = (tw && tw.username) || undefined;
+    const display = (tw && (tw.name || (tw.username && '@'+tw.username))) || shortAddr(address);
+    return { address, short: shortAddr(address), ens: display, handle, avatar, balance, since: sinceFrom(address) };
+  }, [authenticated, address, balance, user]);
 
   async function getWalletClient(){
     if (!bscWallet) throw new Error('No BSC wallet connected');

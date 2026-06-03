@@ -333,7 +333,6 @@ function HomePage({ setRoute }){
   return (
     <main>
       <Hero setRoute={setRoute} />
-      <Ticker/>
       <StatsStrip/>
       <HowItWorks setRoute={setRoute}/>
       <ClosingCTA setRoute={setRoute}/>

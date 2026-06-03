@@ -6,6 +6,7 @@ import { HeroBackdrop } from '../components/HeroBackdrop';
 import { ScrollReveal } from '../components/ScrollReveal';
 import { Flag } from '../components/Flag';
 import { MarketGrid } from '../features/markets/components/MarketGrid';
+import { MarketsTicker } from '../features/markets/components/MarketsTicker';
 import { useMarkets } from '../features/markets/useMarkets';
 import { isPrivyConfigured } from '../lib/env';
 
@@ -74,6 +75,11 @@ export function HomePage() {
           </motion.div>
         </div>
       </section>
+
+      {/* Live markets ticker */}
+      <div className="-mx-4 sm:-mx-6">
+        <MarketsTicker />
+      </div>
 
       {/* Featured markets */}
       <section className="py-12">

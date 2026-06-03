@@ -10,8 +10,8 @@ export interface SkeletonProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 const shapeClasses: Record<Shape, string> = {
-  rect: 'rounded-[--radius-md]',
-  line: 'rounded-[--radius-sm] h-3',
+  rect: 'rounded-md',
+  line: 'rounded-sm h-3',
   circle: 'rounded-full',
 };
 
@@ -25,7 +25,7 @@ export const Skeleton = forwardRef<HTMLDivElement, SkeletonProps>(function Skele
       role="status"
       aria-label="loading"
       className={cn(
-        'relative overflow-hidden bg-[--color-bg-higher]',
+        'relative overflow-hidden bg-bg-higher',
         'before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_1.6s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/5 before:to-transparent',
         shapeClasses[shape],
         className,

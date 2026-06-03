@@ -3,6 +3,7 @@ import { Navbar } from '../components/layout/Navbar';
 import { Footer } from '../components/layout/Footer';
 import { Atmosphere } from '../components/Atmosphere';
 import { CursorGlow } from '../components/CursorGlow';
+import { ThemeSwitcher } from '../components/ThemeSwitcher';
 import { PageTransition } from '../components/PageTransition';
 
 /** Redesigned shell. Wrapped in `.fw-app` so design-system defaults (display
@@ -23,6 +24,7 @@ export function RootLayout() {
         </main>
         <Footer />
       </div>
+      <ThemeSwitcher />
       <ScrollRestoration />
     </div>
   );

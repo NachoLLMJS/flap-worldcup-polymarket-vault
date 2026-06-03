@@ -4,15 +4,15 @@
 export function Atmosphere() {
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-      {/* Burgundy aura, top-left */}
+      {/* Accent aura, top-left — recolors per theme (burgundy/green/lime) */}
       <div
         className="fw-aura fw-aura-a absolute h-[70vh] w-[70vw]"
-        style={{ background: 'radial-gradient(circle at center, oklch(58% 0.18 25 / 0.16), transparent 68%)' }}
+        style={{ background: 'radial-gradient(circle at center, color-mix(in oklch, var(--color-accent) 16%, transparent), transparent 68%)' }}
       />
       {/* Gold aura, bottom-right */}
       <div
         className="fw-aura fw-aura-b absolute h-[65vh] w-[65vw]"
-        style={{ background: 'radial-gradient(circle at center, oklch(82% 0.13 85 / 0.10), transparent 68%)' }}
+        style={{ background: 'radial-gradient(circle at center, color-mix(in oklch, var(--color-gold) 11%, transparent), transparent 68%)' }}
       />
       {/* Cool counter-glow, mid-right for separation */}
       <div

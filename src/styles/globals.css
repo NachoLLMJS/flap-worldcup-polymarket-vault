@@ -208,3 +208,37 @@ body {
     animation: none;
   }
 }
+
+/* ============================================================
+   Light sections — only render light under the editorial theme.
+   Remaps the surface/text/border tokens locally so every child
+   (cards, text, borders) adapts automatically. Accent stays.
+   ============================================================ */
+:root[data-theme='editorial'] .surface-light {
+  background-color: oklch(95% 0.013 85);
+  color: var(--color-surface-light-fg);
+  --color-fg: var(--color-surface-light-fg);
+  --color-fg-muted: var(--color-surface-light-muted);
+  --color-fg-subtle: oklch(58% 0.03 45);
+  --color-bg: oklch(95% 0.013 85);
+  --color-bg-elevated: oklch(99% 0.008 85);
+  --color-bg-higher: oklch(91% 0.02 85);
+  --color-bg-overlay: oklch(95% 0.013 85 / 0.8);
+  --color-border: var(--color-surface-light-border);
+  --color-border-subtle: oklch(89% 0.016 85);
+  --color-border-strong: oklch(80% 0.03 85);
+}
+/* Tame the white grain over a light section */
+:root[data-theme='editorial'] .surface-light .fw-grain-mute {
+  display: none;
+}
+
+/* Hexagon (ball-panel) motif — used by HexField */
+.fw-hex {
+  background-color: transparent;
+  background-image:
+    repeating-linear-gradient(60deg, oklch(50% 0.05 200 / 0.06) 0 1px, transparent 1px 28px),
+    repeating-linear-gradient(-60deg, oklch(50% 0.05 200 / 0.06) 0 1px, transparent 1px 28px),
+    repeating-linear-gradient(0deg, oklch(50% 0.05 200 / 0.06) 0 1px, transparent 1px 48px);
+  mask-image: radial-gradient(120% 100% at 50% 0%, #000 30%, transparent 80%);
+}

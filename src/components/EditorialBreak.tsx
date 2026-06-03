@@ -1,10 +1,13 @@
 import { ScrollReveal } from './ScrollReveal';
+import { ThemeMotif } from './motif/ThemeMotif';
 
 /** Oversized editorial moment that breaks the card-grid rhythm — a quiet, big
- *  statement in Fraunces italic with a faint giant year behind it. */
+ *  statement in Fraunces italic with a faint giant year + theme motif behind. */
 export function EditorialBreak() {
   return (
     <section className="relative -mx-4 my-8 overflow-hidden border-y border-border-subtle py-24 sm:-mx-6 sm:py-32">
+      {/* Signature motif per theme (pitch lines / hex grid) */}
+      <ThemeMotif variant="fill" />
       {/* Faint oversized year */}
       <span
         aria-hidden

@@ -116,7 +116,7 @@ export function HomePage() {
 
       {/* Fee transparency teaser */}
       <ScrollReveal className="py-12">
-        <div className="relative overflow-hidden rounded-2xl border border-border bg-bg-elevated p-8 sm:p-12">
+        <div className="surface-light relative overflow-hidden rounded-2xl border border-border bg-bg-elevated p-8 sm:p-12">
           <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-accent opacity-[0.08] blur-[100px]" />
           <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-gold">No bookmaker</span>
           <h2 className="mt-1 font-display text-2xl font-semibold tracking-[-0.02em] text-fg sm:text-3xl">

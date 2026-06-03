@@ -41,6 +41,12 @@
   --color-sand: oklch(85% 0.08 80);
   --color-sand-soft: oklch(85% 0.08 80 / 0.14);
 
+  /* Light surface (editorial theme uses cream; other themes fall back to dark). */
+  --color-surface-light: oklch(18% 0.02 30);
+  --color-surface-light-fg: oklch(95% 0.02 80);
+  --color-surface-light-muted: oklch(72% 0.04 80);
+  --color-surface-light-border: oklch(28% 0.03 30);
+
   /* Gold — World Cup trophy luxury accent */
   --color-gold: oklch(82% 0.13 85);
   --color-gold-bright: oklch(90% 0.11 92);
@@ -83,4 +89,81 @@
   --duration-base: 200ms;
   --duration-slow: 320ms;
   --duration-cinema: 720ms;
+}
+
+/* ============================================================
+   THEME VARIANTS — switchable identities (data-theme on <html>).
+   Override the @theme custom properties; all utilities follow.
+   ============================================================ */
+
+/* 1) PITCH — Cancha de noche: cold-green charcoal + vivid grass green + gold. */
+:root[data-theme='pitch'] {
+  --color-bg: oklch(15% 0.022 158);
+  --color-bg-elevated: oklch(19% 0.028 158);
+  --color-bg-higher: oklch(23% 0.034 158);
+  --color-bg-overlay: oklch(11% 0.015 158 / 0.72);
+
+  --color-border: oklch(30% 0.035 158);
+  --color-border-strong: oklch(41% 0.05 158);
+  --color-border-subtle: oklch(24% 0.026 158);
+
+  --color-fg: oklch(96% 0.02 140);
+  --color-fg-muted: oklch(74% 0.03 145);
+  --color-fg-subtle: oklch(56% 0.03 150);
+  --color-fg-inverse: oklch(14% 0.02 150);
+
+  --color-accent: oklch(64% 0.16 150);
+  --color-accent-hover: oklch(70% 0.18 150);
+  --color-accent-pressed: oklch(57% 0.14 150);
+  --color-accent-soft: oklch(64% 0.16 150 / 0.16);
+  --color-accent-fg: oklch(14% 0.03 150);
+
+  --shadow-glow: 0 0 34px -8px oklch(64% 0.16 150 / 0.5);
+}
+
+/* 2) EDITORIAL — dark base (burgundy/gold) + real cream LIGHT sections. */
+:root[data-theme='editorial'] {
+  --color-bg: oklch(13% 0.012 30);
+  --color-bg-elevated: oklch(17% 0.016 30);
+  --color-bg-higher: oklch(21% 0.02 30);
+
+  /* Light surface = warm paper with dark ink, used by .surface-light sections */
+  --color-surface-light: oklch(94% 0.014 85);
+  --color-surface-light-fg: oklch(22% 0.03 30);
+  --color-surface-light-muted: oklch(44% 0.04 35);
+  --color-surface-light-border: oklch(86% 0.02 85);
+}
+
+/* 3) ELECTRIC — near-black + high-voltage lime + cyan/magenta blocking. */
+:root[data-theme='electric'] {
+  --color-bg: oklch(12% 0.012 280);
+  --color-bg-elevated: oklch(16% 0.016 280);
+  --color-bg-higher: oklch(20% 0.02 280);
+  --color-bg-overlay: oklch(8% 0.01 280 / 0.76);
+
+  --color-border: oklch(30% 0.02 280);
+  --color-border-strong: oklch(44% 0.03 280);
+  --color-border-subtle: oklch(23% 0.016 280);
+
+  --color-fg: oklch(97% 0.012 110);
+  --color-fg-muted: oklch(73% 0.02 280);
+  --color-fg-subtle: oklch(55% 0.02 280);
+  --color-fg-inverse: oklch(12% 0.02 120);
+
+  --color-accent: oklch(86% 0.19 120);
+  --color-accent-hover: oklch(90% 0.20 120);
+  --color-accent-pressed: oklch(81% 0.18 120);
+  --color-accent-soft: oklch(86% 0.19 120 / 0.16);
+  --color-accent-fg: oklch(16% 0.04 120);
+
+  --color-info: oklch(74% 0.16 225);
+  --color-info-soft: oklch(74% 0.16 225 / 0.16);
+  --color-danger: oklch(64% 0.26 8);
+  --color-danger-soft: oklch(64% 0.26 8 / 0.16);
+
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.625rem;
+  --radius-2xl: 0.875rem;
+
+  --shadow-glow: 0 0 38px -6px oklch(86% 0.19 120 / 0.55);
 }

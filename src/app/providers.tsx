@@ -6,14 +6,15 @@ import { bsc } from 'viem/chains';
 import { PRIVY_APP_ID, PRIVY_CLIENT_ID, isPrivyConfigured } from '../lib/env';
 import { router } from './router';
 import { Preloader } from './Preloader';
+import { ThemeProvider } from './ThemeProvider';
 
 function Shell() {
   const [loaded, setLoaded] = useState(false);
   return (
-    <>
+    <ThemeProvider>
       <AnimatePresence>{!loaded && <Preloader key="pre" onDone={() => setLoaded(true)} />}</AnimatePresence>
       <RouterProvider router={router} />
-    </>
+    </ThemeProvider>
   );
 }
 

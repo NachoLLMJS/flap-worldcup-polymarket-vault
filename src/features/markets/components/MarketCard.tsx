@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Badge, Card } from '../../../components/ui';
+import { Flag } from '../../../components/Flag';
 import { cn } from '../../../lib/cn';
 import { marketKind, type MarketFixture } from '../types';
 import { MARKET_KIND_LABELS } from '../helpers';
@@ -46,7 +47,7 @@ export function MarketCard({ market, className }: { market: MarketFixture; class
               key={o.teamId}
               className="inline-flex items-center gap-1.5 rounded-full border border-border bg-bg px-2.5 h-7 text-xs text-fg-muted"
             >
-              <span aria-hidden>{o.flag}</span>
+              <Flag teamId={o.teamId} size="sm" />
               <span className="truncate max-w-24">{zh ? o.zh : o.name}</span>
             </span>
           ))}

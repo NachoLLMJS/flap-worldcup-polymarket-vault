@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { Flag } from '../../../components/Flag';
 import type { MarketFixture } from '../../markets/types';
 import type { MarketChainData } from '../useMarketChain';
 
@@ -47,7 +48,7 @@ export function PoolBar({ market, chain }: { market: MarketFixture; chain: Marke
           <div key={outcome.teamId} className="flex items-center justify-between text-sm">
             <span className="flex items-center gap-2 text-fg-muted">
               <span className={`h-2 w-2 rounded-full ${TRACK_COLORS[i % TRACK_COLORS.length]}`} />
-              <span aria-hidden>{outcome.flag}</span>
+              <Flag teamId={outcome.teamId} size="sm" />
               {zh ? outcome.zh : outcome.name}
             </span>
             <span className="font-mono tabular-nums text-fg-muted">{(share * 100).toFixed(1)}%</span>

@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { Badge, Button, Card, Skeleton } from '../components/ui';
+import { Flag } from '../components/Flag';
 import { TxToast, type TxToastState } from '../components/TxToast';
 import { isPrivyConfigured } from '../lib/env';
 import { pickBscWallet, pickUserBscAddress, type BscWalletLike, type UserWalletLike } from '../features/wallet/walletHelpers';
@@ -157,7 +158,7 @@ function PositionRow({
               key={s.teamId}
               className="inline-flex items-center gap-1.5 rounded-full border border-border bg-bg px-2.5 h-7 text-xs text-fg-muted"
             >
-              <span aria-hidden>{s.flag}</span>
+              <Flag teamId={s.teamId} size="sm" />
               {s.name}
               <span className="font-mono tabular-nums text-fg-subtle">{s.stakeBnb.toFixed(4)}</span>
             </span>

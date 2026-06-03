@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { cn } from '../../../lib/cn';
+import { Flag } from '../../../components/Flag';
 import type { Outcome } from '../types';
 
 /** Compact outcome label with flag + localized team name. */
@@ -19,9 +20,7 @@ export function OutcomeChip({
 
   const content = (
     <>
-      <span className="text-base leading-none" aria-hidden>
-        {outcome.flag}
-      </span>
+      <Flag teamId={outcome.teamId} size="sm" />
       <span className="truncate">{name}</span>
     </>
   );

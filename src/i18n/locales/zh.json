@@ -54,6 +54,7 @@
     "status": {
       "open": "开放中",
       "closed": "已截止",
+      "locked": "已锁定",
       "resolved": "已结算",
       "cancelled": "已取消",
       "pending": "待定"

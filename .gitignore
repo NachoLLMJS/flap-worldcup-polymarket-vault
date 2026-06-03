@@ -28,6 +28,10 @@ Thumbs.db
 .idea/
 .claude/
 
+# local scratch (commit/PR message drafts)
+.commit-msg.txt
+.pr*-body.md
+
 # Solidity/build caches
 cache/
 out/

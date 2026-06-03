@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
-import { createWalletClient, custom, parseEther } from 'viem';
+import { createWalletClient, custom, parseEther, type EIP1193Provider } from 'viem';
 import { bsc } from 'viem/chains';
 import { BSC_CHAIN_ID, BETTING_VAULT_ADDRESS, PROTOCOL_FEE_BPS } from '../../lib/env';
 import { pickBscWallet, type BscWalletLike } from '../wallet/walletHelpers';
@@ -52,7 +52,7 @@ function LiveBettingSlip({ pick }: { pick: Pick | null }) {
     setSubmitting(true);
     try {
       await bscWallet.switchChain?.(BSC_CHAIN_ID);
-      const provider = await bscWallet.getEthereumProvider?.();
+      const provider = (await bscWallet.getEthereumProvider?.()) as EIP1193Provider | undefined;
       if (!provider) throw new Error('Wallet provider not ready yet');
       const client = createWalletClient({ chain: bsc, transport: custom(provider) });
       const [account] = await client.getAddresses();

@@ -54,6 +54,7 @@
     "status": {
       "open": "Open",
       "closed": "Closed",
+      "locked": "Locked",
       "resolved": "Resolved",
       "cancelled": "Cancelled",
       "pending": "Pending"

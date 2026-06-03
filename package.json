@@ -16,6 +16,7 @@
     "deploy:betting:bsc": "node foundry/worldcup-betting/scripts/deploy-betting-bsc.mjs"
   },
   "dependencies": {
+    "@fontsource-variable/bricolage-grotesque": "^5.2.10",
     "@fontsource-variable/fraunces": "^5.2.9",
     "@fontsource-variable/inter": "^5.2.8",
     "@fontsource/inter": "^5.2.8",
@@ -31,6 +32,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
     "clsx": "^2.1.1",
+    "flag-icons": "^7.5.0",
     "framer-motion": "^12.40.0",
     "gsap": "^3.15.0",
     "i18next": "^26.3.0",
@@ -39,6 +41,7 @@
     "react-aria": "^3.49.0",
     "react-dom": "^19.2.7",
     "react-i18next": "^17.0.8",
+    "react-router-dom": "^7.16.0",
     "tailwind-merge": "^3.6.0",
     "tailwindcss": "^4.3.0",
     "typescript": "^6.0.3",
@@ -46,6 +49,8 @@
     "vite": "^8.0.16"
   },
   "devDependencies": {
+    "ffmpeg-static": "^5.3.0",
+    "sharp": "^0.34.5",
     "solc": "^0.8.30"
   }
 }

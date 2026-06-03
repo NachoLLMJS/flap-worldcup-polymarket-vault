@@ -12,15 +12,15 @@ export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 
 const intentClasses: Record<Intent, string> = {
   neutral:
-    'bg-[--color-bg-higher] text-[--color-fg-muted] border border-[--color-border]',
-  accent: 'bg-[--color-accent-soft] text-[--color-accent] border border-[--color-accent]/30',
+    'bg-bg-higher text-fg-muted border border-border',
+  accent: 'bg-accent-soft text-accent border border-accent/30',
   success:
-    'bg-[--color-success-soft] text-[--color-success] border border-[--color-success]/30',
+    'bg-success-soft text-success border border-success/30',
   warning:
-    'bg-[--color-warning-soft] text-[--color-warning] border border-[--color-warning]/30',
+    'bg-warning-soft text-warning border border-warning/30',
   danger:
-    'bg-[--color-danger-soft] text-[--color-danger] border border-[--color-danger]/30',
-  info: 'bg-[--color-info-soft] text-[--color-info] border border-[--color-info]/30',
+    'bg-danger-soft text-danger border border-danger/30',
+  info: 'bg-info-soft text-info border border-info/30',
 };
 
 const sizeClasses: Record<Size, string> = {
@@ -29,12 +29,12 @@ const sizeClasses: Record<Size, string> = {
 };
 
 const dotClasses: Record<Intent, string> = {
-  neutral: 'bg-[--color-fg-muted]',
-  accent: 'bg-[--color-accent]',
-  success: 'bg-[--color-success]',
-  warning: 'bg-[--color-warning]',
-  danger: 'bg-[--color-danger]',
-  info: 'bg-[--color-info]',
+  neutral: 'bg-fg-muted',
+  accent: 'bg-accent',
+  success: 'bg-success',
+  warning: 'bg-warning',
+  danger: 'bg-danger',
+  info: 'bg-info',
 };
 
 export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(function Badge(
@@ -45,7 +45,7 @@ export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(function Badge(
     <span
       ref={ref}
       className={cn(
-        'inline-flex items-center font-medium uppercase tracking-[0.05em] rounded-[--radius-full]',
+        'inline-flex items-center font-medium uppercase tracking-[0.05em] rounded-full',
         intentClasses[intent],
         sizeClasses[size],
         className,

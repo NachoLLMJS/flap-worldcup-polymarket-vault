@@ -16,7 +16,7 @@ export function LangSwitch({ className }: { className?: string }) {
       role="group"
       aria-label="Language"
       className={cn(
-        'inline-flex items-center gap-0.5 p-0.5 rounded-[--radius-full] border border-[--color-border] bg-[--color-bg-elevated]',
+        'inline-flex items-center gap-0.5 p-0.5 rounded-full border border-border bg-bg-elevated',
         className,
       )}
     >
@@ -30,10 +30,10 @@ export function LangSwitch({ className }: { className?: string }) {
             aria-pressed={active}
             className={cn(
               'inline-flex items-center justify-center min-w-8 h-7 px-2 text-xs font-medium uppercase tracking-[0.06em]',
-              'rounded-[--radius-full] transition-[background,color] duration-[--duration-base] ease-[--ease-out-quint]',
+              'rounded-full transition-[background,color] duration-200 ease-out-quint',
               active
-                ? 'bg-[--color-fg] text-[--color-fg-inverse]'
-                : 'bg-transparent text-[--color-fg-muted] hover:text-[--color-fg]',
+                ? 'bg-fg text-fg-inverse'
+                : 'bg-transparent text-fg-muted hover:text-fg',
             )}
           >
             {labels[lng]}

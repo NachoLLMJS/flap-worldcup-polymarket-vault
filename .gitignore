@@ -28,6 +28,16 @@ Thumbs.db
 .idea/
 .claude/
 
+# local scratch (commit/PR message drafts)
+.commit-msg.txt
+.pr*-body.md
+
+# raw generated source assets (keep only optimized webp/png in public/hero)
+public/hero/hero-trophy.png
+public/hero/logo-src.png
+public/hero/logo-cut.png
+public/hero/markets-src.png
+
 # Solidity/build caches
 cache/
 out/

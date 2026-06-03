@@ -15,10 +15,10 @@ export const Tag = forwardRef<HTMLButtonElement, TagProps>(function Tag(
       type="button"
       aria-pressed={active}
       className={cn(
-        'inline-flex items-center h-8 px-3 text-xs font-medium rounded-[--radius-full] transition-[background,color,border-color] duration-[--duration-base] ease-[--ease-out-quint]',
+        'inline-flex items-center h-8 px-3 text-xs font-medium rounded-full transition-[background,color,border-color] duration-200 ease-out-quint',
         active
-          ? 'bg-[--color-fg] text-[--color-fg-inverse] border border-[--color-fg]'
-          : 'bg-transparent text-[--color-fg-muted] border border-[--color-border] hover:text-[--color-fg] hover:border-[--color-border-strong]',
+          ? 'bg-fg text-fg-inverse border border-fg'
+          : 'bg-transparent text-fg-muted border border-border hover:text-fg hover:border-border-strong',
         className,
       )}
       {...rest}

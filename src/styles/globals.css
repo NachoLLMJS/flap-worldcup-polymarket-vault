@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import '@fontsource-variable/bricolage-grotesque';
 @import '@fontsource-variable/fraunces';
 @import '@fontsource-variable/inter';
 @import '@fontsource/inter/400.css';
@@ -9,6 +10,7 @@
 @import '@fontsource/inter/900.css';
 @import '@fontsource/jetbrains-mono/500.css';
 @import '@fontsource/jetbrains-mono/700.css';
+@import 'flag-icons/css/flag-icons.min.css';
 @import './tokens.css';
 
 /* Reset + base */
@@ -123,4 +125,86 @@ body {
 /* Mono numerals */
 .tabular-nums {
   font-variant-numeric: tabular-nums;
+}
+
+/* Markets ticker marquee */
+.fw-marquee {
+  animation: fw-marquee 60s linear infinite;
+}
+.fw-marquee:hover {
+  animation-play-state: paused;
+}
+@keyframes fw-marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fw-marquee { animation: none; }
+}
+
+/* Global atmosphere auras — slow, organic drift for living depth. */
+.fw-aura {
+  border-radius: 9999px;
+  filter: blur(40px);
+  will-change: transform;
+}
+.fw-aura-a {
+  top: -18vh;
+  left: -16vw;
+  animation: fw-drift-a 26s ease-in-out infinite alternate;
+}
+.fw-aura-b {
+  bottom: -20vh;
+  right: -14vw;
+  animation: fw-drift-b 32s ease-in-out infinite alternate;
+}
+.fw-aura-c {
+  top: 28vh;
+  right: 8vw;
+  animation: fw-drift-c 38s ease-in-out infinite alternate;
+}
+@keyframes fw-drift-a {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  100% { transform: translate3d(6vw, 8vh, 0) scale(1.12); }
+}
+@keyframes fw-drift-b {
+  0% { transform: translate3d(0, 0, 0) scale(1.05); }
+  100% { transform: translate3d(-7vw, -6vh, 0) scale(1); }
+}
+@keyframes fw-drift-c {
+  0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.7; }
+  100% { transform: translate3d(-5vw, 5vh, 0) scale(1.15); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fw-aura-a, .fw-aura-b, .fw-aura-c { animation: none; }
+}
+
+/* Stadium-floodlight god rays for the hero backdrop. */
+.fw-godrays {
+  background-image:
+    conic-gradient(from 210deg at 18% -10%, transparent 0deg, oklch(82% 0.13 85 / 0.10) 8deg, transparent 16deg),
+    conic-gradient(from 200deg at 38% -10%, transparent 0deg, oklch(82% 0.13 85 / 0.07) 6deg, transparent 14deg),
+    conic-gradient(from 160deg at 64% -10%, transparent 0deg, oklch(58% 0.18 25 / 0.10) 7deg, transparent 15deg),
+    conic-gradient(from 150deg at 84% -10%, transparent 0deg, oklch(82% 0.13 85 / 0.08) 6deg, transparent 13deg);
+  mix-blend-mode: screen;
+  filter: blur(6px);
+  animation: fw-rays 12s ease-in-out infinite alternate;
+  opacity: 0.8;
+}
+
+@keyframes fw-rays {
+  0% {
+    opacity: 0.55;
+    transform: translateY(0) scaleY(1);
+  }
+  100% {
+    opacity: 0.9;
+    transform: translateY(-1.5%) scaleY(1.04);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fw-godrays {
+    animation: none;
+  }
 }

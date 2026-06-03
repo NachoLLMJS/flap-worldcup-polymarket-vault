@@ -1,11 +1,30 @@
 import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
 
 const root = new URL('..', import.meta.url);
-const read = (path) => fs.readFileSync(new URL(path, root), 'utf8');
+const read = (p) => fs.readFileSync(new URL(p, root), 'utf8');
+
+// Concatenate the whole `src/` tree so product invariants are checked against
+// the source regardless of how it is split into modules (PR #2 carved the
+// former monolith into features/components/lib).
+function readSrcTree() {
+  const srcDir = fileURLToPath(new URL('src/', root));
+  const out = [];
+  const walk = (dir) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) walk(full);
+      else if (/\.(ts|tsx|json)$/.test(entry.name)) out.push(fs.readFileSync(full, 'utf8'));
+    }
+  };
+  walk(srcDir);
+  return out.join('\n');
+}
 
 const betting = read('foundry/worldcup-betting/src/WorldCupBettingVault.sol');
-const main = read('src/main.tsx');
+const main = readSrcTree();
 const css = read('src/styles.css');
 const seedMarkets = JSON.parse(read('foundry/worldcup-betting/seed/initial-markets.json'));
 
@@ -21,7 +40,7 @@ assert.doesNotMatch(betting, /resolveMarket\(uint256 marketId\) external onlyOpe
 
 assert.match(main, /VITE_BETTING_VAULT_ADDRESS/, 'web must read betting vault address env');
 assert.match(main, /placeBet/, 'web must wire a real placeBet transaction path');
-assert.match(main, /protocolFeeBps\s*=\s*100/, 'web must show 1% betting fee');
+assert.match(main, /protocol_?fee_?bps\s*=\s*100/i, 'web must show 1% betting fee');
 assert.match(main, /0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e/, 'web must show fee recipient wallet');
 assert.doesNotMatch(main, /Real integration status/i, 'client UI must remove Real integration status section');
 assert.doesNotMatch(main, /Vault UI Schema/i, 'public website must not expose the developer UI schema section');

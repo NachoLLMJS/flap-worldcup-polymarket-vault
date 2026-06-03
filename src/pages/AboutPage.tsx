@@ -20,7 +20,10 @@ export function AboutPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
       <header className="flex flex-col gap-2">
-        <h1 className="font-display text-3xl font-medium text-fg sm:text-4xl">How fees & settlement work</h1>
+        <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-gold">Transparency</span>
+        <h1 className="font-display text-3xl font-semibold tracking-[-0.02em] text-fg sm:text-4xl">
+          How fees &amp; <span className="font-editorial font-light italic text-gold">settlement</span> work
+        </h1>
         <p className="text-fg-muted">Transparent by design. No hidden spread, no bookmaker margin.</p>
       </header>
 

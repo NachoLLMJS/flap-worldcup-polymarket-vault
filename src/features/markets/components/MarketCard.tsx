@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Badge } from '../../../components/ui';
 import { Flag } from '../../../components/Flag';
+import { Tilt } from '../../../components/Tilt';
 import { cn } from '../../../lib/cn';
 import { marketKind, type MarketFixture } from '../types';
 import { MARKET_KIND_LABELS } from '../helpers';
@@ -33,15 +34,15 @@ export function MarketCard({ market, className }: { market: MarketFixture; class
   const extra = market.outcomes.length - previewOutcomes.length;
 
   return (
+    <Tilt className={cn('h-full', className)}>
     <Link
       to={`/markets/${market.marketId}`}
       aria-label={title}
       className={cn(
-        'group relative flex flex-col overflow-hidden rounded-xl border border-border bg-bg-elevated',
-        'transition-[transform,border-color,box-shadow] duration-300 ease-out-quint',
-        'hover:-translate-y-1 hover:border-border-strong',
+        'group relative flex h-full flex-col overflow-hidden rounded-xl border border-border bg-bg-elevated',
+        'transition-[border-color,box-shadow] duration-300 ease-out-quint',
+        'hover:border-border-strong',
         kindGlow[kind],
-        className,
       )}
     >
       {/* Top accent bar */}
@@ -95,5 +96,6 @@ export function MarketCard({ market, className }: { market: MarketFixture; class
         </div>
       </div>
     </Link>
+    </Tilt>
   );
 }

@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import { Badge, Button } from '../components/ui';
 import { HeroBackdrop } from '../components/HeroBackdrop';
 import { ScrollReveal } from '../components/ScrollReveal';
+import { Magnetic } from '../components/Magnetic';
+import { CountUp } from '../components/CountUp';
 import { Flag } from '../components/Flag';
 import { MarketGrid } from '../features/markets/components/MarketGrid';
 import { MarketsTicker } from '../features/markets/components/MarketsTicker';
@@ -45,12 +47,16 @@ export function HomePage() {
               no bookmaker, just a transparent pari-mutuel pool.
             </p>
             <div className="flex flex-wrap items-center gap-3 pt-1">
-              <Button intent="primary" size="lg" onClick={() => navigate('/markets')}>
-                {t('markets.all')}
-              </Button>
-              <Button intent="secondary" size="lg" onClick={() => navigate('/about')}>
-                How it works
-              </Button>
+              <Magnetic>
+                <Button intent="primary" size="lg" onClick={() => navigate('/markets')}>
+                  {t('markets.all')}
+                </Button>
+              </Magnetic>
+              <Magnetic>
+                <Button intent="secondary" size="lg" onClick={() => navigate('/about')}>
+                  How it works
+                </Button>
+              </Magnetic>
             </div>
 
             {/* Live teams ticker */}
@@ -67,7 +73,12 @@ export function HomePage() {
             </div>
 
             <dl className="mt-6 grid grid-cols-2 gap-x-8 gap-y-5 sm:grid-cols-4">
-              <Stat value={`${markets.length}`} label="markets" />
+              <div className="flex flex-col gap-1">
+                <dt className="font-display text-2xl font-semibold text-fg">
+                  <CountUp to={markets.length} />
+                </dt>
+                <dd className="font-mono text-[11px] uppercase tracking-[0.06em] text-fg-subtle">markets</dd>
+              </div>
               <Stat value="1%" label="platform fee" />
               <Stat value="BNB" label="native stake" />
               <Stat value="Pari-mutuel" label="payout" />

@@ -4,8 +4,9 @@ import { createWalletClient, custom, parseEther } from 'viem';
 import { bsc } from 'viem/chains';
 import { useTranslation } from 'react-i18next';
 import { Button, Card, Input, Tooltip } from '../../components/ui';
+import { AnimatedNumber } from '../../components/AnimatedNumber';
+import { TxToast } from '../../components/TxToast';
 import { BSC_CHAIN_ID, BETTING_VAULT_ADDRESS, PROTOCOL_FEE_BPS, isPrivyConfigured } from '../../lib/env';
-import { formatBnb } from '../../lib/format';
 import { pickBscWallet, type BscWalletLike } from '../wallet/walletHelpers';
 import { OutcomeChip } from '../markets/components/OutcomeChip';
 import type { MarketFixture, Outcome } from '../markets/types';
@@ -153,7 +154,14 @@ function BetSlipView({
       </label>
 
       <div className="mt-4 flex flex-col gap-2 rounded-lg border border-border-subtle bg-bg p-4">
-        <Row label={t('betting.amount')} value={`${formatBnb(valid ? amountNum : 0)} BNB`} />
+        <Row
+          label={t('betting.amount')}
+          value={
+            <>
+              <AnimatedNumber value={valid ? amountNum : 0} /> BNB
+            </>
+          }
+        />
         <Row
           label={
             <Tooltip content={t('betting.feeNote')}>
@@ -162,10 +170,22 @@ function BetSlipView({
               </span>
             </Tooltip>
           }
-          value={`-${formatBnb(fee)} BNB`}
+          value={
+            <>
+              -<AnimatedNumber value={fee} /> BNB
+            </>
+          }
         />
         <div className="my-1 border-t border-border-subtle" />
-        <Row label={t('betting.netStake')} value={`${formatBnb(net)} BNB`} strong />
+        <Row
+          label={t('betting.netStake')}
+          strong
+          value={
+            <>
+              <AnimatedNumber value={net} /> BNB
+            </>
+          }
+        />
       </div>
 
       <p className="mt-3 text-xs leading-relaxed text-fg-subtle">{t('betting.feeNote')}</p>
@@ -182,21 +202,16 @@ function BetSlipView({
         )}
       </div>
 
-      {message && (
-        <p
-          className={
-            'mt-3 break-words text-xs ' +
-            (tx === 'error' ? 'text-danger' : tx === 'success' ? 'text-success' : 'text-fg-muted')
-          }
-        >
-          {tx === 'success' ? `${t('tx.success')} · ${message.slice(0, 12)}…` : message}
-        </p>
-      )}
+      <TxToast
+        state={tx}
+        hash={tx === 'success' ? message : null}
+        message={tx === 'error' ? message : null}
+      />
     </Card>
   );
 }
 
-function Row({ label, value, strong }: { label: React.ReactNode; value: string; strong?: boolean }) {
+function Row({ label, value, strong }: { label: React.ReactNode; value: React.ReactNode; strong?: boolean }) {
   return (
     <div className="flex items-center justify-between gap-3">
       <span className={'text-sm ' + (strong ? 'font-medium text-fg' : 'text-fg-muted')}>{label}</span>

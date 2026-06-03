@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Input, Tag } from '../components/ui';
-import { MarketCard } from '../features/markets/components/MarketCard';
+import { MarketGrid } from '../features/markets/components/MarketGrid';
 import { useFilteredMarkets } from '../features/markets/useMarkets';
 import type { MarketKind } from '../features/markets/types';
 
@@ -57,10 +57,8 @@ export function MarketsPage() {
           <p className="text-fg-muted">{t('markets.empty')}</p>
         </div>
       ) : (
-        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {markets.map((m) => (
-            <MarketCard key={m.marketId} market={m} />
-          ))}
+        <div className="mt-6">
+          <MarketGrid markets={markets} />
         </div>
       )}
     </div>

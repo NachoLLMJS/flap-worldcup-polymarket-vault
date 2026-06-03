@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Badge, Button } from '../components/ui';
-import { MarketCard } from '../features/markets/components/MarketCard';
+import { MarketGrid } from '../features/markets/components/MarketGrid';
 import { useMarkets } from '../features/markets/useMarkets';
 import { isPrivyConfigured } from '../lib/env';
 
@@ -54,11 +54,7 @@ export function HomePage() {
             {t('markets.all')} →
           </Link>
         </div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {featured.map((m) => (
-            <MarketCard key={m.marketId} market={m} />
-          ))}
-        </div>
+        <MarketGrid markets={featured} />
       </section>
 
       {/* Fee transparency teaser */}

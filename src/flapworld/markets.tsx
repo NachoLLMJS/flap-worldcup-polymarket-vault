@@ -1,107 +1,63 @@
 // @ts-nocheck -- ported claude.ai/design prototype; strict types pass is a follow-up
 /* ============================================================
    FlapWorld — Markets (the markets floor + order ticket)
+   Markets show real teams/titles only — no simulated odds, pools,
+   statuses or winners. Outcomes are selectable; the real payout is
+   set by the on-chain pool at close (placeBet simulates first, so a
+   non-open market reverts before signing).
    ============================================================ */
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useT, marketTitle, teamName } from './i18n';
-import { Icon, BnbMark, OutcomeMark, Btn, StatusBadge, Countdown, CatTag, useNow } from './components';
-import { FEE_RATE, ALL_MARKETS, MATCHES, GROUP_MARKETS, marketStatus, fmtPct, fmtMult, fmtBNB } from './data';
-
-function useMediaQuery(q){
-  const [m,setM]=useState(()=> typeof matchMedia!=='undefined' ? matchMedia(q).matches : false);
-  useEffect(()=>{ const mq=matchMedia(q); const on=()=>setM(mq.matches); mq.addEventListener('change',on); return ()=>mq.removeEventListener('change',on); },[q]);
-  return m;
-}
-
-/* thin implied-probability bar */
-function ProbBar({ value, active }){
-  return (
-    <span className="block h-1 w-full overflow-hidden rounded-full bg-white/10">
-      <span className="block h-full rounded-full transition-all duration-500"
-        style={{ width:`${Math.max(3,Math.min(100,value))}%`, background: active?'#d7ff36':'rgba(215,255,54,0.5)' }}/>
-    </span>
-  );
-}
+import { Icon, BnbMark, OutcomeMark, Btn, CatTag } from './components';
+import { FEE_RATE, ALL_MARKETS, MATCHES, GROUP_MARKETS } from './data';
 
 /* ---------- a single tappable outcome ---------- */
-function OutcomeButton({ market, outcome, selected, onPick, tradable, isWinner, compact, lang }){
+function OutcomeButton({ market, outcome, selected, onPick, compact, lang }){
   const { t } = useT();
   const label = outcome.kind==='team' ? teamName(outcome.teamCode, lang)
     : outcome.kind==='draw' ? t('draw_o') : t('others_o');
-  const dim = !tradable && !isWinner;
+  const sub = outcome.id==='home' ? t('home_o')
+    : outcome.id==='away' ? t('away_o')
+    : outcome.id==='draw' ? t('draw_o')
+    : market.type==='group' ? t('tab_groups_sub') : t('winner');
   return (
     <button
-      onClick={()=> tradable && onPick(market, outcome)}
-      disabled={!tradable}
+      onClick={()=> onPick(market, outcome)}
       aria-pressed={selected}
       className={`group/o relative overflow-hidden rounded-xl px-3 py-2.5 text-left transition-all duration-150
-        ${selected ? 'bg-acid/12 ring-2 ring-acid pick-pop' : 'bg-ink-800 ring-1 ring-white/8'}
-        ${tradable && !selected ? 'hover:ring-acid/45 hover:bg-ink-750 hover:-translate-y-0.5' : ''}
-        ${dim ? 'opacity-45' : ''}
-        ${isWinner ? 'ring-2 ring-acid bg-acid/15' : ''}
+        ${selected ? 'bg-acid/12 ring-2 ring-acid pick-pop' : 'bg-ink-800 ring-1 ring-white/8 hover:ring-acid/45 hover:bg-ink-750 hover:-translate-y-0.5'}
         focus:outline-none focus-visible:ring-2 focus-visible:ring-acid`}>
       {selected && <span className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-acid/35 to-transparent" style={{ animation:'sweepIn .55s ease-out' }}/>}
       <div className="relative flex items-center gap-2.5">
         <OutcomeMark outcome={outcome} size={compact?22:26}/>
         <div className="min-w-0 flex-1">
-          <div className={`truncate font-bold leading-tight ${compact?'text-[13px]':'text-sm'} ${selected||isWinner?'text-white':'text-white/90'}`}>{label}</div>
-          {!compact && <div className="mt-0.5 text-[10px] uppercase tracking-wider text-white/35">
-            {outcome.id==='home'?t('home_o'):outcome.id==='away'?t('away_o'):outcome.id==='draw'?t('draw_o'):market.type==='group'?t('tab_groups_sub'):t('winner')}
-          </div>}
+          <div className={`truncate font-bold leading-tight ${compact?'text-[13px]':'text-sm'} ${selected?'text-white':'text-white/90'}`}>{label}</div>
+          {!compact && <div className="mt-0.5 text-[10px] uppercase tracking-wider text-white/35">{sub}</div>}
         </div>
-        <div className="text-right">
-          <div className={`font-mono text-base leading-none tnum ${selected||isWinner?'text-acid':'text-white'}`}>{fmtPct(outcome.prob)}</div>
-          <div className="mt-1 font-mono text-[10px] leading-none text-white/45 tnum">{fmtMult(outcome.mult)}</div>
-        </div>
-        {isWinner && <span className="ml-1 grid h-5 w-5 place-items-center rounded-full bg-acid text-ink-950"><Icon.check/></span>}
       </div>
-      <div className="relative mt-2.5"><ProbBar value={outcome.prob} active={selected||isWinner}/></div>
     </button>
   );
 }
 
-/* ---------- market card ---------- */
+/* ---------- market card (teams + title only) ---------- */
 function MarketCard({ market, selection, onPick, lang }){
-  const { t } = useT();
-  const now = useNow(1000);
-  const status = marketStatus(market, now);
-  const tradable = status==='open' || status==='soon';
   const isSel = (oid)=> selection && selection.marketId===market.id && selection.outcomeId===oid;
-
   const head = (
-    <div className="flex items-start justify-between gap-3">
-      <div className="min-w-0">
-        <div className="flex items-center gap-2">
-          <CatTag cat={market.cat}/>
-          {market.group && market.type==='match' && <span className="font-mono text-[10px] text-white/35">GRP {market.group}</span>}
-        </div>
-        <h3 className="mt-2 truncate font-display text-xl leading-tight text-white sm:text-2xl">{marketTitle(market, lang)}</h3>
+    <div className="min-w-0">
+      <div className="flex items-center gap-2">
+        <CatTag cat={market.cat}/>
+        {market.group && market.type==='match' && <span className="font-mono text-[10px] text-white/35">GRP {market.group}</span>}
       </div>
-      <StatusBadge status={status} size="sm"/>
+      <h3 className="mt-2 truncate font-display text-xl leading-tight text-white sm:text-2xl">{marketTitle(market, lang)}</h3>
     </div>
   );
 
-  const meta = (
-    <div className="mt-3 flex items-center justify-between border-t border-white/8 pt-3 text-xs">
-      <span className="inline-flex items-center gap-1.5 text-white/45">
-        <span className="text-white/35">{t('pool')}</span>
-        <span className="inline-flex items-center gap-1 font-mono text-white/80"><BnbMark size={11} color="#d7ff36"/>{fmtBNB(market.poolBNB)}</span>
-      </span>
-      <span className="inline-flex items-center gap-1.5">
-        <span className="text-white/35">{status==='open'||status==='soon'?t('closes'):t('closed_at')}</span>
-        <Countdown target={market.closeTime} status={status}/>
-      </span>
-    </div>
-  );
-
-  // outcome layouts per type
   let body;
   if (market.type==='match'){
     body = (
       <div className="mt-4 grid grid-cols-3 gap-2">
         {market.outcomes.map(o=>(
-          <OutcomeButton key={o.id} market={market} outcome={o} selected={isSel(o.id)} onPick={onPick}
-            tradable={tradable} isWinner={market.winner===o.id} lang={lang}/>
+          <OutcomeButton key={o.id} market={market} outcome={o} selected={isSel(o.id)} onPick={onPick} lang={lang}/>
         ))}
       </div>
     );
@@ -109,8 +65,7 @@ function MarketCard({ market, selection, onPick, lang }){
     body = (
       <div className="mt-4 grid grid-cols-2 gap-2">
         {market.outcomes.map(o=>(
-          <OutcomeButton key={o.id} market={market} outcome={o} selected={isSel(o.id)} onPick={onPick}
-            tradable={tradable} isWinner={market.winner===o.id} compact lang={lang}/>
+          <OutcomeButton key={o.id} market={market} outcome={o} selected={isSel(o.id)} onPick={onPick} compact lang={lang}/>
         ))}
       </div>
     );
@@ -118,9 +73,8 @@ function MarketCard({ market, selection, onPick, lang }){
     body = (
       <div className="mt-4 max-h-[420px] overflow-y-auto pr-1 no-scrollbar">
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {market.outcomes.map((o,i)=>(
-            <OutcomeButton key={o.id} market={market} outcome={o} selected={isSel(o.id)} onPick={onPick}
-              tradable={tradable} isWinner={market.winner===o.id} compact lang={lang}/>
+          {market.outcomes.map((o)=>(
+            <OutcomeButton key={o.id} market={market} outcome={o} selected={isSel(o.id)} onPick={onPick} compact lang={lang}/>
           ))}
         </div>
       </div>
@@ -128,22 +82,15 @@ function MarketCard({ market, selection, onPick, lang }){
   }
 
   return (
-    <div className={`rounded-2xl border bg-ink-900 p-4 transition-colors sm:p-5 ${tradable?'border-white/8 hover:border-white/15':'border-white/6'}`}>
+    <div className="rounded-2xl border border-white/8 bg-ink-900 p-4 transition-colors hover:border-white/15 sm:p-5">
       {head}
-      {market.resolved && (
-        <div className="mt-3 flex items-center gap-2 rounded-lg bg-acid/10 px-3 py-2 text-xs ring-1 ring-acid/25">
-          <span className="font-bold uppercase tracking-wider text-acid">{t('winner')}</span>
-          <span className="text-white/80">{teamName(market.outcomes.find(o=>o.id===market.winner)?.teamCode, lang) || t('draw_o')}</span>
-        </div>
-      )}
       {body}
-      {meta}
     </div>
   );
 }
 
 /* ---------- order ticket inner ---------- */
-function TicketPanel({ market, outcome, wallet, status, onConnect, onBuy, onSell, openPosition, onClear, lang }){
+function TicketPanel({ market, outcome, wallet, onConnect, onBuy, onSell, openPosition, onClear, lang }){
   const { t } = useT();
   const [amount, setAmount] = useState('');
   const [phase, setPhase] = useState('idle'); // idle | confirming | bought | sold
@@ -152,14 +99,11 @@ function TicketPanel({ market, outcome, wallet, status, onConnect, onBuy, onSell
   const amt = parseFloat(amount) || 0;
   const fee = amt * FEE_RATE;
   const net = amt - fee;
-  const estWin = outcome ? net * outcome.mult : 0;
-  const profit = estWin - amt;
-  const tradable = status==='open' || status==='soon';
   const insufficient = wallet && amt > wallet.balance + 1e-9;
-  const valid = amt>0 && !insufficient && tradable;
-
+  const valid = amt>0 && !insufficient;
   const quicks = [0.1, 0.5, 1, 5];
   const hasPosition = !!openPosition;
+
   const doBuy = async ()=>{
     if (!valid || phase!=='idle') return;
     setPhase('confirming');
@@ -193,7 +137,7 @@ function TicketPanel({ market, outcome, wallet, status, onConnect, onBuy, onSell
 
   return (
     <div className="flex flex-col">
-      {/* selection card (re-animates on change) */}
+      {/* selection card */}
       <div key={market.id+outcome.id} className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-acid/15 to-transparent p-4 ring-1 ring-acid/25">
         <span className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-acid/25 to-transparent" style={{ animation:'sweepIn .6s ease-out' }}/>
         <div className="flex items-center gap-3">
@@ -204,24 +148,13 @@ function TicketPanel({ market, outcome, wallet, status, onConnect, onBuy, onSell
           </div>
           <button onClick={onClear} className="grid h-7 w-7 place-items-center rounded-full bg-white/8 text-white/50 hover:text-white"><Icon.close/></button>
         </div>
-        <div className="mt-3 flex items-center gap-4 border-t border-white/10 pt-3">
-          <div><div className="text-[10px] uppercase tracking-wider text-white/40">{t('pool')} %</div><div className="font-mono text-lg text-acid tnum">{fmtPct(outcome.prob)}</div></div>
-          <div><div className="text-[10px] uppercase tracking-wider text-white/40">{t('to_win')}</div><div className="font-mono text-lg text-white tnum">{fmtMult(outcome.mult)}</div></div>
-          <div className="ml-auto"><StatusBadge status={status} size="sm"/></div>
-        </div>
       </div>
 
-      {/* not connected */}
       {!wallet ? (
         <div className="mt-4 rounded-2xl border border-white/8 bg-ink-850 p-5 text-center">
           <div className="font-display text-lg text-white">{t('connect_to_trade')}</div>
           <p className="mx-auto mt-1.5 max-w-[240px] text-sm text-white/45">{t('connect_sub')}</p>
           <div className="mt-4"><Btn variant="primary" size="md" className="w-full" onClick={onConnect}><Icon.wallet/> {t('connect')}</Btn></div>
-        </div>
-      ) : !tradable ? (
-        <div className="mt-4 rounded-2xl border border-white/8 bg-ink-850 p-5 text-center">
-          <StatusBadge status={status}/>
-          <p className="mt-3 text-sm text-white/55">{status==='resolved'?t('market_resolved'):t('market_locked')}</p>
         </div>
       ) : (
         <>
@@ -249,14 +182,11 @@ function TicketPanel({ market, outcome, wallet, status, onConnect, onBuy, onSell
             {insufficient && <div className="mt-2 text-xs text-down">Insufficient BNB balance.</div>}
           </div>
 
-          {/* breakdown */}
+          {/* breakdown: fee + net only (no simulated odds/payout) */}
           <div className="mt-4 rounded-xl bg-ink-850 p-3.5 ring-1 ring-white/8">
             <div className="space-y-2 font-mono text-[13px]">
               <Row label={t('fee_line')} value={`-${fee.toFixed(4)}`} dim/>
-              <Row label={t('net_stake')} value={net>0?net.toFixed(4):'0.0000'}/>
-              <div className="my-1 border-t border-dashed border-white/10"/>
-              <Row label={t('est_win')} value={estWin>0?estWin.toFixed(4):'0.0000'} accent/>
-              <Row label={t('profit')} value={`${profit>0?'+':''}${profit.toFixed(4)}`} accent={profit>0} down={profit<0}/>
+              <Row label={t('net_stake')} value={net>0?net.toFixed(4):'0.0000'} accent/>
             </div>
             <p className="mt-3 text-[11px] leading-snug text-white/35">{t('illustrative')}</p>
           </div>
@@ -288,16 +218,16 @@ function TicketPanel({ market, outcome, wallet, status, onConnect, onBuy, onSell
     </div>
   );
 }
-function Row({ label, value, dim, accent, down }){
+function Row({ label, value, dim, accent }){
   return (
     <div className="flex items-center justify-between">
       <span className={`${dim?'text-white/40':'text-white/55'}`}>{label}</span>
-      <span className={`tnum ${accent?'text-acid':down?'text-down':'text-white'}`}>{value} <span className="text-[10px] text-white/30">BNB</span></span>
+      <span className={`tnum ${accent?'text-acid':'text-white'}`}>{value} <span className="text-[10px] text-white/30">BNB</span></span>
     </div>
   );
 }
 
-/* ---------- desktop sticky panel + mobile sheet wrappers ---------- */
+/* ---------- desktop sticky panel + mobile sheet ---------- */
 function DesktopTicket(props){
   const { t } = useT();
   return (
@@ -314,7 +244,7 @@ function DesktopTicket(props){
 }
 function MobileTicket(props){
   const { t } = useT();
-  const { outcome, status } = props;
+  const { outcome } = props;
   const [open, setOpen] = useState(false);
   useEffect(()=>{ if(outcome) setOpen(true); }, [outcome?.id, props.market?.id]);
   if (!outcome) return null;
@@ -327,7 +257,7 @@ function MobileTicket(props){
           <OutcomeMark outcome={outcome} size={32}/>
           <div className="min-w-0 flex-1">
             <div className="truncate text-sm font-bold text-white">{oLabel}</div>
-            <div className="truncate font-mono text-xs text-acid">{fmtPct(outcome.prob)} · {fmtMult(outcome.mult)}</div>
+            <div className="truncate text-xs text-white/45">{marketTitle(props.market,props.lang)}</div>
           </div>
           <Btn size="md" variant="primary" onClick={()=>setOpen(true)}>{t('ticket')}</Btn>
         </div>
@@ -352,14 +282,14 @@ function MobileTicket(props){
   );
 }
 
-/* ---------- toolbar (tabs + search + sort) ---------- */
+/* ---------- toolbar (tabs + search) ---------- */
 const TABS = [
   { k:'all', key:'tab_all' },
-  { k:'matches', key:'tab_matches', sub:'tab_matches_sub' },
-  { k:'groups', key:'tab_groups', sub:'tab_groups_sub' },
-  { k:'tournament', key:'tab_tournament', sub:'tab_tournament_sub' },
+  { k:'matches', key:'tab_matches' },
+  { k:'groups', key:'tab_groups' },
+  { k:'tournament', key:'tab_tournament' },
 ];
-function Toolbar({ tab, setTab, q, setQ, sort, setSort, counts }){
+function Toolbar({ tab, setTab, q, setQ, counts }){
   const { t } = useT();
   return (
     <div className="sticky top-16 z-30 -mx-4 border-b border-white/8 bg-ink-950/92 px-4 py-3 backdrop-blur-xl sm:-mx-6 sm:px-6">
@@ -379,15 +309,6 @@ function Toolbar({ tab, setTab, q, setQ, sort, setSort, counts }){
             <input value={q} onChange={e=>setQ(e.target.value)} placeholder={t('search_ph')}
               className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/35"/>
             {q && <button onClick={()=>setQ('')} className="text-white/40 hover:text-white"><Icon.close/></button>}
-          </div>
-          <div className="relative">
-            <select value={sort} onChange={e=>setSort(e.target.value)}
-              className="appearance-none rounded-xl bg-ink-800 py-2 pl-3 pr-9 text-sm font-semibold text-white/80 ring-1 ring-white/8 outline-none focus:ring-acid/50">
-              <option value="close">{t('sort_close')}</option>
-              <option value="pool">{t('sort_pool')}</option>
-              <option value="az">{t('sort_az')}</option>
-            </select>
-            <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-white/40"><Icon.chevron/></span>
           </div>
         </div>
       </div>
@@ -411,10 +332,8 @@ function EmptyState({ onClear }){
 /* ---------- markets page ---------- */
 function MarketsPage({ wallet, onConnect, onBuy, onSell, positions=[] }){
   const { t, lang } = useT();
-  const now = useNow(1000);
   const [tab, setTab] = useState('matches');
   const [q, setQ] = useState('');
-  const [sort, setSort] = useState('close');
   const [selection, setSelection] = useState(null); // {marketId, outcomeId}
 
   const counts = useMemo(()=>({
@@ -425,28 +344,17 @@ function MarketsPage({ wallet, onConnect, onBuy, onSell, positions=[] }){
     let list = tab==='all' ? ALL_MARKETS : ALL_MARKETS.filter(m=>m.cat===tab);
     const query = q.trim().toLowerCase();
     if (query) list = list.filter(m=> m.searchKey.includes(query) || marketTitle(m,lang).toLowerCase().includes(query));
-    list = list.slice().sort((a,b)=>{
-      if (sort==='pool') return b.poolBNB - a.poolBNB;
-      if (sort==='az') return a.titleEn.localeCompare(b.titleEn);
-      return a.closeTime - b.closeTime;
-    });
-    return list;
-  },[tab,q,sort,lang]);
+    return list.slice().sort((a,b)=> a.titleEn.localeCompare(b.titleEn));
+  },[tab,q,lang]);
 
-  const onPick = useCallback((market, outcome)=>{
-    setSelection({ marketId:market.id, outcomeId:outcome.id });
-  },[]);
+  const onPick = useCallback((market, outcome)=>{ setSelection({ marketId:market.id, outcomeId:outcome.id }); },[]);
   const clear = ()=> setSelection(null);
 
   const selMarket = selection ? ALL_MARKETS.find(m=>m.id===selection.marketId) : null;
   const selOutcome = selMarket ? selMarket.outcomes.find(o=>o.id===selection.outcomeId) : null;
-  const selStatus = selMarket ? marketStatus(selMarket, now) : null;
-
   const openPosition = selection ? positions.find(p=> p.status==='open' && p.marketId===selection.marketId && p.outcomeId===selection.outcomeId) : null;
 
-  const ticketProps = { market:selMarket, outcome:selOutcome, status:selStatus, wallet, onConnect,
-    onBuy, onSell, openPosition, onClear:clear, lang };
-
+  const ticketProps = { market:selMarket, outcome:selOutcome, wallet, onConnect, onBuy, onSell, openPosition, onClear:clear, lang };
   const tabSub = tab==='matches'?t('tab_matches_sub'):tab==='groups'?t('tab_groups_sub'):tab==='tournament'?t('tab_tournament_sub'):'';
 
   return (
@@ -466,7 +374,7 @@ function MarketsPage({ wallet, onConnect, onBuy, onSell, positions=[] }){
       </div>
 
       <div className="mx-auto mt-5 max-w-[1320px] px-4 sm:px-6">
-        <Toolbar tab={tab} setTab={setTab} q={q} setQ={setQ} sort={sort} setSort={setSort} counts={counts}/>
+        <Toolbar tab={tab} setTab={setTab} q={q} setQ={setQ} counts={counts}/>
       </div>
 
       <div className="mx-auto max-w-[1320px] px-4 pb-32 pt-6 sm:px-6 lg:pb-16">
@@ -490,4 +398,4 @@ function MarketsPage({ wallet, onConnect, onBuy, onSell, positions=[] }){
   );
 }
 
-export { useMediaQuery, ProbBar, OutcomeButton, MarketCard, TicketPanel, DesktopTicket, MobileTicket, Toolbar, EmptyState, MarketsPage };
+export { OutcomeButton, MarketCard, TicketPanel, DesktopTicket, MobileTicket, Toolbar, EmptyState, MarketsPage };

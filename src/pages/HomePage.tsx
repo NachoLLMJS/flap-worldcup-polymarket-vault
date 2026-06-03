@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Badge, Button } from '../components/ui';
+import { HeroBackdrop } from '../components/HeroBackdrop';
 import { MarketGrid } from '../features/markets/components/MarketGrid';
 import { useMarkets } from '../features/markets/useMarkets';
 import { isPrivyConfigured } from '../lib/env';
@@ -15,7 +16,7 @@ export function HomePage() {
     <div className="mx-auto max-w-7xl px-4 sm:px-6">
       {/* Hero */}
       <section className="relative overflow-hidden py-16 sm:py-24">
-        <div className="pointer-events-none absolute -top-32 left-1/2 -z-10 h-[480px] w-[760px] -translate-x-1/2 rounded-full bg-accent opacity-[0.12] blur-[120px]" />
+        <HeroBackdrop className="-mx-4 sm:-mx-6" />
         <div className="flex flex-col items-start gap-6 text-left">
           <Badge intent="accent" size="md" dot>
             {isPrivyConfigured ? 'Live on BNB Chain' : 'Preview · World Cup 2026'}

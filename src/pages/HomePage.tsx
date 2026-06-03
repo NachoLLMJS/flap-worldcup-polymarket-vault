@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Badge, Button } from '../components/ui';
 import { HeroBackdrop } from '../components/HeroBackdrop';
+import { ScrollReveal } from '../components/ScrollReveal';
 import { Flag } from '../components/Flag';
 import { MarketGrid } from '../features/markets/components/MarketGrid';
 import { useMarkets } from '../features/markets/useMarkets';
@@ -76,19 +77,30 @@ export function HomePage() {
 
       {/* Featured markets */}
       <section className="py-12">
-        <div className="mb-6 flex items-end justify-between">
-          <h2 className="font-display text-2xl font-medium text-fg">Featured markets</h2>
-          <Link to="/markets" className="text-sm font-medium text-accent hover:underline">
-            {t('markets.all')} →
-          </Link>
-        </div>
+        <ScrollReveal>
+          <div className="mb-6 flex items-end justify-between">
+            <div className="flex flex-col gap-1">
+              <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-gold">Open now</span>
+              <h2 className="font-display text-2xl font-semibold tracking-[-0.02em] text-fg sm:text-3xl">
+                Featured <span className="font-editorial font-light italic text-gold">markets</span>
+              </h2>
+            </div>
+            <Link to="/markets" className="text-sm font-medium text-accent hover:underline">
+              {t('markets.all')} →
+            </Link>
+          </div>
+        </ScrollReveal>
         <MarketGrid markets={featured} />
       </section>
 
       {/* Fee transparency teaser */}
-      <section className="py-12">
-        <div className="rounded-2xl border border-border bg-bg-elevated p-8 sm:p-12">
-          <h2 className="font-display text-2xl font-medium text-fg">How a bet works</h2>
+      <ScrollReveal className="py-12">
+        <div className="relative overflow-hidden rounded-2xl border border-border bg-bg-elevated p-8 sm:p-12">
+          <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-accent opacity-[0.08] blur-[100px]" />
+          <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-gold">No bookmaker</span>
+          <h2 className="mt-1 font-display text-2xl font-semibold tracking-[-0.02em] text-fg sm:text-3xl">
+            How a bet <span className="font-editorial font-light italic text-gold">works</span>
+          </h2>
           <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3">
             <Step n="1" title="Stake BNB">
               You bet on an outcome with native BNB. A 1% platform fee is taken at entry; the rest enters the market
@@ -107,7 +119,7 @@ export function HomePage() {
             </Button>
           </div>
         </div>
-      </section>
+      </ScrollReveal>
     </div>
   );
 }

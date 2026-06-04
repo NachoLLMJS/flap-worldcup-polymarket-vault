@@ -34,3 +34,6 @@ out/
 artifacts/
 typechain-types/
 .vercel
+
+# local og preview artifact
+og-preview.png

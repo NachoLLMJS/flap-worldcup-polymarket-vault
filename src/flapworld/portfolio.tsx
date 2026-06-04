@@ -3,7 +3,6 @@
    FlapWorld — Portfolio / Profile
    ============================================================ */
 import { useState, useRef } from 'react';
-import { toPng } from 'html-to-image';
 import { useT, marketTitle, teamName } from './i18n';
 import { Icon, Avatar, Btn, OutcomeMark, CatTag, Countdown, useNow } from './components';
 import { ALL_MARKETS, marketStatus } from './data';
@@ -339,27 +338,42 @@ function PortfolioPage({ wallet, onConnect, onDisconnect, positions, activity, o
   const open = positions.filter(p=>p.status==='open');
   const settled = positions.filter(p=>p.status!=='open').sort((a,b)=>(b.settledAt||0)-(a.settledAt||0));
 
-  // share the trader card + stats as an image: Web Share (mobile) or download + X composer (desktop)
+  // share via the server-rendered OG card: /api/share carries the meta tags so X renders the card (with the X photo)
   const handleShare = async ()=>{
-    const node = shareRef.current; if(!node || sharing) return;
+    if(sharing) return;
     setSharing(true); setShareErr(false);
     try {
-      // 1x1 transparent fallback so a cross-origin avatar (the X photo) can't taint/abort the whole capture
-      const TRANSPARENT_PX = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
-      const dataUrl = await toPng(node, { cacheBust:true, pixelRatio:2, backgroundColor:'#09090a', imagePlaceholder:TRANSPARENT_PX });
+      const pct = stats.staked>0 ? stats.totalPnl/stats.staked*100 : 0;
+      // P&L evolution series from settled positions (cumulative) for the card chart
+      const settledAsc = positions.filter(p=>p.status!=='open').sort((a,b)=>(a.settledAt||0)-(b.settledAt||0));
+      let cum = 0; const sparkArr = [0];
+      settledAsc.forEach(p=>{ cum += posMetrics(p).pnl; sparkArr.push(cum); });
+      const params = new URLSearchParams({
+        address: wallet.address || '',
+        name: wallet.ens || (wallet.handle ? '@'+wallet.handle : 'Trader'),
+        avatar: wallet.avatar || '',
+        pnl: (stats.totalPnl>0?'+':'') + stats.totalPnl.toFixed(3),
+        pct: (pct>0?'+':'') + pct.toFixed(1),
+        wr: String(Math.round(stats.winRate*100)),
+        record: `${stats.wins}-${stats.losses}`,
+        vol: stats.staked.toFixed(1),
+        open: String(stats.openCount),
+        staked: stats.staked.toFixed(1),
+        portfolio: stats.portfolioValue.toFixed(2),
+        fees: stats.fees.toFixed(3),
+        spark: sparkArr.length>1 ? sparkArr.map(v=>v.toFixed(3)).join(',') : '',
+      });
+      const shareUrl = `${window.location.origin}/api/share?${params.toString()}`;
       const shareText = 'My FlapWorld card — World Cup 2026 prediction markets on BNB Chain';
-      const shareUrl = `https://flapworld.app/u/${wallet.address}`;
-      const blob = await (await fetch(dataUrl)).blob();
-      const file = new File([blob], 'flapworld-card.png', { type:'image/png' });
-      if (navigator.canShare && navigator.canShare({ files:[file] })) {
-        await navigator.share({ files:[file], text:shareText, url:shareUrl });
+      if (navigator.share) {
+        await navigator.share({ title:'FlapWorld', text:shareText, url:shareUrl });
       } else {
-        const a = document.createElement('a'); a.href = dataUrl; a.download = 'flapworld-card.png'; a.click();
+        try { await navigator.clipboard.writeText(shareUrl); } catch(e){}
         window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`, '_blank', 'noopener');
       }
     } catch(err){
       if (err && err.name === 'AbortError') return; // user dismissed the native share sheet — not an error
-      console.error('share card failed', err); setShareErr(true);
+      console.error('share failed', err); setShareErr(true);
     }
     finally { setSharing(false); }
   };

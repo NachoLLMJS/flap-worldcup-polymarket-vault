@@ -23,6 +23,9 @@
     "@fontsource/jetbrains-mono": "^5.2.8",
     "@paper-design/shaders-react": "^0.0.76",
     "@privy-io/react-auth": "^3.28.0",
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.6.1",
+    "@react-three/postprocessing": "^3.0.4",
     "@solana-program/memo": "^0.11.1",
     "@solana-program/system": "^0.12.2",
     "@solana-program/token": "^0.13.0",
@@ -44,11 +47,13 @@
     "react-router-dom": "^7.16.0",
     "tailwind-merge": "^3.6.0",
     "tailwindcss": "^4.3.0",
+    "three": "^0.184.0",
     "typescript": "^6.0.3",
     "viem": "^2.52.0",
     "vite": "^8.0.16"
   },
   "devDependencies": {
+    "@types/three": "^0.184.1",
     "ffmpeg-static": "^5.3.0",
     "sharp": "^0.34.5",
     "solc": "^0.8.30"

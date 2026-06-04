@@ -1,16 +1,17 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 
-export const DESIGNS = ['classic', 'board', 'poster'] as const;
+export const DESIGNS = ['cinema', 'classic', 'board', 'poster'] as const;
 export type Design = (typeof DESIGNS)[number];
 
 export const DESIGN_LABELS: Record<Design, string> = {
+  cinema: 'Cinema 3D',
   classic: 'Classic',
   board: 'Board',
   poster: 'Poster',
 };
 
 const STORAGE_KEY = 'flapworld.design';
-const DEFAULT: Design = 'classic';
+const DEFAULT: Design = 'cinema';
 
 const Ctx = createContext<{ design: Design; setDesign: (d: Design) => void }>({
   design: DEFAULT,

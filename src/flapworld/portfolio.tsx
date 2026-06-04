@@ -365,12 +365,9 @@ function PortfolioPage({ wallet, onConnect, onDisconnect, positions, activity, o
       });
       const shareUrl = `${window.location.origin}/api/share?${params.toString()}`;
       const shareText = 'My FlapWorld card — World Cup 2026 prediction markets on BNB Chain';
-      if (navigator.share) {
-        await navigator.share({ title:'FlapWorld', text:shareText, url:shareUrl });
-      } else {
-        try { await navigator.clipboard.writeText(shareUrl); } catch(e){}
-        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`, '_blank', 'noopener');
-      }
+      // open the X composer directly — the link renders as the og:image card; copy it too as a convenience
+      try { await navigator.clipboard.writeText(shareUrl); } catch(e){}
+      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`, '_blank', 'noopener');
     } catch(err){
       if (err && err.name === 'AbortError') return; // user dismissed the native share sheet — not an error
       console.error('share failed', err); setShareErr(true);

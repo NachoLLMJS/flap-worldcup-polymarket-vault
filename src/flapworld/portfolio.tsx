@@ -76,7 +76,7 @@ function WinRing({ value, size=58 }){
 function PfConnectEmpty({ onConnect }){
   const { t } = useT();
   return (
-    <main className="min-h-screen bg-ink-950 pt-16">
+    <main className="min-h-screen bg-ink-950 pt-20">
       <div className="mx-auto flex min-h-[70vh] max-w-md flex-col items-center justify-center px-6 text-center">
         <span className="grid h-20 w-20 place-items-center rounded-3xl bg-acid/10 text-acid ring-1 ring-acid/25"><Icon.wallet/></span>
         <h1 className="font-display mt-7 text-4xl text-white sm:text-5xl">{t('pf_connect_h')}</h1>
@@ -364,7 +364,10 @@ function PortfolioPage({ wallet, onConnect, onDisconnect, positions, activity, o
         spark: sparkArr.length>1 ? sparkArr.map(v=>v.toFixed(3)).join(',') : '',
       });
       const shareUrl = `${window.location.origin}/api/share?${params.toString()}`;
+      const ogUrl = `${window.location.origin}/api/og?${params.toString()}`;
       const shareText = 'My Polyflap card — World Cup 2026 prediction markets on BNB Chain';
+      // pre-warm the og:image so X's crawler reads it from Vercel cache (cold render ~3.8s -> warm ~0.6s)
+      fetch(ogUrl, { mode: 'no-cors' }).catch(()=>{});
       // open the X composer directly — the link renders as the og:image card; copy it too as a convenience
       try { await navigator.clipboard.writeText(shareUrl); } catch(e){}
       window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`, '_blank', 'noopener');
@@ -376,7 +379,7 @@ function PortfolioPage({ wallet, onConnect, onDisconnect, positions, activity, o
   };
 
   return (
-    <main className="min-h-screen bg-ink-950 pt-16">
+    <main className="min-h-screen bg-ink-950 pt-20">
       <ProfileHeader wallet={wallet} stats={stats} onDisconnect={onDisconnect}/>
 
       <div className="mx-auto max-w-[1320px] px-4 pt-6 sm:px-6">

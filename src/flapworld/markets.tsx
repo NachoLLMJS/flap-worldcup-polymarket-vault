@@ -358,7 +358,7 @@ function MarketsPage({ wallet, onConnect, onBuy, onSell, positions=[] }){
   const tabSub = tab==='matches'?t('tab_matches_sub'):tab==='groups'?t('tab_groups_sub'):tab==='tournament'?t('tab_tournament_sub'):'';
 
   return (
-    <main className="min-h-screen bg-ink-950 pt-16">
+    <main className="min-h-screen bg-ink-950 pt-20">
       {/* page head */}
       <div className="mx-auto max-w-[1320px] px-4 pt-8 sm:px-6">
         <div className="flex items-end justify-between gap-4">

@@ -58,12 +58,12 @@ function Nav({ route, setRoute, wallet, onConnect, onDisconnect, overHero=false 
   ];
   return (
     <header className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${solid?'bg-ink-950/85 backdrop-blur-xl border-b border-white/8':'bg-transparent'}`}>
-      <div className="mx-auto flex h-16 max-w-[1320px] items-center gap-4 px-4 sm:px-6">
-        <Logo onClick={()=>setRoute('home')} />
-        <nav className="ml-4 hidden items-center gap-1 md:flex">
+      <div className="mx-auto flex h-20 max-w-[1320px] items-center gap-5 px-4 sm:px-6">
+        <Logo onClick={()=>setRoute('home')} size={28} />
+        <nav className="ml-5 hidden items-center gap-1.5 md:flex">
           {links.map(l=>(
             <button key={l.k} onClick={l.go}
-              className={`group relative rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${route===l.k?'text-acid':'text-white/70 hover:text-white'} ${l.soon?'cursor-default':''}`}>
+              className={`group relative rounded-lg px-4 py-2.5 text-[16px] font-semibold transition-colors ${route===l.k?'text-acid':'text-white hover:text-acid'} ${l.soon?'cursor-default':''}`}>
               {l.label}
               {l.soon && <span className="ml-1.5 rounded bg-white/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white/50 align-middle">{t('soon_badge')}</span>}
               {route===l.k && <span className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-acid"/>}
@@ -332,22 +332,40 @@ function Footer(){
 function AboutPage({ setRoute }){
   const { lang } = useT();
   const t2 = (en,zh)=> lang==='zh'?zh:en;
-  const features = [
-    { t:t2('On-chain settlement','链上结算'), d:t2('Outcomes resolve through the WorldCupViewer contract on BSC — verifiable, no manual oracle.','结果通过 BSC 上的 WorldCupViewer 合约结算 — 可验证，无人工预言机。') },
-    { t:t2('Non-custodial','非托管'), d:t2('You bet from your own wallet and sign every trade. We never hold your funds.','你用自己的钱包下注并签署每一笔交易。我们从不持有你的资金。') },
-    { t:t2('1% flat fee','1% 固定费用'), d:t2('A single 1% fee on each buy. No spreads, no hidden costs.','每次买入仅收 1% 费用。无点差，无隐藏成本。') },
-    { t:t2('Built on BNB Chain','基于 BNB 链'), d:t2('Fast, low-cost transactions on BSC (chainId 56).','BSC 上快速、低成本的交易（链 ID 56）。') },
-    { t:t2('Sign in your way','多种登录方式'), d:t2('Email, Google, X or an existing wallet — an embedded wallet is created in seconds via Privy.','邮箱、Google、X 或现有钱包 — 通过 Privy 几秒内创建嵌入式钱包。') },
-    { t:t2('85 markets','85 个市场'), d:t2('Group stage, knockout matches and the tournament winner for World Cup 2026.','2026 世界杯的小组赛、淘汰赛和总冠军。') },
+  const specs = [
+    { k:t2('Network','网络'), v:'BNB Smart Chain · 56' },
+    { k:t2('Settlement','结算'), v:'WorldCupViewer' },
+    { k:t2('Protocol fee','协议费'), v:'1% / buy' },
+    { k:t2('Markets','市场'), v:'85' },
+    { k:t2('Custody','托管'), v:t2('Non-custodial','非托管') },
+    { k:t2('Stack','技术栈'), v:'Privy · viem' },
   ];
-  const faqs = [
-    { q:t2('Is Polyflap custodial?','Polyflap 托管资金吗？'), a:t2('No. Every bet is a transaction you sign from your own wallet on BSC. Funds live in the contract, never with us.','不。每笔下注都是你用自己的钱包在 BSC 上签署的交易。资金在合约里，绝不在我们这里。') },
-    { q:t2('How are winners decided?','如何决定赢家？'), a:t2('Once a match or stage resolves, results are read on-chain from the WorldCupViewer contract and payouts become claimable.','比赛或阶段结束后，结果从 WorldCupViewer 合约链上读取，奖金随即可领取。') },
-    { q:t2('What does it cost?','费用是多少？'), a:t2('A flat 1% fee on each buy, plus normal BSC gas. No withdrawal or hidden fees.','每次买入收取 1% 固定费用，外加正常的 BSC gas。无提现费或隐藏费用。') },
-    { q:t2('Do I need crypto to start?','开始需要加密货币吗？'), a:t2('You need BNB on BSC to bet. Sign in with email, Google or X to get an embedded wallet, then fund it.','下注需要 BSC 上的 BNB。用邮箱、Google 或 X 登录获得嵌入式钱包，然后充值。') },
+  const chapters = [
+    { n:'01', t:t2('Architecture','架构'), ps:[
+      t2('Polyflap runs entirely on BNB Smart Chain (BSC, chainId 56). Three on-chain roles: a betting vault that holds positions and processes buys and sells; the WorldCupViewer, the on-chain source of truth for results; and a factory + implementation pair that launches the Flap token and its vault.','Polyflap 完全运行在 BNB 智能链（BSC，链 ID 56）。三个链上角色：持有仓位并处理买卖的投注金库；作为结果链上真相来源的 WorldCupViewer；以及发行 Flap 代币及其金库的 factory + implementation。'),
+      t2('The web app is a thin client: it signs through Privy-managed wallets using viem, and dry-runs every call with simulateContract before you sign.','网页端是轻客户端：通过 Privy 管理的钱包用 viem 签名，并在你签名前用 simulateContract 预演每一次调用。'),
+    ] },
+    { n:'02', t:t2('Markets & positions','市场与仓位'), ps:[
+      t2('85 markets span the group stage, individual matches and the tournament winner. Each market exposes one outcome per team, plus reserved IDs 50 (Draw) and 49 (Others / the field).','85 个市场涵盖小组赛、单场比赛和总冠军。每个市场为每支球队提供一个结果，外加保留 ID 50（平局）和 49（其他 / 大盘）。'),
+      t2('You open a position with placeBet(marketId, teamId), sending BNB as the stake, and reduce or exit before close with withdrawBet(marketId, teamId, amount). Stakes per outcome form the pool that backs payouts.','用 placeBet(marketId, teamId) 开仓并以 BNB 作为本金，用 withdrawBet(marketId, teamId, amount) 在截止前减仓或退出。各结果的本金构成支撑赔付的资金池。'),
+    ] },
+    { n:'03', t:t2('Settlement & payouts','结算与赔付'), ps:[
+      t2('There is no manual oracle. When a match or stage resolves, the result is read on-chain from the WorldCupViewer (getWorldCupWinner, getGroupMatchWinners, getMatchResult).','没有人工预言机。当比赛或阶段结束时，结果从 WorldCupViewer 链上读取（getWorldCupWinner、getGroupMatchWinners、getMatchResult）。'),
+      t2('Winning positions become claimable; voided markets become refundable. Every step is verifiable on BscScan.','获胜仓位变为可领取；作废市场变为可退款。每一步都可在 BscScan 上验证。'),
+    ] },
+    { n:'04', t:t2('Fees','费用'), ps:[
+      t2('A single 1% protocol fee applies on each buy (PROTOCOL_FEE_BPS = 100), routed to the fee wallet hardcoded in the vault. There are no withdrawal or hidden fees beyond standard BSC gas.','每次买入收取单一的 1% 协议费（PROTOCOL_FEE_BPS = 100），发送到金库中硬编码的费用钱包。除标准 BSC gas 外，无提现费或隐藏费用。'),
+    ] },
+    { n:'05', t:t2('Flap token & vault','Flap 代币与金库'), ps:[
+      t2('The betting layer plugs into the Flap ecosystem. The Flap vault is created together with the Flap token when it launches through the factory (deployed from the implementation contract). Until launch, the vault address is unset.','投注层接入 Flap 生态。Flap 金库在代币通过 factory 发行时一并创建（由 implementation 合约部署）。发行前，金库地址尚未设置。'),
+    ] },
+    { n:'06', t:t2('Security & trust','安全与信任'), ps:[
+      t2('Non-custodial by design: funds live in the contract and every buy, sell or claim is a transaction you sign — Polyflap never holds your keys or your money.','设计上非托管：资金存于合约，每一次买入、卖出或领取都是你签名的交易 — Polyflap 从不持有你的私钥或资金。'),
+      t2('Each call is dry-run with simulateContract first, so a closed or invalid market reverts before you spend gas. All contracts are public and verifiable on-chain.','每次调用先用 simulateContract 预演，因此已关闭或无效的市场会在你花费 gas 之前回滚。所有合约公开且链上可验证。'),
+    ] },
   ];
   return (
-    <main className="bg-ink-950 pt-16">
+    <main className="bg-ink-950 pt-20">
       {/* hero */}
       <section className="relative overflow-hidden border-b border-white/8">
         <div className="grain pointer-events-none absolute inset-0 opacity-30"/>
@@ -368,48 +386,42 @@ function AboutPage({ setRoute }){
         </div>
       </section>
 
-      <HowItWorks setRoute={setRoute}/>
-
-      {/* features */}
-      <section className="bg-ink-950 py-20 sm:py-24">
-        <div className="mx-auto max-w-[1320px] px-5 sm:px-6">
-          <Reveal>
-            <span className="text-xs font-bold uppercase tracking-[0.2em] text-acid">{t2('Why Polyflap','为什么选 Polyflap')}</span>
-            <h2 className="font-display mt-3 max-w-2xl text-4xl leading-[0.95] text-white sm:text-5xl">{t2('Yours to own, simple to use.','属于你，简单易用。')}</h2>
-          </Reveal>
-          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {features.map((f,i)=>(
-              <Reveal key={i} delay={i*70}>
-                <div className="h-full rounded-2xl border border-white/8 bg-ink-900 p-6 transition-colors hover:border-acid/40">
-                  <div className="h-9 w-9 rounded-lg bg-acid/15 ring-1 ring-acid/30"/>
-                  <h3 className="font-display mt-5 text-xl text-white">{f.t}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-white/55">{f.d}</p>
-                </div>
-              </Reveal>
-            ))}
-          </div>
+      {/* spec sheet */}
+      <section className="border-b border-white/8 bg-ink-950">
+        <div className="mx-auto grid max-w-[1320px] grid-cols-2 divide-x divide-y divide-white/8 sm:grid-cols-3 lg:grid-cols-6 lg:divide-y-0">
+          {specs.map((s,i)=>(
+            <Reveal key={i} delay={i*60} className="px-5 py-7">
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-white/40">{s.k}</div>
+              <div className="font-mono mt-1.5 text-sm text-acid">{s.v}</div>
+            </Reveal>
+          ))}
         </div>
       </section>
 
-      {/* faq */}
-      <section className="border-t border-white/8 bg-ink-950 py-20 sm:py-24">
+      {/* whitepaper */}
+      <section className="bg-ink-950 py-20 sm:py-24">
         <div className="mx-auto max-w-[920px] px-5 sm:px-6">
           <Reveal>
-            <span className="text-xs font-bold uppercase tracking-[0.2em] text-acid">FAQ</span>
-            <h2 className="font-display mt-3 text-4xl leading-[0.95] text-white sm:text-5xl">{t2('Good to know','须知')}</h2>
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-acid">{t2('Protocol','协议')}</span>
+            <h2 className="font-display mt-3 text-4xl leading-[0.95] text-white sm:text-5xl">{t2('How Polyflap works','Polyflap 如何运作')}</h2>
           </Reveal>
-          <div className="mt-10 divide-y divide-white/8 border-y border-white/8">
-            {faqs.map((f,i)=>(
-              <Reveal key={i} delay={i*60}>
-                <div className="py-6">
-                  <h3 className="text-lg font-bold text-white">{f.q}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-white/55">{f.a}</p>
+          <div className="mt-14 flex flex-col gap-12">
+            {chapters.map((c,i)=>(
+              <Reveal key={c.n} delay={i*50}>
+                <div className="grid gap-4 sm:grid-cols-[88px_1fr]">
+                  <div className="font-mono text-2xl text-acid/80">{c.n}</div>
+                  <div>
+                    <h3 className="font-display text-2xl text-white">{c.t}</h3>
+                    <div className="mt-3 flex flex-col gap-3">
+                      {c.ps.map((p,j)=>(<p key={j} className="text-[15px] leading-relaxed text-white/60">{p}</p>))}
+                    </div>
+                  </div>
                 </div>
               </Reveal>
             ))}
           </div>
           <Reveal>
-            <p className="mt-8 text-xs leading-relaxed text-white/35">{t2('Demo build — figures may be illustrative until on-chain volume exists. Not affiliated with FIFA. Bet responsibly.','演示版本 — 在产生链上交易量之前，数据可能为示意。与 FIFA 无关。请理性下注。')}</p>
+            <p className="mt-14 border-t border-white/8 pt-6 text-xs leading-relaxed text-white/35">{t2('Demo build — figures may be illustrative until on-chain volume exists. Not financial advice. Not affiliated with FIFA. Bet responsibly.','演示版本 — 在产生链上交易量之前，数据可能为示意。非财务建议。与 FIFA 无关。请理性下注。')}</p>
           </Reveal>
         </div>
       </section>

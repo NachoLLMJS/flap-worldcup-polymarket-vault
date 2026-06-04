@@ -7,13 +7,19 @@ import { PRIVY_APP_ID, PRIVY_CLIENT_ID, isPrivyConfigured } from '../lib/env';
 import { router } from './router';
 import { Preloader } from './Preloader';
 import { ThemeProvider } from './ThemeProvider';
+import { DesignProvider } from './DesignProvider';
 
 function Shell() {
-  const [loaded, setLoaded] = useState(false);
+  // ?nopre skips the preloader (debug aid: its rAF load-gate freezes in
+  // background/automation tabs, so this lets headless previews see the app).
+  const skipPre = typeof location !== 'undefined' && new URLSearchParams(location.search).has('nopre');
+  const [loaded, setLoaded] = useState(skipPre);
   return (
     <ThemeProvider>
-      <AnimatePresence>{!loaded && <Preloader key="pre" onDone={() => setLoaded(true)} />}</AnimatePresence>
-      <RouterProvider router={router} />
+      <DesignProvider>
+        <AnimatePresence>{!loaded && <Preloader key="pre" onDone={() => setLoaded(true)} />}</AnimatePresence>
+        <RouterProvider router={router} />
+      </DesignProvider>
     </ThemeProvider>
   );
 }

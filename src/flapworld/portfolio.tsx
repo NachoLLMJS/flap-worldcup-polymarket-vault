@@ -2,7 +2,8 @@
 /* ============================================================
    FlapWorld — Portfolio / Profile
    ============================================================ */
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { toPng } from 'html-to-image';
 import { useT, marketTitle, teamName } from './i18n';
 import { Icon, Avatar, Btn, OutcomeMark, CatTag, Countdown, useNow } from './components';
 import { ALL_MARKETS, marketStatus } from './data';
@@ -125,7 +126,7 @@ function ProfileHeader({ wallet, stats, onDisconnect }){
 }
 
 /* ---------- trader card (the shareable wow) ---------- */
-function TraderCard({ wallet, stats }){
+function TraderCard({ wallet, stats, onShare, sharing, shareErr }){
   const { t } = useT();
   const rank = rankFor(stats);
   const pct = stats.staked>0 ? stats.totalPnl/stats.staked*100 : 0;
@@ -175,7 +176,7 @@ function TraderCard({ wallet, stats }){
 
       <div className="relative mt-5 flex items-center justify-between">
         <span className="inline-flex items-center gap-1.5 font-mono text-[11px] text-white/40"><span className="h-1.5 w-1.5 rounded-full bg-acid"/>BNB Chain · BSC</span>
-        <CopyChip text={`flapworld.app/u/${wallet.ens}`} label={<span className="inline-flex items-center gap-1.5"><Icon.bolt/>{t('pf_share')}</span>}/>
+        <button onClick={onShare} disabled={sharing} title={shareErr ? "Couldn't generate image — try again" : ''} className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 font-mono text-[11px] transition ${shareErr ? 'bg-down/15 text-down hover:bg-down/20' : 'bg-white/6 text-white/60 hover:text-acid hover:bg-white/10'} ${sharing ? 'opacity-50 cursor-wait' : ''}`}><Icon.bolt/>{sharing ? '…' : t('pf_share')}</button>
       </div>
     </div>
   );
@@ -329,19 +330,47 @@ function PfEmpty({ title, sub, cta, onCta }){
 function PortfolioPage({ wallet, onConnect, onDisconnect, positions, activity, onSell, setRoute }){
   const { t, lang } = useT();
   const [tab, setTab] = useState('open');
+  const [sharing, setSharing] = useState(false);
+  const [shareErr, setShareErr] = useState(false);
+  const shareRef = useRef(null);
   if (!wallet) return <PfConnectEmpty onConnect={onConnect}/>;
 
   const stats = computeStats(positions, wallet);
   const open = positions.filter(p=>p.status==='open');
   const settled = positions.filter(p=>p.status!=='open').sort((a,b)=>(b.settledAt||0)-(a.settledAt||0));
 
+  // share the trader card + stats as an image: Web Share (mobile) or download + X composer (desktop)
+  const handleShare = async ()=>{
+    const node = shareRef.current; if(!node || sharing) return;
+    setSharing(true); setShareErr(false);
+    try {
+      // 1x1 transparent fallback so a cross-origin avatar (the X photo) can't taint/abort the whole capture
+      const TRANSPARENT_PX = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+      const dataUrl = await toPng(node, { cacheBust:true, pixelRatio:2, backgroundColor:'#09090a', imagePlaceholder:TRANSPARENT_PX });
+      const shareText = 'My FlapWorld card — World Cup 2026 prediction markets on BNB Chain';
+      const shareUrl = `https://flapworld.app/u/${wallet.address}`;
+      const blob = await (await fetch(dataUrl)).blob();
+      const file = new File([blob], 'flapworld-card.png', { type:'image/png' });
+      if (navigator.canShare && navigator.canShare({ files:[file] })) {
+        await navigator.share({ files:[file], text:shareText, url:shareUrl });
+      } else {
+        const a = document.createElement('a'); a.href = dataUrl; a.download = 'flapworld-card.png'; a.click();
+        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`, '_blank', 'noopener');
+      }
+    } catch(err){
+      if (err && err.name === 'AbortError') return; // user dismissed the native share sheet — not an error
+      console.error('share card failed', err); setShareErr(true);
+    }
+    finally { setSharing(false); }
+  };
+
   return (
     <main className="min-h-screen bg-ink-950 pt-16">
       <ProfileHeader wallet={wallet} stats={stats} onDisconnect={onDisconnect}/>
 
       <div className="mx-auto max-w-[1320px] px-4 pt-6 sm:px-6">
-        <div className="grid gap-4 lg:grid-cols-[400px_1fr]">
-          <TraderCard wallet={wallet} stats={stats}/>
+        <div ref={shareRef} className="grid gap-4 rounded-2xl bg-ink-950 lg:grid-cols-[400px_1fr]">
+          <TraderCard wallet={wallet} stats={stats} onShare={handleShare} sharing={sharing} shareErr={shareErr}/>
           <StatTiles stats={stats}/>
         </div>
 

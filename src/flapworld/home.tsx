@@ -243,11 +243,16 @@ function StatsStrip(){
 /* ---------- how it works ---------- */
 function HowItWorks({ setRoute }){
   const { t } = useT();
+  const sw = { fill:'none', stroke:'currentColor', strokeWidth:1.8, strokeLinecap:'round', strokeLinejoin:'round' };
   const steps = [
-    { n:'01', t:t('how_1t'), d:t('how_1d') },
-    { n:'02', t:t('how_2t'), d:t('how_2d') },
-    { n:'03', t:t('how_3t'), d:t('how_3d') },
-    { n:'04', t:t('how_4t'), d:t('how_4d') },
+    // 01 Pick — crosshair / choose an outcome
+    { n:'01', t:t('how_1t'), d:t('how_1d'), ic:(<svg viewBox="0 0 24 24" width="22" height="22" {...sw}><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.2"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3"/></svg>) },
+    // 02 Buy with BNB — BNB diamond
+    { n:'02', t:t('how_2t'), d:t('how_2d'), ic:(<svg viewBox="0 0 24 24" width="22" height="22" {...sw}><path d="M12 3.5l8.5 8.5-8.5 8.5L3.5 12z"/><path d="M9 12l3-3 3 3-3 3z"/></svg>) },
+    // 03 Sell before close — swap arrows
+    { n:'03', t:t('how_3t'), d:t('how_3d'), ic:(<svg viewBox="0 0 24 24" width="22" height="22" {...sw}><path d="M4 9h13l-3.5-3.5"/><path d="M20 15H7l3.5 3.5"/></svg>) },
+    // 04 Settled on-chain — shield check
+    { n:'04', t:t('how_4t'), d:t('how_4d'), ic:(<svg viewBox="0 0 24 24" width="22" height="22" {...sw}><path d="M12 3l7 3v5.5c0 4-3 6.8-7 8-4-1.2-7-4-7-8V6z"/><path d="M9 12l2 2 4-4"/></svg>) },
   ];
   return (
     <section id="how" className="relative bg-ink-950 py-20 sm:py-28">
@@ -262,7 +267,7 @@ function HowItWorks({ setRoute }){
               <div className="group h-full rounded-2xl border border-white/8 bg-ink-900 p-6 transition-colors hover:border-acid/40">
                 <div className="flex items-center justify-between">
                   <span className="font-mono text-sm text-acid">{s.n}</span>
-                  <span className="h-8 w-8 rounded-full bg-white/5 transition-colors group-hover:bg-acid/15"/>
+                  <span className="grid h-11 w-11 place-items-center rounded-xl bg-acid/10 text-acid ring-1 ring-acid/20 transition-colors group-hover:bg-acid/20">{s.ic}</span>
                 </div>
                 <h3 className="font-display mt-8 text-2xl text-white">{s.t}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-white/55">{s.d}</p>

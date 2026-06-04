@@ -7,7 +7,7 @@
 import { Component, useState, useCallback, type ReactNode } from 'react';
 import { isPrivyConfigured } from '../lib/env';
 import { LangProvider } from './i18n';
-import { Nav, HomePage } from './home';
+import { Nav, HomePage, AboutPage } from './home';
 import { MarketsPage } from './markets';
 import { PortfolioPage } from './portfolio';
 import { MockWalletProvider, RealWalletProvider, useWallet } from './wallet';
@@ -28,6 +28,7 @@ function App(){
       {route==='home' && <HomePage setRoute={go} />}
       {route==='markets' && <MarketsPage wallet={wallet} onConnect={connect} positions={positions} onBuy={buyPosition} onSell={sellPosition} />}
       {route==='portfolio' && <PortfolioPage wallet={wallet} onConnect={connect} onDisconnect={disconnect} positions={positions} activity={activity} onSell={sellPosition} setRoute={go} />}
+      {route==='about' && <AboutPage setRoute={go} />}
     </>
   );
 }

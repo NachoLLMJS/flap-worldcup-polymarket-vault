@@ -11,7 +11,7 @@ export const DESIGN_LABELS: Record<Design, string> = {
 };
 
 const STORAGE_KEY = 'flapworld.design';
-const DEFAULT: Design = 'cinema';
+const DEFAULT: Design = 'classic';
 
 const Ctx = createContext<{ design: Design; setDesign: (d: Design) => void }>({
   design: DEFAULT,

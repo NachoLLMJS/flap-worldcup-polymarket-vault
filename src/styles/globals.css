@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import '@fontsource-variable/bricolage-grotesque';
+@import '@fontsource/anton/400.css';
 @import '@fontsource-variable/fraunces';
 @import '@fontsource-variable/inter';
 @import '@fontsource/inter/400.css';
@@ -102,12 +103,12 @@ body {
   font-family: var(--font-sans);
 }
 
-.fw-app h1,
-.fw-app h2,
-.fw-app h3 {
-  font-family: var(--font-display);
-  font-weight: 500;
-  letter-spacing: -0.02em;
+@layer base {
+  .fw-app :where(h1, h2, h3) {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
 }
 
 /* Subtle grain overlay for redesigned surfaces only. */

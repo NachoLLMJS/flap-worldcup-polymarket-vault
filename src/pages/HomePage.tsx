@@ -36,16 +36,16 @@ export function HomePage() {
             <Badge intent="accent" size="md" dot>
               {isPrivyConfigured ? 'Live on BNB Chain' : 'World Cup 2026 · BNB Chain'}
             </Badge>
-            <h1 className="font-display text-5xl font-semibold leading-[1.0] tracking-[-0.03em] text-fg sm:text-6xl md:text-7xl">
-              Own a piece of
+            <h1 className="font-impact text-6xl uppercase leading-[0.86] tracking-[-0.01em] text-fg sm:text-7xl md:text-[6.5rem]">
+              Back a winner.
               <br />
-              <span className="font-editorial text-[1.06em] font-light italic bg-gradient-to-br from-gold-bright via-gold to-gold-deep bg-clip-text text-transparent">
-                football history.
+              <span className="bg-gradient-to-br from-gold-bright via-gold to-gold-deep bg-clip-text text-transparent">
+                Own the cup.
               </span>
             </h1>
-            <p className="max-w-xl text-lg leading-relaxed text-fg-muted">
-              {t('brand.tagline')}. Pick a winner, stake BNB, and settle from official Flap WorldCupViewer results —
-              no bookmaker, just a transparent pari-mutuel pool.
+            <p className="max-w-lg text-lg leading-relaxed text-fg-muted">
+              World Cup 2026, settled on-chain. Stake BNB on an outcome — the pool pays the bold, not a bookmaker.
+              <span className="text-fg"> Sell anytime before kickoff.</span>
             </p>
             <div className="flex flex-wrap items-center gap-3 pt-1">
               <Magnetic>
@@ -141,6 +141,29 @@ export function HomePage() {
           </div>
         </div>
       </ScrollReveal>
+
+      {/* Full-bleed inverted gold CTA — the bold "kickoff" moment */}
+      <section className="relative -mx-4 mt-8 overflow-hidden bg-gold py-24 text-center sm:-mx-6 sm:py-32">
+        <div className="relative mx-auto max-w-4xl px-6">
+          <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-fg-inverse/70">
+            {markets.length} markets are open
+          </span>
+          <h2 className="mt-3 font-impact text-6xl uppercase leading-[0.86] text-fg-inverse sm:text-7xl md:text-8xl">
+            Kickoff is
+            <br />
+            coming.
+          </h2>
+          <p className="mx-auto mt-5 max-w-md text-base font-medium text-fg-inverse/80">
+            Browse every match, group and the outright board. Find your edge before the whistle.
+          </p>
+          <button
+            onClick={() => navigate('/markets')}
+            className="mt-8 inline-flex items-center gap-2 rounded-full bg-fg-inverse px-7 py-3.5 font-display font-semibold text-gold transition-transform hover:scale-105"
+          >
+            Enter the markets floor →
+          </button>
+        </div>
+      </section>
     </div>
   );
 }

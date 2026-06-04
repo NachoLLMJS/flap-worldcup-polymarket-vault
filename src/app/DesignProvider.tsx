@@ -1,10 +1,9 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 
-export const DESIGNS = ['cinema', 'classic', 'board', 'poster'] as const;
+export const DESIGNS = ['classic', 'board', 'poster'] as const;
 export type Design = (typeof DESIGNS)[number];
 
 export const DESIGN_LABELS: Record<Design, string> = {
-  cinema: 'Cinema 3D',
   classic: 'Classic',
   board: 'Board',
   poster: 'Poster',

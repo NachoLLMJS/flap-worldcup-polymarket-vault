@@ -1,6 +1,6 @@
 // @ts-nocheck -- ported claude.ai/design prototype; strict types pass is a follow-up
 /* ============================================================
-   FlapWorld — wallet + trading layer
+   Polyflap — wallet + trading layer
    Two providers behind one context:
    - MockWalletProvider: no Privy (preview/demo) — seeded book.
    - RealWalletProvider: Privy login + viem placeBet/withdrawBet on BSC.

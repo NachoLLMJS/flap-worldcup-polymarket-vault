@@ -1,6 +1,6 @@
 // @ts-nocheck -- ported claude.ai/design prototype; strict types pass is a follow-up
 /* ============================================================
-   FlapWorld — shared UI components
+   Polyflap — shared UI components
    ============================================================ */
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useT } from './i18n';
@@ -72,17 +72,17 @@ function OutcomeMark({ outcome, size=26 }){
 }
 
 /* ---------- logo / wordmark ---------- */
-function Logo({ onClick, size=22 }){
+function Logo({ onClick, size=22, wordmark=true }){
   return (
-    <button onClick={onClick} className="group flex items-center gap-2.5 select-none" aria-label="FlapWorld home">
-      <span className="relative grid place-items-center rounded-[7px] bg-acid transition-transform group-hover:rotate-[-8deg]"
-            style={{ width:size+10, height:size+10 }}>
-        <span className="absolute rounded-full bg-ink-950" style={{ width:size*0.5, height:size*0.5 }}/>
-        <span className="absolute rounded-full bg-acid" style={{ width:size*0.2, height:size*0.2 }}/>
-      </span>
-      <span className="font-display leading-none tracking-tight" style={{ fontSize:size }}>
-        <span className="text-white">FLAP</span><span className="text-acid">WORLD</span>
-      </span>
+    <button onClick={onClick} className="group flex items-center gap-2.5 select-none" aria-label="Polyflap home">
+      <img src="/brand-logo.png" alt="Polyflap" draggable={false}
+        className="transition-transform group-hover:rotate-[-6deg]"
+        style={{ width:size+16, height:size+16, objectFit:'contain', filter:'drop-shadow(0 2px 10px rgba(215,255,54,0.28))' }}/>
+      {wordmark && (
+        <span className="font-display leading-none tracking-tight" style={{ fontSize:size }}>
+          <span className="text-white">POLY</span><span className="text-acid">FLAP</span>
+        </span>
+      )}
     </button>
   );
 }

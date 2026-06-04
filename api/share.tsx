@@ -1,6 +1,6 @@
 // @ts-nocheck
 /* ============================================================
-   FlapWorld — share landing with dynamic OG / Twitter Card meta
+   Polyflap — share landing with dynamic OG / Twitter Card meta
    GET /api/share?address=&name=&avatar=&pnl=&pct=&wr=&record=&vol=&open=
    The X/Twitter crawler doesn't run JS — it reads these meta tags.
    og:image points at /api/og with the same params (server-rendered card).
@@ -25,7 +25,7 @@ export default async function handler(req) {
   const wr = sp.get('wr') || '0';
 
   const ogImage = `${origin}/api/og?${sp.toString()}`;
-  const title = `${name} · FlapWorld`;
+  const title = `${name} · Polyflap`;
   const desc = `All-time P&L ${pnl} BNB · Win rate ${wr}% · World Cup 2026 prediction markets on BNB Chain`;
 
   const html = `<!doctype html>
@@ -34,7 +34,7 @@ export default async function handler(req) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(title)}</title>
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="FlapWorld">
+<meta property="og:site_name" content="Polyflap">
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(desc)}">
 <meta property="og:image" content="${esc(ogImage)}">
@@ -47,7 +47,7 @@ export default async function handler(req) {
 <meta http-equiv="refresh" content="0; url=/">
 </head>
 <body style="background:#09090a;color:#fff;font-family:system-ui,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0">
-<a href="/" style="color:#d7ff36;text-decoration:none">Go to FlapWorld &rarr;</a>
+<a href="/" style="color:#d7ff36;text-decoration:none">Go to Polyflap &rarr;</a>
 </body></html>`;
 
   return new Response(html, {

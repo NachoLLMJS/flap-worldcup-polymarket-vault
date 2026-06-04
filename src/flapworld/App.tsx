@@ -1,13 +1,13 @@
 // @ts-nocheck -- ported claude.ai/design prototype; strict types pass is a follow-up
 /* ============================================================
-   FlapWorld — root app: routing + wallet via context
+   Polyflap — root app: routing + wallet via context
    Real wallet/trading (Privy + viem) when VITE_PRIVY_APP_ID is set,
    otherwise an honest mock/preview. See ./wallet.tsx.
    ============================================================ */
 import { Component, useState, useCallback, type ReactNode } from 'react';
 import { isPrivyConfigured } from '../lib/env';
 import { LangProvider } from './i18n';
-import { Nav, HomePage } from './home';
+import { Nav, HomePage, AboutPage } from './home';
 import { MarketsPage } from './markets';
 import { PortfolioPage } from './portfolio';
 import { MockWalletProvider, RealWalletProvider, useWallet } from './wallet';
@@ -28,6 +28,7 @@ function App(){
       {route==='home' && <HomePage setRoute={go} />}
       {route==='markets' && <MarketsPage wallet={wallet} onConnect={connect} positions={positions} onBuy={buyPosition} onSell={sellPosition} />}
       {route==='portfolio' && <PortfolioPage wallet={wallet} onConnect={connect} onDisconnect={disconnect} positions={positions} activity={activity} onSell={sellPosition} setRoute={go} />}
+      {route==='about' && <AboutPage setRoute={go} />}
     </>
   );
 }
@@ -37,7 +38,7 @@ function App(){
 class WalletBoundary extends Component<{ fallback: ReactNode; children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
   static getDerivedStateFromError(){ return { failed: true }; }
-  componentDidCatch(err: unknown){ console.error('[FlapWorld] live wallet failed — falling back to preview:', err); }
+  componentDidCatch(err: unknown){ console.error('[Polyflap] live wallet failed — falling back to preview:', err); }
   render(){ return this.state.failed ? this.props.fallback : this.props.children; }
 }
 

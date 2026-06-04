@@ -3,7 +3,7 @@ import React from 'react';
 import { TEAM } from './data';
 
 /* ============================================================
-   FlapWorld — bilingual strings (EN primary / 中文 secondary)
+   Polyflap — bilingual strings (EN primary / 中文 secondary)
    ============================================================ */
 const STRINGS = {
   en: {

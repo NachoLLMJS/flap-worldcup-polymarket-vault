@@ -1,6 +1,6 @@
 // @ts-nocheck
 /* ============================================================
-   FlapWorld — og:image edge function
+   Polyflap — og:image edge function
    GET /api/og?name=&address=&avatar=&pnl=&pct=&wr=&record=&vol=&open=
    Renders the trader card (api/_card.mjs) to a 1200x630 PNG.
    The avatar URL (pbs.twimg.com) is fetched SERVER-SIDE by ImageResponse,

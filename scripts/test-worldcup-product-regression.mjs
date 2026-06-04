@@ -7,8 +7,8 @@ const root = new URL('..', import.meta.url);
 const read = (p) => fs.readFileSync(new URL(p, root), 'utf8');
 
 // Concatenate the whole `src/` tree so product invariants are checked against
-// the source regardless of how it is split into modules. (The FlapWorld
-// redesign lives under src/flapworld/ + integration assets under src/lib,
+// the source regardless of how it is split into modules. (The Polyflap
+// redesign lives under src/Polyflap/ + integration assets under src/lib,
 // src/features, src/data.)
 function readSrcTree() {
   const srcDir = fileURLToPath(new URL('src/', root));
@@ -41,9 +41,9 @@ assert.doesNotMatch(betting, /resolveMarket\(uint256 marketId\) external onlyOpe
 assert.match(betting, /function withdrawBet\(uint256 marketId, uint256 teamId, uint256 amount\) external nonReentrant/, 'users must be able to withdraw open stake before market close');
 assert.match(betting, /emit BetWithdrawn/, 'withdrawBet must emit a sell/withdraw event');
 
-/* ---- web product invariants (FlapWorld redesign) ----
+/* ---- web product invariants (Polyflap redesign) ----
    The redesign replaced the old single-page app (PolyFlap / href-anchor nav /
-   TwitterProfilePill / styles.css) with a routed React app under src/flapworld/.
+   TwitterProfilePill / styles.css) with a routed React app under src/Polyflap/.
    These assertions track the *product* invariants, not the old structure. */
 // Real money plumbing — must stay wired.
 assert.match(main, /VITE_BETTING_VAULT_ADDRESS/, 'web must read the betting vault address env');
@@ -59,7 +59,7 @@ assert.match(main, /walletClientType === 'privy-v2'/, 'web must support newer Pr
 assert.match(main, /BNB Chain|BSC/, 'web must label the BNB Chain (BSC) runtime');
 
 // Product identity + core surfaces (redesign).
-assert.match(main, /FlapWorld/, 'web must use the product name FlapWorld');
+assert.match(main, /Polyflap/, 'web must use the product name Polyflap');
 assert.match(main, /Buy|Sell \/ withdraw|withdrawBet/, 'web must expose buy and sell/withdraw actions');
 assert.match(main, /PortfolioPage/, 'web must include a Portfolio surface');
 assert.match(main, /Open positions|polyflap\.betActivity\.v1/, 'portfolio must surface open positions / on-chain bet activity');

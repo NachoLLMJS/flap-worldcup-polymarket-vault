@@ -1,6 +1,6 @@
 // @ts-nocheck -- ported claude.ai/design prototype; strict types pass is a follow-up
 /* ============================================================
-   FlapWorld — Portfolio / Profile
+   Polyflap — Portfolio / Profile
    ============================================================ */
 import { useState, useRef } from 'react';
 import { useT, marketTitle, teamName } from './i18n';
@@ -364,13 +364,10 @@ function PortfolioPage({ wallet, onConnect, onDisconnect, positions, activity, o
         spark: sparkArr.length>1 ? sparkArr.map(v=>v.toFixed(3)).join(',') : '',
       });
       const shareUrl = `${window.location.origin}/api/share?${params.toString()}`;
-      const shareText = 'My FlapWorld card — World Cup 2026 prediction markets on BNB Chain';
-      if (navigator.share) {
-        await navigator.share({ title:'FlapWorld', text:shareText, url:shareUrl });
-      } else {
-        try { await navigator.clipboard.writeText(shareUrl); } catch(e){}
-        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`, '_blank', 'noopener');
-      }
+      const shareText = 'My Polyflap card — World Cup 2026 prediction markets on BNB Chain';
+      // open the X composer directly — the link renders as the og:image card; copy it too as a convenience
+      try { await navigator.clipboard.writeText(shareUrl); } catch(e){}
+      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`, '_blank', 'noopener');
     } catch(err){
       if (err && err.name === 'AbortError') return; // user dismissed the native share sheet — not an error
       console.error('share failed', err); setShareErr(true);

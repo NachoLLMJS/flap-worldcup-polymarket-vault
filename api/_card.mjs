@@ -1,5 +1,5 @@
 /* ============================================================
-   FlapWorld — og:image trader card (server-side render)
+   Polyflap — og:image trader card (server-side render)
    Plain element tree (no JSX/React) so the same module feeds both
    @vercel/og's ImageResponse (production) and satori (local preview).
    Satori-safe: flexbox only, explicit flexDirection, hex/rgba colors, inline SVG.
@@ -132,8 +132,8 @@ export function ogCard(d = {}) {
         { justifyContent: 'space-between', alignItems: 'center' },
         [
           box({ alignItems: 'baseline' }, [
-            txt({ fontFamily: 'Anton', fontSize: 34, color: ACID }, 'FLAP'),
-            txt({ fontFamily: 'Anton', fontSize: 34, color: '#ffffff', marginLeft: 2 }, 'WORLD'),
+            txt({ fontFamily: 'Anton', fontSize: 34, color: '#ffffff' }, 'POLY'),
+            txt({ fontFamily: 'Anton', fontSize: 34, color: ACID, marginLeft: 2 }, 'FLAP'),
           ]),
           txt({ fontFamily: 'Archivo', fontSize: 17, color: ACID, letterSpacing: 3 }, 'WORLD CUP 2026'),
         ]
@@ -193,7 +193,7 @@ export function ogCard(d = {}) {
       box(
         { justifyContent: 'space-between', alignItems: 'center', marginTop: 14 },
         [
-          txt({ fontFamily: 'JetBrainsMono', fontSize: 19, color: 'rgba(255,255,255,0.5)' }, 'flapworld.app'),
+          txt({ fontFamily: 'JetBrainsMono', fontSize: 19, color: 'rgba(255,255,255,0.5)' }, 'Polyflap.app'),
           box({ alignItems: 'center' }, [
             col({ width: 9, height: 9, borderRadius: 9, backgroundColor: ACID, marginRight: 9 }, []),
             txt({ fontFamily: 'Archivo', fontSize: 15, color: 'rgba(255,255,255,0.5)' }, 'BNB Chain · BSC'),

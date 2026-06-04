@@ -1,6 +1,6 @@
 // @ts-nocheck -- ported claude.ai/design prototype; strict types pass is a follow-up
 /* ============================================================
-   FlapWorld — Home / Landing
+   Polyflap — Home / Landing
    ============================================================ */
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { gsap } from 'gsap';
@@ -54,7 +54,7 @@ function Nav({ route, setRoute, wallet, onConnect, onDisconnect, overHero=false 
     { k:'home', label:t('nav_home'), go:()=>setRoute('home') },
     { k:'markets', label:t('nav_markets'), go:()=>setRoute('markets') },
     { k:'portfolio', label:t('nav_portfolio'), go:()=>setRoute('portfolio') },
-    { k:'about', label:t('nav_about'), soon:true },
+    { k:'about', label:t('nav_about'), go:()=>setRoute('about') },
   ];
   return (
     <header className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${solid?'bg-ink-950/85 backdrop-blur-xl border-b border-white/8':'bg-transparent'}`}>
@@ -320,11 +320,103 @@ function Footer(){
           </div>
         </div>
         <div className="mt-10 flex flex-col gap-2 border-t border-white/8 pt-6 text-[11px] text-white/30 sm:flex-row sm:items-center sm:justify-between">
-          <span>© 2026 FlapWorld · Not affiliated with FIFA. Bet responsibly.</span>
+          <span>© 2026 Polyflap · Not affiliated with FIFA. Bet responsibly.</span>
           <span className="font-mono">Settlement: WorldCupViewer · BSC</span>
         </div>
       </div>
     </footer>
+  );
+}
+
+/* ---------- about ---------- */
+function AboutPage({ setRoute }){
+  const { lang } = useT();
+  const t2 = (en,zh)=> lang==='zh'?zh:en;
+  const features = [
+    { t:t2('On-chain settlement','链上结算'), d:t2('Outcomes resolve through the WorldCupViewer contract on BSC — verifiable, no manual oracle.','结果通过 BSC 上的 WorldCupViewer 合约结算 — 可验证，无人工预言机。') },
+    { t:t2('Non-custodial','非托管'), d:t2('You bet from your own wallet and sign every trade. We never hold your funds.','你用自己的钱包下注并签署每一笔交易。我们从不持有你的资金。') },
+    { t:t2('1% flat fee','1% 固定费用'), d:t2('A single 1% fee on each buy. No spreads, no hidden costs.','每次买入仅收 1% 费用。无点差，无隐藏成本。') },
+    { t:t2('Built on BNB Chain','基于 BNB 链'), d:t2('Fast, low-cost transactions on BSC (chainId 56).','BSC 上快速、低成本的交易（链 ID 56）。') },
+    { t:t2('Sign in your way','多种登录方式'), d:t2('Email, Google, X or an existing wallet — an embedded wallet is created in seconds via Privy.','邮箱、Google、X 或现有钱包 — 通过 Privy 几秒内创建嵌入式钱包。') },
+    { t:t2('85 markets','85 个市场'), d:t2('Group stage, knockout matches and the tournament winner for World Cup 2026.','2026 世界杯的小组赛、淘汰赛和总冠军。') },
+  ];
+  const faqs = [
+    { q:t2('Is Polyflap custodial?','Polyflap 托管资金吗？'), a:t2('No. Every bet is a transaction you sign from your own wallet on BSC. Funds live in the contract, never with us.','不。每笔下注都是你用自己的钱包在 BSC 上签署的交易。资金在合约里，绝不在我们这里。') },
+    { q:t2('How are winners decided?','如何决定赢家？'), a:t2('Once a match or stage resolves, results are read on-chain from the WorldCupViewer contract and payouts become claimable.','比赛或阶段结束后，结果从 WorldCupViewer 合约链上读取，奖金随即可领取。') },
+    { q:t2('What does it cost?','费用是多少？'), a:t2('A flat 1% fee on each buy, plus normal BSC gas. No withdrawal or hidden fees.','每次买入收取 1% 固定费用，外加正常的 BSC gas。无提现费或隐藏费用。') },
+    { q:t2('Do I need crypto to start?','开始需要加密货币吗？'), a:t2('You need BNB on BSC to bet. Sign in with email, Google or X to get an embedded wallet, then fund it.','下注需要 BSC 上的 BNB。用邮箱、Google 或 X 登录获得嵌入式钱包，然后充值。') },
+  ];
+  return (
+    <main className="bg-ink-950 pt-16">
+      {/* hero */}
+      <section className="relative overflow-hidden border-b border-white/8">
+        <div className="grain pointer-events-none absolute inset-0 opacity-30"/>
+        <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full" style={{ background:'radial-gradient(circle, rgba(215,255,54,0.16), transparent 65%)' }}/>
+        <div className="relative mx-auto grid max-w-[1320px] items-center gap-10 px-5 py-20 sm:px-6 sm:py-28 lg:grid-cols-[1.25fr_1fr]">
+          <Reveal>
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-acid">{t2('About','关于')}</span>
+            <h1 className="font-display mt-3 text-5xl leading-[0.92] text-white sm:text-7xl">{t2('Bet the World Cup, on-chain.','链上竞猜世界杯。')}</h1>
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-white/60 sm:text-lg">{t2('Polyflap is a prediction market for the 2026 World Cup, built on BNB Chain. Back a team, a match or the tournament winner with BNB — every position is a transaction you own, settled on-chain.','Polyflap 是基于 BNB 链的 2026 世界杯预测市场。用 BNB 押注球队、比赛或总冠军 — 每个仓位都是你拥有的交易，链上结算。')}</p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Btn onClick={()=>setRoute('markets')}>{t2('Explore markets','浏览市场')} <Icon.arrow/></Btn>
+              <Btn variant="outline" onClick={()=>setRoute('portfolio')}>{t2('My portfolio','我的持仓')}</Btn>
+            </div>
+          </Reveal>
+          <Reveal delay={120} className="hidden justify-self-center lg:block">
+            <img src="/brand-logo.png" alt="Polyflap" className="w-[300px]" style={{ filter:'drop-shadow(0 16px 50px rgba(215,255,54,0.25))' }}/>
+          </Reveal>
+        </div>
+      </section>
+
+      <HowItWorks setRoute={setRoute}/>
+
+      {/* features */}
+      <section className="bg-ink-950 py-20 sm:py-24">
+        <div className="mx-auto max-w-[1320px] px-5 sm:px-6">
+          <Reveal>
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-acid">{t2('Why Polyflap','为什么选 Polyflap')}</span>
+            <h2 className="font-display mt-3 max-w-2xl text-4xl leading-[0.95] text-white sm:text-5xl">{t2('Yours to own, simple to use.','属于你，简单易用。')}</h2>
+          </Reveal>
+          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {features.map((f,i)=>(
+              <Reveal key={i} delay={i*70}>
+                <div className="h-full rounded-2xl border border-white/8 bg-ink-900 p-6 transition-colors hover:border-acid/40">
+                  <div className="h-9 w-9 rounded-lg bg-acid/15 ring-1 ring-acid/30"/>
+                  <h3 className="font-display mt-5 text-xl text-white">{f.t}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-white/55">{f.d}</p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* faq */}
+      <section className="border-t border-white/8 bg-ink-950 py-20 sm:py-24">
+        <div className="mx-auto max-w-[920px] px-5 sm:px-6">
+          <Reveal>
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-acid">FAQ</span>
+            <h2 className="font-display mt-3 text-4xl leading-[0.95] text-white sm:text-5xl">{t2('Good to know','须知')}</h2>
+          </Reveal>
+          <div className="mt-10 divide-y divide-white/8 border-y border-white/8">
+            {faqs.map((f,i)=>(
+              <Reveal key={i} delay={i*60}>
+                <div className="py-6">
+                  <h3 className="text-lg font-bold text-white">{f.q}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-white/55">{f.a}</p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+          <Reveal>
+            <p className="mt-8 text-xs leading-relaxed text-white/35">{t2('Demo build — figures may be illustrative until on-chain volume exists. Not affiliated with FIFA. Bet responsibly.','演示版本 — 在产生链上交易量之前，数据可能为示意。与 FIFA 无关。请理性下注。')}</p>
+          </Reveal>
+        </div>
+      </section>
+
+      <ClosingCTA setRoute={setRoute}/>
+      <Footer/>
+    </main>
   );
 }
 
@@ -341,4 +433,4 @@ function HomePage({ setRoute }){
   );
 }
 
-export { HERO_VIDEO_SRC, Reveal, Nav, Ticker, Hero, StatsStrip, HowItWorks, ClosingCTA, Footer, HomePage };
+export { HERO_VIDEO_SRC, Reveal, Nav, Ticker, Hero, StatsStrip, HowItWorks, ClosingCTA, Footer, HomePage, AboutPage };

@@ -1,6 +1,6 @@
 // @ts-nocheck -- ported claude.ai/design prototype; strict types pass is a follow-up
 /* ============================================================
-   FlapWorld — Markets (the markets floor + order ticket)
+   Polyflap — Markets (the markets floor + order ticket)
    Markets show real teams/titles only — no simulated odds, pools,
    statuses or winners. Outcomes are selectable; the real payout is
    set by the on-chain pool at close (placeBet simulates first, so a

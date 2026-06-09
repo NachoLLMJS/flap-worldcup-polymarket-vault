@@ -37,11 +37,12 @@ https://flap.sh/launch?vaultfactory=0xc6f9e1e06699209507c95e4eb23b6ee68901afa3
 Other current contracts:
 
 - Vault implementation: `0x28eb637368cb07c658dc20d2852665de81e340a7`
-- Preview vault: `0xf8a204353ee286c1a98776efb35510d4e489e57f`
+- Active Flap vault: unset until a new Flap token/vault is created from the launch factory.
+- Historical preview vault: `0xf8a204353ee286c1a98776efb35510d4e489e57f` (do not use as the active vault after launch)
 - Betting vault: `0x2c194de4fc820128044b4b405a5e8e5bd1e91358`
 - WorldCupViewer: `0x00036192958C2aaAF9F445d3Cdc2979995EA333e`
 
-Do not use the preview vault as `vaultfactory`; use the factory address above.
+Do not use the preview vault as `vaultfactory`; use the factory address above. Set `VITE_FLAP_VAULT_ADDRESS` only after Flap creates the new vault during launch.
 
 ## Frontend setup
 

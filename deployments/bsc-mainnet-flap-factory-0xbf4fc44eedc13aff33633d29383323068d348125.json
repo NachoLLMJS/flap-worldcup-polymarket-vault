@@ -1,0 +1,11 @@
+{
+  "chainId": 56,
+  "network": "bsc-mainnet",
+  "implementation": "0xb5e6ecd590bb03db5b1caf15a1bcf3f80e01bf71",
+  "implementationTx": "0x0dbbc2fce0bf5965a9018f3f82b1d2d185178714a77b20053a3f34c9c315f365",
+  "implementationGasUsed": "5155866",
+  "factory": "0xbf4fc44eedc13aff33633d29383323068d348125",
+  "factoryTx": "0xa8adaad35173686090e7743dc747c19ba7e1e2381f7eea51fdaf19214981ded6",
+  "factoryGasUsed": "1111899",
+  "timestamp": "2026-06-09T19:40:34.152Z"
+}

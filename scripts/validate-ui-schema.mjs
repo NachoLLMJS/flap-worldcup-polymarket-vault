@@ -7,19 +7,19 @@ for (const key of requiredTop) {
   if (!(key in schema)) throw new Error(`missing top-level ${key}`);
 }
 if (schema.vaultType !== "WorldCupPolymarketVault") throw new Error("wrong vaultType");
-if (!Array.isArray(schema.methods) || schema.methods.length < 20) throw new Error("not enough methods");
+if (!Array.isArray(schema.methods) || schema.methods.length < 12) throw new Error("not enough user-facing methods");
 
 const mustExpose = [
   "description",
-  "taxToken",
-  "guardian",
-  "worldCupViewer",
-  "operator",
   "totalRevenueReceived",
-  "lastSettlementMatchId",
-  "lastSettlementTeamId",
-  "lastSettlementTeamName",
+  "taxToken",
+  "bettingVault",
+  "bettingMarketCount",
+  "totalBettingRewardShares",
+  "totalTaxRewardsReceivedByBetting",
+  "claimableBettingTaxRewards",
   "lastSettlementResolved",
+  "lastSettlementTeamName",
   "getWorldCupWinner",
   "getGroupWinner",
   "getMatchResult",
@@ -27,12 +27,7 @@ const mustExpose = [
   "marketCount",
   "getMarket",
   "getMarkets",
-  "getMarketTiming",
-  "setOperator",
-  "upsertMarket",
-  "refreshSettlement",
-  "recoverNative",
-  "recoverTaxToken"
+  "getMarketTiming"
 ];
 const names = schema.methods.map((m) => m.name);
 for (const name of mustExpose) {
@@ -54,63 +49,63 @@ for (const method of schema.methods) {
 }
 
 const writeMethods = schema.methods.filter((m) => m.isWriteMethod).map((m) => m.name);
-for (const name of ["setOperator", "upsertMarket", "refreshSettlement", "recoverNative", "recoverTaxToken"]) {
-  if (!writeMethods.includes(name)) throw new Error(`write method ${name} not clearly marked`);
-}
+if (writeMethods.length) throw new Error(`clean user UI schema should not expose write/admin methods: ${writeMethods.join(",")}`);
 const readMethods = schema.methods.filter((m) => !m.isWriteMethod).map((m) => m.name);
-for (const name of ["taxToken", "guardian", "worldCupViewer", "operator", "totalRevenueReceived"]) {
-  if (!readMethods.includes(name)) throw new Error(`getter ${name} should be marked read-only`);
+for (const name of mustExpose) {
+  if (!readMethods.includes(name)) throw new Error(`user-facing method ${name} should be marked read-only`);
+}
+const forbiddenUserUi = ["setOperator", "upsertMarket", "refreshSettlement", "setBettingVault", "forwardTaxRewardsToBetting", "emergencyWithdrawNative", "emergencyWithdrawToken", "guardian", "operator", "worldCupViewer"];
+for (const name of forbiddenUserUi) {
+  if (names.includes(name)) throw new Error(`admin/internal method ${name} should not be exposed in clean user UI schema`);
 }
 const getMarkets = schema.methods.find((m) => m.name === "getMarkets");
 if (!getMarkets.isOutputArray) throw new Error("getMarkets should mark isOutputArray=true");
-
-for (const name of ["recoverNative", "recoverTaxToken"]) {
-  const method = schema.methods.find((m) => m.name === name);
-  const description = method?.description ?? "";
-  if (!/guardian emergency only/i.test(description)) {
-    throw new Error(`${name} must be labeled Guardian emergency only`);
-  }
-  if (!/must not bypass user claims/i.test(description)) {
-    throw new Error(`${name} must warn against bypassing future user escrow claims`);
-  }
-}
-const recoverTaxToken = schema.methods.find((m) => m.name === "recoverTaxToken");
-if (!/only recovers taxToken, not arbitrary assets/i.test(recoverTaxToken?.description ?? "")) {
-  throw new Error("recoverTaxToken must state it cannot recover arbitrary assets");
-}
-
-for (const key of ["description", "fields", "isArray", "factoryNotes"]) {
+for (const key of ["description", "fields", "isArray"]) {
   if (!(key in (schema.vaultDataSchema ?? {}))) throw new Error(`vaultDataSchema missing ${key}`);
 }
 const vaultDataNames = schema.vaultDataSchema.fields.map((f) => f.name);
-for (const name of ["taxToken", "guardian", "worldCupViewer", "operator"]) {
+for (const name of ["worldCupViewer", "operator", "bettingVault"]) {
   if (!vaultDataNames.includes(name)) throw new Error(`vaultDataSchema does not expose launch field ${name}`);
 }
-if (!schema.vaultDataSchema.fields.find((f) => f.name === "guardian")?.description.toLowerCase().includes("guardian")) {
-  throw new Error("vaultDataSchema guardian field must preserve Guardian requirement");
-}
 const factoryNotes = [schema.vaultDataSchema.factoryNotes, ...(schema.factory.notes ?? [])].join("\n");
-if (!/direct polymarket trading/i.test(factoryNotes)) {
-  throw new Error("factory notes must state that direct Polymarket trading is not part of this MVP");
+if (!/betting vault|bettors/i.test(factoryNotes)) {
+  throw new Error("factory notes must describe the betting vault reward receiver");
 }
 
 const source = fs.readFileSync(new URL("../contracts/WorldCupPolymarketVault.sol", import.meta.url), "utf8");
+
+function findImports(importPath) {
+  const candidates = [
+    new URL(`../contracts/${importPath.replace(/^\.\//, "")}`, import.meta.url),
+    new URL(`../contracts/${importPath}`, import.meta.url)
+  ];
+  for (const url of candidates) {
+    try {
+      if (fs.existsSync(url)) return { contents: fs.readFileSync(url, "utf8") };
+    } catch {}
+  }
+  return { error: `Import not found: ${importPath}` };
+}
 const input = {
   language: "Solidity",
   sources: { "WorldCupPolymarketVault.sol": { content: source } },
   settings: { outputSelection: { "*": { "WorldCupPolymarketVault": ["abi"] } } }
 };
-const output = JSON.parse(solc.compile(JSON.stringify(input)));
+const output = JSON.parse(solc.compile(JSON.stringify(input), { import: findImports }));
 const errors = (output.errors ?? []).filter((e) => e.severity === "error");
 if (errors.length) throw new Error(errors.map((e) => e.formattedMessage).join("\n"));
 const abi = output.contracts["WorldCupPolymarketVault.sol"].WorldCupPolymarketVault.abi;
 const excludedAbiFunctions = new Set(["vaultUISchema", "vaultDataSchema", "initialize"]);
 const abiFunctions = abi.filter((entry) => entry.type === "function" && !excludedAbiFunctions.has(entry.name)).map((entry) => entry.name).sort();
 const schemaNames = names.slice().sort();
-const missingFromSchema = abiFunctions.filter((name) => !schemaNames.includes(name));
 const staleInSchema = schemaNames.filter((name) => !abiFunctions.includes(name));
-if (missingFromSchema.length || staleInSchema.length) {
-  throw new Error(`schema/ABI mismatch; missing=${missingFromSchema.join(",") || "none"}; stale=${staleInSchema.join(",") || "none"}`);
+if (staleInSchema.length) {
+  throw new Error(`schema/ABI mismatch; stale=${staleInSchema.join(",")}`);
+}
+const intentionallyHidden = new Set(["emergencyWithdrawNative", "emergencyWithdrawToken", "forwardTaxRewardsToBetting", "guardian", "lastSettlementMatchId", "lastSettlementTeamId", "operator", "refreshSettlement", "setBettingVault", "setOperator", "upsertMarket", "worldCupViewer"]);
+const missingFromSchema = abiFunctions.filter((name) => !schemaNames.includes(name) && !intentionallyHidden.has(name));
+if (missingFromSchema.length) {
+  throw new Error(`schema/ABI mismatch; missing user-facing=${missingFromSchema.join(",")}`);
 }
 
 console.log(`OK: ${schema.vaultType} exposes ${schema.methods.length} UI-schema methods plus ${schema.vaultDataSchema.fields.length} vaultData fields: ${names.join(", ")}`);

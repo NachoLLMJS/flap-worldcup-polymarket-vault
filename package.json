@@ -13,7 +13,10 @@
     "compile:clone-factory": "node scripts/compile-clone-factory.mjs",
     "deploy:bsc": "node scripts/deploy-bsc.mjs",
     "deploy:clone-factory:bsc": "node scripts/deploy-clone-factory-bsc.mjs",
-    "deploy:betting:bsc": "node foundry/worldcup-betting/scripts/deploy-betting-bsc.mjs"
+    "deploy:betting:bsc": "node foundry/worldcup-betting/scripts/deploy-betting-bsc.mjs",
+    "compile:betting": "node foundry/worldcup-betting/scripts/compile-betting.mjs",
+    "deploy:betting:testnet": "node foundry/worldcup-betting/scripts/deploy-betting-testnet.mjs",
+    "encode:flap-vault-data": "node scripts/encode-flap-vault-data.mjs"
   },
   "dependencies": {
     "@fontsource-variable/fraunces": "^5.2.9",

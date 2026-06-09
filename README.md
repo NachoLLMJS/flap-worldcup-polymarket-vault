@@ -22,27 +22,33 @@ Current package includes:
 
 ## Live BSC contracts
 
-Flap launch factory:
+Fixed Flap launch factory:
 
 ```text
-0xc6f9e1e06699209507c95e4eb23b6ee68901afa3
+0x35dd03331ca995e90ca6304f45d60705c596e65d
 ```
 
-Launch URL:
+Launch URL for the next final launch:
 
 ```text
-https://flap.sh/launch?vaultfactory=0xc6f9e1e06699209507c95e4eb23b6ee68901afa3
+https://flap.sh/launch?vaultfactory=0x35dd03331ca995e90ca6304f45d60705c596e65d
 ```
 
-Other current contracts:
+Current configured contracts:
 
-- Vault implementation: `0x28eb637368cb07c658dc20d2852665de81e340a7`
-- Active Flap vault: unset until a new Flap token/vault is created from the launch factory.
-- Historical preview vault: `0xf8a204353ee286c1a98776efb35510d4e489e57f` (do not use as the active vault after launch)
-- Betting vault: `0x2c194de4fc820128044b4b405a5e8e5bd1e91358`
+- Vault implementation: `0xf9f63eb4c0ce81a1edd1f517b3247103867f8e04`
+- Betting vault: `0x0729614f2775b99d7825bf76405e38b10529ddb0`
 - WorldCupViewer: `0x00036192958C2aaAF9F445d3Cdc2979995EA333e`
+- Active Flap token: unset until the final token launch.
+- Active Flap vault clone: unset until the final token/vault launch.
 
-Do not use the preview vault as `vaultfactory`; use the factory address above. Set `VITE_FLAP_VAULT_ADDRESS` only after Flap creates the new vault during launch.
+Do not use the temporary token/vault launched during testing yet. Keep `VITE_FLAP_TOKEN_ADDRESS` and `VITE_FLAP_VAULT_ADDRESS` empty until the final launch creates the real token and concrete vault clone.
+
+Old/deprecated addresses:
+
+- `0x8257f357cee6c3ee77f5b89818d9ee9bfecd72f6`: do not use; it produced malformed EIP-1167 clone bytecode and generic ThirdParty UI fallback.
+- `0xc6f9e1e06699209507c95e4eb23b6ee68901afa3`: older visual-good factory, but not the current fixed three-field factory.
+- `0xbf4fc44eedc13aff33633d29383323068d348125`: old admin-heavy UI implementation/factory path.
 
 ## Frontend setup
 

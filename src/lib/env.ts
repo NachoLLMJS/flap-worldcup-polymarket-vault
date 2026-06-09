@@ -3,8 +3,18 @@ import { bsc } from 'viem/chains';
 /** Public, build-time environment values. Safe to expose to the browser. */
 export const PRIVY_APP_ID = import.meta.env.VITE_PRIVY_APP_ID as string | undefined;
 export const PRIVY_CLIENT_ID = import.meta.env.VITE_PRIVY_CLIENT_ID as string | undefined;
+export const FLAP_TOKEN_ADDRESS = import.meta.env.VITE_FLAP_TOKEN_ADDRESS as `0x${string}` | undefined;
 export const VAULT_ADDRESS = import.meta.env.VITE_FLAP_VAULT_ADDRESS as `0x${string}` | undefined;
+export const FLAP_VAULT_FACTORY_ADDRESS = import.meta.env.VITE_FLAP_VAULT_FACTORY_ADDRESS as
+  | `0x${string}`
+  | undefined;
+export const FLAP_VAULT_IMPLEMENTATION_ADDRESS = import.meta.env.VITE_FLAP_VAULT_IMPLEMENTATION_ADDRESS as
+  | `0x${string}`
+  | undefined;
 export const BETTING_VAULT_ADDRESS = import.meta.env.VITE_BETTING_VAULT_ADDRESS as
+  | `0x${string}`
+  | undefined;
+export const WORLD_CUP_VIEWER_ADDRESS = import.meta.env.VITE_WORLD_CUP_VIEWER_ADDRESS as
   | `0x${string}`
   | undefined;
 export const BSC_RPC_URL = import.meta.env.VITE_BSC_RPC_URL as string | undefined;

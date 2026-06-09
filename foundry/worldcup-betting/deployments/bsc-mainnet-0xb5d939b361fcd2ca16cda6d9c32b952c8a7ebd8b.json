@@ -1,0 +1,14 @@
+{
+  "chainId": 56,
+  "network": "bsc-mainnet",
+  "contract": "WorldCupBettingVault",
+  "address": "0xb5d939b361fcd2ca16cda6d9c32b952c8a7ebd8b",
+  "txHash": "0xc672dea7ee3da08f1f6ba74bace1fe0e6462a2a889db6710dd5f17ebbecb975b",
+  "worldCupViewer": "0x00036192958C2aaAF9F445d3Cdc2979995EA333e",
+  "guardian": "0xEB155312Eeca8Bbb3600f6e64B09fAd04FeBf9D1",
+  "operator": "0xEB155312Eeca8Bbb3600f6e64B09fAd04FeBf9D1",
+  "seeded": false,
+  "opened": false,
+  "maxSeedMarkets": null,
+  "timestamp": "2026-06-09T19:39:15.251Z"
+}

@@ -33,15 +33,23 @@ contract WorldCupBettingVault {
     address public immutable guardian;
     address public immutable feeRecipient;
     uint256 public constant PROTOCOL_FEE_BPS = 100;
+    uint256 public constant REWARD_PRECISION = 1e18;
     address public operator;
     uint256 public marketCount;
+    uint256 public totalRewardShares;
+    uint256 public accTaxRewardPerShare;
+    uint256 public totalTaxRewardsReceived;
 
     mapping(uint256 => BettingMarket) private markets;
     mapping(uint256 => uint256[]) private marketOutcomes;
     mapping(uint256 => mapping(uint256 => bool)) public validOutcome;
     mapping(uint256 => mapping(uint256 => uint256)) public outcomePool;
     mapping(uint256 => mapping(address => mapping(uint256 => uint256))) public userBets;
+    mapping(uint256 => mapping(address => uint256)) public userMarketStake;
     mapping(uint256 => mapping(address => bool)) public claimed;
+    mapping(address => uint256) public rewardShares;
+    mapping(address => uint256) public rewardDebt;
+    mapping(address => uint256) public pendingTaxRewards;
 
     bool private entered;
 
@@ -56,6 +64,8 @@ contract WorldCupBettingVault {
     event Claimed(uint256 indexed marketId, address indexed user, uint256 amount);
     event Refunded(uint256 indexed marketId, address indexed user, uint256 amount);
     event FeePaid(uint256 indexed marketId, address indexed payer, address indexed recipient, uint256 amount);
+    event TaxRewardsDeposited(address indexed from, uint256 amount, uint256 accTaxRewardPerShare);
+    event TaxRewardsClaimed(address indexed user, uint256 amount);
 
     modifier onlyOperatorOrGuardian() {
         require(msg.sender == operator || msg.sender == guardian, "not operator/guardian");
@@ -151,7 +161,12 @@ contract WorldCupBettingVault {
         uint256 netStake = msg.value - fee;
         require(netStake > 0, "stake too small");
 
+        _syncTaxRewards(msg.sender);
         userBets[marketId][msg.sender][teamId] += netStake;
+        userMarketStake[marketId][msg.sender] += netStake;
+        rewardShares[msg.sender] += netStake;
+        totalRewardShares += netStake;
+        rewardDebt[msg.sender] = (rewardShares[msg.sender] * accTaxRewardPerShare) / REWARD_PRECISION;
         outcomePool[marketId][teamId] += netStake;
         m.totalPool += netStake;
         if (fee != 0) {
@@ -172,7 +187,12 @@ contract WorldCupBettingVault {
         uint256 stake = userBets[marketId][msg.sender][teamId];
         require(stake >= amount, "amount exceeds stake");
 
+        _syncTaxRewards(msg.sender);
         userBets[marketId][msg.sender][teamId] = stake - amount;
+        userMarketStake[marketId][msg.sender] -= amount;
+        rewardShares[msg.sender] -= amount;
+        totalRewardShares -= amount;
+        rewardDebt[msg.sender] = (rewardShares[msg.sender] * accTaxRewardPerShare) / REWARD_PRECISION;
         outcomePool[marketId][teamId] -= amount;
         m.totalPool -= amount;
         _send(payable(msg.sender), amount);
@@ -217,6 +237,31 @@ contract WorldCupBettingVault {
 
     function claimable(uint256 marketId, address user) public view returns (uint256 amount) {
         return _claimable(marketId, user);
+    }
+
+    /// @notice Receives BNB tax-reward distributions from the Flap vault and allocates them pro-rata to current reward shares.
+    /// @dev Reward shares are created by net BNB stakes. Users who withdraw open bets lose the withdrawn shares; settled bettors keep historical shares.
+    function depositTaxRewards() external payable {
+        require(msg.value > 0, "reward required");
+        require(totalRewardShares > 0, "no bettors");
+        accTaxRewardPerShare += (msg.value * REWARD_PRECISION) / totalRewardShares;
+        totalTaxRewardsReceived += msg.value;
+        emit TaxRewardsDeposited(msg.sender, msg.value, accTaxRewardPerShare);
+    }
+
+    function claimableTaxRewards(address user) public view returns (uint256) {
+        uint256 accumulated = (rewardShares[user] * accTaxRewardPerShare) / REWARD_PRECISION;
+        if (accumulated < rewardDebt[user]) return pendingTaxRewards[user];
+        return pendingTaxRewards[user] + (accumulated - rewardDebt[user]);
+    }
+
+    function claimTaxRewards() external nonReentrant {
+        _syncTaxRewards(msg.sender);
+        uint256 amount = pendingTaxRewards[msg.sender];
+        require(amount > 0, "nothing to claim");
+        pendingTaxRewards[msg.sender] = 0;
+        _send(payable(msg.sender), amount);
+        emit TaxRewardsClaimed(msg.sender, amount);
     }
 
     function _claimable(uint256 marketId, address user) private view returns (uint256 amount) {
@@ -284,8 +329,21 @@ contract WorldCupBettingVault {
         return userBets[marketId][user][teamId];
     }
 
+    function getUserMarketStake(uint256 marketId, address user) external view returns (uint256) {
+        return userMarketStake[marketId][user];
+    }
+
     function getTeamName(uint256 teamId) external view returns (string memory) {
         return worldCupViewer.getTeamName(teamId);
+    }
+
+    function _syncTaxRewards(address user) private {
+        uint256 accumulated = (rewardShares[user] * accTaxRewardPerShare) / REWARD_PRECISION;
+        uint256 debt = rewardDebt[user];
+        if (accumulated > debt) {
+            pendingTaxRewards[user] += accumulated - debt;
+        }
+        rewardDebt[user] = accumulated;
     }
 
     function _send(address payable recipient, uint256 amount) private {

@@ -24,6 +24,19 @@ const account = privateKeyToAccount(PRIVATE_KEY);
 const guardian = GUARDIAN ?? account.address;
 
 const source = fs.readFileSync(new URL("../contracts/WorldCupPolymarketVault.sol", import.meta.url), "utf8");
+
+function findImports(importPath) {
+  const candidates = [
+    new URL(`../contracts/${importPath.replace(/^\.\//, "")}`, import.meta.url),
+    new URL(`../contracts/${importPath}`, import.meta.url)
+  ];
+  for (const url of candidates) {
+    try {
+      if (fs.existsSync(url)) return { contents: fs.readFileSync(url, "utf8") };
+    } catch {}
+  }
+  return { error: `Import not found: ${importPath}` };
+}
 const input = {
   language: "Solidity",
   sources: { "WorldCupPolymarketVault.sol": { content: source } },
@@ -33,7 +46,7 @@ const input = {
     outputSelection: { "*": { "WorldCupPolymarketVault": ["abi", "evm.bytecode.object"] } }
   }
 };
-const output = JSON.parse(solc.compile(JSON.stringify(input)));
+const output = JSON.parse(solc.compile(JSON.stringify(input), { import: findImports }));
 const errors = (output.errors ?? []).filter((e) => e.severity === "error");
 if (errors.length) throw new Error(errors.map((e) => e.formattedMessage).join("\n"));
 const warnings = (output.errors ?? []).filter((e) => e.severity !== "error");

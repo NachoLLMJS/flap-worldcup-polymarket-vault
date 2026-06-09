@@ -18,6 +18,8 @@ const GUARDIAN = process.env.GUARDIAN_ADDRESS;
 const OPERATOR = process.env.OPERATOR_ADDRESS ?? GUARDIAN;
 const SHOULD_SEED = process.env.SEED_MARKETS !== "false";
 const SHOULD_OPEN = process.env.OPEN_MARKETS !== "false";
+const MAX_SEED_MARKETS = process.env.MAX_SEED_MARKETS ? Number(process.env.MAX_SEED_MARKETS) : undefined;
+const deploymentsDir = path.join(root, "deployments");
 
 if (!rawKey) throw new Error("Set BSC_PRIVATE_KEY or PRIVATE_KEY for the deployer wallet");
 if (!GUARDIAN) throw new Error("Set GUARDIAN_ADDRESS; OPERATOR_ADDRESS is optional and defaults to guardian");
@@ -86,7 +88,8 @@ console.log(`Betting vault: ${address}`);
 patchEnv(address);
 
 if (SHOULD_SEED) {
-  const markets = JSON.parse(fs.readFileSync(seedPath, "utf8"));
+  let markets = JSON.parse(fs.readFileSync(seedPath, "utf8"));
+  if (Number.isFinite(MAX_SEED_MARKETS)) markets = markets.slice(0, MAX_SEED_MARKETS);
   console.log(`Seeding ${markets.length} markets${SHOULD_OPEN ? " and opening them" : ""}...`);
   const marketType = {MatchWinner: 0n, GroupWinner: 1n, TournamentWinner: 2n};
   for (const m of markets) {
@@ -117,5 +120,23 @@ if (SHOULD_SEED) {
   }
 }
 
+fs.mkdirSync(deploymentsDir, {recursive: true});
+const deployment = {
+  chainId: 56,
+  network: "bsc-mainnet",
+  contract: "WorldCupBettingVault",
+  address,
+  txHash: hash,
+  worldCupViewer: WORLD_CUP_VIEWER,
+  guardian: GUARDIAN,
+  operator: OPERATOR,
+  seeded: SHOULD_SEED,
+  opened: SHOULD_OPEN,
+  maxSeedMarkets: MAX_SEED_MARKETS ?? null,
+  timestamp: new Date().toISOString()
+};
+const deploymentPath = path.join(deploymentsDir, `bsc-mainnet-${address}.json`);
+fs.writeFileSync(deploymentPath, JSON.stringify(deployment, null, 2));
 console.log("Done");
+console.log(`DeploymentJson=${deploymentPath}`);
 console.log(`VITE_BETTING_VAULT_ADDRESS=${address}`);

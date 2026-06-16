@@ -1,6 +1,6 @@
 /* WorldCupBettingVault ABI — the subset the UI needs.
-   Writes: placeBet / withdrawBet / claim / resolveMarket.
-   Reads: getMarket / getUserBet / claimable. */
+   Writes: placeBet / withdrawBet / claim / resolveMarket / claimTaxRewards / claimEpochTaxRewards.
+   Reads: getMarket / getUserBet / claimable / claimableTaxRewards / getUserBettingStats. */
 export const bettingAbi = [
   {
     type: 'event', name: 'BetPlaced', anonymous: false,
@@ -72,5 +72,37 @@ export const bettingAbi = [
     type: 'function', name: 'claimable', stateMutability: 'view',
     inputs: [{ name: 'marketId', type: 'uint256' }, { name: 'user', type: 'address' }],
     outputs: [{ name: '', type: 'uint256' }],
+  },
+  {
+    type: 'function', name: 'claimTaxRewards', stateMutability: 'nonpayable',
+    inputs: [],
+    outputs: [],
+  },
+  {
+    type: 'function', name: 'claimEpochTaxRewards', stateMutability: 'nonpayable',
+    inputs: [{ name: 'epoch', type: 'uint256' }],
+    outputs: [],
+  },
+  {
+    type: 'function', name: 'claimableTaxRewards', stateMutability: 'view',
+    inputs: [{ name: 'user', type: 'address' }],
+    outputs: [{ name: '', type: 'uint256' }],
+  },
+  {
+    type: 'function', name: 'currentEpoch', stateMutability: 'view',
+    inputs: [],
+    outputs: [{ name: '', type: 'uint256' }],
+  },
+  {
+    type: 'function', name: 'getUserBettingStats', stateMutability: 'view',
+    inputs: [{ name: 'user', type: 'address' }],
+    outputs: [
+      { name: 'totalUserWagered', type: 'uint256' },
+      { name: 'activeBets', type: 'uint256' },
+      { name: 'lastMarketId', type: 'uint256' },
+      { name: 'lastTeamId', type: 'uint256' },
+      { name: 'lastTimestamp', type: 'uint256' },
+      { name: 'previousEpochClaimable', type: 'uint256' },
+    ],
   },
 ] as const;

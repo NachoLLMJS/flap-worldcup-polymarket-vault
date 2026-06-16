@@ -44,10 +44,12 @@ function useOnchainMarketStates(wallet){
     try {
       const marketCalls = ALL_MARKETS.map(m=>({ address: BETTING_VAULT_ADDRESS, abi: bettingAbi, functionName:'getMarket', args:[BigInt(m.marketId)] }));
       const viewerCalls = ALL_MARKETS.map(viewerCallFor);
-      const [marketResults, viewerResults] = await Promise.all([
+      const [marketResults, viewerResults, latestBlock] = await Promise.all([
         readClient.multicall({ contracts: marketCalls, allowFailure: true }),
         readClient.multicall({ contracts: viewerCalls, allowFailure: true }),
+        readClient.getBlock(),
       ]);
+      const chainNow = Number(latestBlock.timestamp);
       let claimResults = [];
       if (wallet?.address) {
         claimResults = await readClient.multicall({
@@ -59,8 +61,29 @@ function useOnchainMarketStates(wallet){
       ALL_MARKETS.forEach((m, i)=>{
         const mr = marketResults[i];
         const vr = viewerResults[i];
-        if (mr.status !== 'success') return;
-        const { market, outcomeTeamIds, outcomePools } = mr.result;
+        if (mr.status !== 'success') {
+          next[m.id] = {
+            missing: true,
+            statusName: 'Not seeded yet',
+            resolved: false,
+            cancelled: false,
+            closeTime: Math.floor(m.closeTime / 1000),
+            resolveAfter: Math.floor(m.closeTime / 1000),
+            totalPool: 0,
+            outcomePools: [],
+            outcomeTeamIds: [],
+            viewerResolved: false,
+            viewerTeamId: 0,
+            viewerTeamName: '',
+            viewerMatchName: '',
+            closedByTime: false,
+            claimableWei: '0',
+            claimableBnb: 0,
+          };
+          return;
+        }
+        const view = mr.result?.view_ || mr.result?.[0] || mr.result;
+        const { market, outcomeTeamIds, outcomePools } = view;
         const v = vr.status === 'success' ? vr.result : null;
         const claimableWei = claimResults[i]?.status === 'success' ? claimResults[i].result : 0n;
         const status = Number(market.status);
@@ -82,7 +105,7 @@ function useOnchainMarketStates(wallet){
           viewerTeamId: v ? Number(v.teamId) : 0,
           viewerTeamName: v?.teamName || '',
           viewerMatchName: v?.matchName || '',
-          closedByTime: Math.floor(Date.now()/1000) >= closeTime,
+          closedByTime: chainNow >= closeTime,
           claimableWei: claimableWei.toString(),
           claimableBnb: Number(formatEther(claimableWei || 0n)),
         };
@@ -471,9 +494,10 @@ function MarketsPage({ wallet, onConnect, onBuy, onSell, onClaim, onResolve, pos
   const { states: marketStates, loaded: marketsLoaded, refresh: refreshMarketStates } = useOnchainMarketStates(wallet);
 
   const visibleMarkets = useMemo(()=>{
-    if (!marketsLoaded) return [];
-    return ALL_MARKETS.filter(m=>isOpenForBetting(marketStates[m.id]));
-  },[marketsLoaded, marketStates]);
+    // Always show the real World Cup catalog. On-chain state controls whether a
+    // card is tradable, but missing/draft RPC state must not hide all markets.
+    return ALL_MARKETS;
+  },[]);
 
   const counts = useMemo(()=>({
     matches: visibleMarkets.filter(m=>m.cat==='matches').length,
@@ -485,8 +509,20 @@ function MarketsPage({ wallet, onConnect, onBuy, onSell, onClaim, onResolve, pos
     let list = visibleMarkets.filter(m=>m.cat===tab);
     const query = q.trim().toLowerCase();
     if (query) list = list.filter(m=> m.searchKey.includes(query) || marketTitle(m,lang).toLowerCase().includes(query));
+    const rank = (m)=>{
+      const s = marketStates[m.id];
+      if (!s) return 1; // loading/unknown: keep near the top but after confirmed tradable
+      if (isOpenForBetting(s)) return 0; // active betting markets first
+      if (s.statusName === 'Draft' || s.missing) return 2;
+      if (s.statusName === 'Locked') return 3;
+      if (s.resolved) return 4;
+      if (s.cancelled) return 5;
+      return 6;
+    };
     const closeOf = (m)=> marketStates[m.id]?.closeTime ?? Math.floor(m.closeTime/1000);
     return list.slice().sort((a,b)=>{
+      const ar = rank(a), br = rank(b);
+      if (ar !== br) return ar - br;
       const at = closeOf(a), bt = closeOf(b);
       if (at !== bt) return at - bt;
       return a.titleEn.localeCompare(b.titleEn);

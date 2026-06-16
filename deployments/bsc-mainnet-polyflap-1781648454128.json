@@ -1,0 +1,20 @@
+{
+  "chainId": 56,
+  "rpc": "https://bsc-dataseed.binance.org",
+  "deployer": "0xEB155312Eeca8Bbb3600f6e64B09fAd04FeBf9D1",
+  "worldCupViewer": "0x00036192958C2aaAF9F445d3Cdc2979995EA333e",
+  "guardian": "0x9e27098dcD8844bcc6287a557E0b4D09C86B8a4b",
+  "bettingVault": "0x5e14fd7fac9a3d4386621c1f44bddb631ee00d7b",
+  "vaultImplementation": "0x6b31fa70f11558b226f6ee929cbb4de407b5b38a",
+  "beacon": "0x894bfda41620d0837cacb4393968a177519f5d40",
+  "factory": "0x7afff3d66e62b597c9c0431228407f3a0cf7dbbd",
+  "timestamp": "2026-06-16T22:18:56.960Z",
+  "seed": {
+    "totalSeed": 85,
+    "created": 85,
+    "opened": 23,
+    "skippedPastOpen": 62,
+    "finalCount": "85",
+    "note": "Past markets are created but not opened because openMarket correctly rejects closeTime in the past."
+  }
+}

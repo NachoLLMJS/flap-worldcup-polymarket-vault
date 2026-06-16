@@ -7,6 +7,7 @@ import { useT, marketTitle, teamName } from './i18n';
 import { Icon, Avatar, Btn, OutcomeMark, CatTag, Countdown, useNow } from './components';
 import { ALL_MARKETS, marketStatus } from './data';
 import { publicClient } from './wallet';
+import { BETTING_VAULT_ADDRESS, FLAP_TOKEN_ADDRESS, VAULT_ADDRESS } from '../lib/env';
 
 /* ---------- helpers ---------- */
 function pfMkt(id){ return ALL_MARKETS.find(m=>m.id===id); }
@@ -301,8 +302,8 @@ function ActivityRow({ a, lang }){
   const { t } = useT();
   const m = a.marketId ? pfMkt(a.marketId) : null;
   const o = m ? pfOutcome(m, a.outcomeId) : null;
-  const meta = { buy:{i:'+',c:'text-acid bg-acid/12'}, sell:{i:'↩',c:'text-white/70 bg-white/8'}, settle:{i: a.win?'★':'×', c:a.win?'text-acid bg-acid/12':'text-down bg-down/12'}, connect:{i:'⬡',c:'text-cool bg-cool/12'} }[a.type];
-  const label = a.type==='buy'?t('act_buy'):a.type==='sell'?t('act_sell'):a.type==='settle'?(a.win?t('act_settle_won'):t('act_settle_lost')):t('act_connect');
+  const meta = { buy:{i:'+',c:'text-acid bg-acid/12'}, sell:{i:'↩',c:'text-white/70 bg-white/8'}, settle:{i: a.win?'★':'×', c:a.win?'text-acid bg-acid/12':'text-down bg-down/12'}, claim:{i:'✓',c:'text-acid bg-acid/12'}, taxClaim:{i:'◆',c:'text-acid bg-acid/12'}, connect:{i:'⬡',c:'text-cool bg-cool/12'} }[a.type] || {i:'•',c:'text-white/60 bg-white/8'};
+  const label = a.type==='buy'?t('act_buy'):a.type==='sell'?t('act_sell'):a.type==='settle'?(a.win?t('act_settle_won'):t('act_settle_lost')):a.type==='claim'?'Claimed market winnings':a.type==='taxClaim'?'Claimed tax rewards':t('act_connect');
   return (
     <div className="flex items-center gap-3 px-1 py-2.5">
       <span className={`grid h-8 w-8 flex-none place-items-center rounded-lg text-sm font-bold ${meta.c}`}>{meta.i}</span>
@@ -350,8 +351,52 @@ function PfEmpty({ title, sub, cta, onCta }){
   );
 }
 
+/* ---------- tax rewards ---------- */
+function TaxRewardsCard({ taxRewards, onClaimTaxRewards, onRefreshTaxRewards }){
+  const [phase, setPhase] = useState('idle');
+  const claimable = Number(taxRewards?.claimableBnb || 0);
+  const canClaim = claimable > 0 && phase === 'idle' && !taxRewards?.loading;
+  const claim = async ()=>{
+    if (!canClaim) return;
+    setPhase('confirming');
+    try { await onClaimTaxRewards(); setPhase('idle'); }
+    catch(e){ console.error('[Polyflap] tax reward claim failed', e); setPhase('idle'); }
+  };
+  return (
+    <div className="mb-4 overflow-hidden rounded-2xl border border-acid/25 bg-ink-900 p-4">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="text-acid"><Icon.bolt/></span>
+            <h2 className="font-display text-xl text-white">Tax rewards</h2>
+          </div>
+          <p className="mt-1 text-sm text-white/45">Claim forwarded Flap-vault BNB rewards. Requires 1000+ POLYFLAP and an active bet.</p>
+        </div>
+        <button onClick={onRefreshTaxRewards} disabled={taxRewards?.loading} className="rounded-lg bg-white/6 px-3 py-2 text-xs font-bold text-white/60 ring-1 ring-white/10 hover:text-acid">
+          {taxRewards?.loading ? 'Syncing…' : 'Refresh'}
+        </button>
+      </div>
+      <div className="mt-4 grid gap-3 sm:grid-cols-4">
+        <div className="rounded-xl bg-white/5 p-3"><div className="text-[10px] uppercase tracking-wider text-white/35">Claimable</div><div className="font-mono mt-1 text-2xl text-acid tnum">{claimable.toFixed(6)}</div><div className="text-xs text-white/35">BNB</div></div>
+        <div className="rounded-xl bg-white/5 p-3"><div className="text-[10px] uppercase tracking-wider text-white/35">Epoch</div><div className="font-mono mt-1 text-xl text-white tnum">{taxRewards?.previousEpoch ?? '—'}</div><div className="text-xs text-white/35">last closed</div></div>
+        <div className="rounded-xl bg-white/5 p-3"><div className="text-[10px] uppercase tracking-wider text-white/35">Active bets</div><div className="font-mono mt-1 text-xl text-white tnum">{taxRewards?.activeBets ?? 0}</div><div className="text-xs text-white/35">eligibility gate</div></div>
+        <div className="rounded-xl bg-white/5 p-3"><div className="text-[10px] uppercase tracking-wider text-white/35">Volume</div><div className="font-mono mt-1 text-xl text-white tnum">{Number(taxRewards?.totalUserWageredBnb || 0).toFixed(4)}</div><div className="text-xs text-white/35">BNB wagered</div></div>
+      </div>
+      {taxRewards?.error && <div className="mt-3 rounded-xl bg-down/10 px-3 py-2 text-sm text-down ring-1 ring-down/20">{taxRewards.error}</div>}
+      <div className="mt-3 grid gap-2 font-mono text-[10px] text-white/35 sm:grid-cols-3">
+        <a className="truncate rounded-lg bg-white/5 px-2 py-1.5 hover:text-acid" href={`https://bscscan.com/address/${VAULT_ADDRESS}`} target="_blank" rel="noreferrer">Flap vault {VAULT_ADDRESS ? VAULT_ADDRESS.slice(0,6)+'…'+VAULT_ADDRESS.slice(-4) : 'unset'}</a>
+        <a className="truncate rounded-lg bg-white/5 px-2 py-1.5 hover:text-acid" href={`https://bscscan.com/address/${BETTING_VAULT_ADDRESS}`} target="_blank" rel="noreferrer">Betting vault {BETTING_VAULT_ADDRESS ? BETTING_VAULT_ADDRESS.slice(0,6)+'…'+BETTING_VAULT_ADDRESS.slice(-4) : 'unset'}</a>
+        <a className="truncate rounded-lg bg-white/5 px-2 py-1.5 hover:text-acid" href={`https://bscscan.com/address/${FLAP_TOKEN_ADDRESS}`} target="_blank" rel="noreferrer">Token {FLAP_TOKEN_ADDRESS ? FLAP_TOKEN_ADDRESS.slice(0,6)+'…'+FLAP_TOKEN_ADDRESS.slice(-4) : 'unset'}</a>
+      </div>
+      <button onClick={claim} disabled={!canClaim} className={`mt-4 h-11 w-full rounded-xl font-bold transition ${canClaim?'bg-acid text-ink-950 hover:brightness-110':'bg-white/6 text-white/35 cursor-not-allowed'}`}>
+        {phase==='confirming' ? 'Confirm in wallet…' : claimable > 0 ? `Claim ${claimable.toFixed(6)} BNB rewards` : 'No tax rewards claimable yet'}
+      </button>
+    </div>
+  );
+}
+
 /* ---------- page ---------- */
-function PortfolioPage({ wallet, onConnect, onDisconnect, positions, activity, onSell, setRoute }){
+function PortfolioPage({ wallet, onConnect, onDisconnect, positions, activity, onSell, taxRewards, onClaimTaxRewards, onRefreshTaxRewards, setRoute }){
   const { t, lang } = useT();
   const [tab, setTab] = useState('open');
   const [sharing, setSharing] = useState(false);
@@ -415,6 +460,7 @@ function PortfolioPage({ wallet, onConnect, onDisconnect, positions, activity, o
 
         <div className="mt-7 grid gap-6 pb-24 lg:grid-cols-[1fr_360px]">
           <div>
+            <TaxRewardsCard taxRewards={taxRewards} onClaimTaxRewards={onClaimTaxRewards} onRefreshTaxRewards={onRefreshTaxRewards}/>
             {/* sub-tabs */}
             <div className="mb-4 flex gap-1.5">
               {[['open', t('pf_open_pos'), open.length],['history', t('pf_settled'), settled.length]].map(([k,label,count])=>(

@@ -7,12 +7,90 @@
    non-open market reverts before signing).
    ============================================================ */
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { createPublicClient, formatEther, http, parseAbi } from 'viem';
+import { bsc } from 'viem/chains';
 import { useT, marketTitle, teamName } from './i18n';
 import { Icon, BnbMark, OutcomeMark, Btn, CatTag } from './components';
 import { FEE_RATE, ALL_MARKETS, MATCHES, GROUP_MARKETS } from './data';
+import { bettingAbi } from './abi';
+import { BETTING_VAULT_ADDRESS, BSC_RPC_URL, WORLD_CUP_VIEWER_ADDRESS } from '../lib/env';
+
+const STATUS_NAMES = ['Draft','Open','Locked','Resolved','Cancelled'];
+const viewerAbi = parseAbi([
+  'function getWorldCupWinner() view returns ((uint256 matchId,string matchName,bool isResolved,uint256 teamId,string teamName))',
+  'function getGroupMatchWinners(uint256 matchId) view returns ((uint256 matchId,string matchName,bool isResolved,uint256 teamId,string teamName))',
+  'function getMatchResult(uint256 matchId) view returns ((uint256 matchId,string matchName,bool isResolved,uint256 teamId,string teamName))',
+]);
+const readClient = createPublicClient({ chain: bsc, transport: http(BSC_RPC_URL || 'https://bsc-dataseed.binance.org') });
+const viewerAddress = WORLD_CUP_VIEWER_ADDRESS || '0x00036192958C2aaAF9F445d3Cdc2979995EA333e';
+const isOpenForBetting = (s)=> s && s.statusName === 'Open' && Math.floor(Date.now()/1000) < s.closeTime;
+const canResolveState = (s)=> s && (s.statusName === 'Locked' || (s.statusName === 'Open' && Math.floor(Date.now()/1000) >= s.closeTime)) && Math.floor(Date.now()/1000) >= s.resolveAfter && s.viewerResolved && !s.resolved;
+function viewerCallFor(m){
+  if (m.type === 'tournament') return { address: viewerAddress, abi: viewerAbi, functionName: 'getWorldCupWinner' };
+  if (m.type === 'group') return { address: viewerAddress, abi: viewerAbi, functionName: 'getGroupMatchWinners', args: [BigInt(m.viewerMatchId)] };
+  return { address: viewerAddress, abi: viewerAbi, functionName: 'getMatchResult', args: [BigInt(m.viewerMatchId)] };
+}
+function useOnchainMarketStates(wallet){
+  const [states, setStates] = useState({});
+  const refresh = useCallback(async ()=>{
+    if (!BETTING_VAULT_ADDRESS) return;
+    try {
+      const marketCalls = ALL_MARKETS.map(m=>({ address: BETTING_VAULT_ADDRESS, abi: bettingAbi, functionName:'getMarket', args:[BigInt(m.marketId)] }));
+      const viewerCalls = ALL_MARKETS.map(viewerCallFor);
+      const [marketResults, viewerResults] = await Promise.all([
+        readClient.multicall({ contracts: marketCalls, allowFailure: true }),
+        readClient.multicall({ contracts: viewerCalls, allowFailure: true }),
+      ]);
+      let claimResults = [];
+      if (wallet?.address) {
+        claimResults = await readClient.multicall({
+          contracts: ALL_MARKETS.map(m=>({ address: BETTING_VAULT_ADDRESS, abi: bettingAbi, functionName:'claimable', args:[BigInt(m.marketId), wallet.address] })),
+          allowFailure: true,
+        });
+      }
+      const next = {};
+      ALL_MARKETS.forEach((m, i)=>{
+        const mr = marketResults[i];
+        const vr = viewerResults[i];
+        if (mr.status !== 'success') return;
+        const { market, outcomeTeamIds, outcomePools } = mr.result;
+        const v = vr.status === 'success' ? vr.result : null;
+        const claimableWei = claimResults[i]?.status === 'success' ? claimResults[i].result : 0n;
+        const status = Number(market.status);
+        const closeTime = Number(market.closeTime);
+        const resolveAfter = Number(market.resolveAfter);
+        next[m.id] = {
+          status,
+          statusName: STATUS_NAMES[status] || String(status),
+          openTime: Number(market.openTime),
+          closeTime,
+          resolveAfter,
+          resolved: status === 3,
+          cancelled: status === 4,
+          winningTeamId: Number(market.winningTeamId),
+          totalPool: Number(formatEther(market.totalPool || 0n)),
+          outcomePools: (outcomePools || []).map(x=>x?.toString?.() ?? String(x)),
+          outcomeTeamIds: (outcomeTeamIds || []).map(x=>Number(x)),
+          viewerResolved: !!v?.isResolved,
+          viewerTeamId: v ? Number(v.teamId) : 0,
+          viewerTeamName: v?.teamName || '',
+          viewerMatchName: v?.matchName || '',
+          closedByTime: Math.floor(Date.now()/1000) >= closeTime,
+          claimableWei: claimableWei.toString(),
+          claimableBnb: Number(formatEther(claimableWei || 0n)),
+        };
+      });
+      setStates(next);
+    } catch (err) {
+      console.warn('[Polyflap] market state refresh failed; keeping markets interactive', err);
+    }
+  },[wallet?.address]);
+  useEffect(()=>{ refresh(); const id = setInterval(refresh, 30000); return ()=>clearInterval(id); }, [refresh]);
+  return { states, refresh };
+}
 
 /* ---------- a single tappable outcome ---------- */
-function OutcomeButton({ market, outcome, selected, onPick, compact, lang }){
+function OutcomeButton({ market, outcome, selected, onPick, compact, lang, disabled }){
   const { t } = useT();
   const label = outcome.kind==='team' ? teamName(outcome.teamCode, lang)
     : outcome.kind==='draw' ? t('draw_o') : t('others_o');
@@ -22,10 +100,11 @@ function OutcomeButton({ market, outcome, selected, onPick, compact, lang }){
     : market.type==='group' ? t('tab_groups_sub') : t('winner');
   return (
     <button
-      onClick={()=> onPick(market, outcome)}
+      onClick={()=> !disabled && onPick(market, outcome)}
+      disabled={disabled}
       aria-pressed={selected}
       className={`group/o relative overflow-hidden rounded-xl px-3 py-2.5 text-left transition-all duration-150
-        ${selected ? 'bg-acid/12 ring-2 ring-acid pick-pop' : 'bg-ink-800 ring-1 ring-white/8 hover:ring-acid/45 hover:bg-ink-750 hover:-translate-y-0.5'}
+        ${selected ? 'bg-acid/12 ring-2 ring-acid pick-pop' : disabled ? 'bg-ink-800/45 ring-1 ring-white/5 opacity-45 cursor-not-allowed' : 'bg-ink-800 ring-1 ring-white/8 hover:ring-acid/45 hover:bg-ink-750 hover:-translate-y-0.5'}
         focus:outline-none focus-visible:ring-2 focus-visible:ring-acid`}>
       {selected && <span className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-acid/35 to-transparent" style={{ animation:'sweepIn .55s ease-out' }}/>}
       <div className="relative flex items-center gap-2.5">
@@ -40,8 +119,13 @@ function OutcomeButton({ market, outcome, selected, onPick, compact, lang }){
 }
 
 /* ---------- market card (teams + title only) ---------- */
-function MarketCard({ market, selection, onPick, lang }){
+function MarketCard({ market, selection, onPick, lang, state }){
+  // Do not lock the UI while BSC state is still loading or an RPC call fails.
+  // Unknown state should remain browsable/selectable; only a confirmed closed/resolved
+  // on-chain state disables outcomes.
+  const blocked = state ? !isOpenForBetting(state) : false;
   const isSel = (oid)=> selection && selection.marketId===market.id && selection.outcomeId===oid;
+  const statusLabel = state ? state.resolved ? `Resolved: ${state.viewerTeamName || teamName(state.winningTeamId, lang)}` : state.viewerResolved && state.closedByTime ? `Result: ${state.viewerTeamName}` : state.closedByTime ? 'Closed' : state.statusName : 'Loading chain state';
   const head = (
     <div className="min-w-0">
       <div className="flex items-center gap-2">
@@ -49,6 +133,7 @@ function MarketCard({ market, selection, onPick, lang }){
         {market.group && market.type==='match' && <span className="font-mono text-[10px] text-white/35">GRP {market.group}</span>}
       </div>
       <h3 className="mt-2 truncate font-display text-xl leading-tight text-white sm:text-2xl">{marketTitle(market, lang)}</h3>
+      <div className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${blocked?'bg-white/8 text-white/50':'bg-acid/15 text-acid'}`}>{statusLabel}</div>
     </div>
   );
 
@@ -57,7 +142,7 @@ function MarketCard({ market, selection, onPick, lang }){
     body = (
       <div className="mt-4 grid grid-cols-3 gap-2">
         {market.outcomes.map(o=>(
-          <OutcomeButton key={o.id} market={market} outcome={o} selected={isSel(o.id)} onPick={onPick} lang={lang}/>
+          <OutcomeButton key={o.id} market={market} outcome={o} selected={isSel(o.id)} onPick={onPick} disabled={blocked} lang={lang}/>
         ))}
       </div>
     );
@@ -65,7 +150,7 @@ function MarketCard({ market, selection, onPick, lang }){
     body = (
       <div className="mt-4 grid grid-cols-2 gap-2">
         {market.outcomes.map(o=>(
-          <OutcomeButton key={o.id} market={market} outcome={o} selected={isSel(o.id)} onPick={onPick} compact lang={lang}/>
+          <OutcomeButton key={o.id} market={market} outcome={o} selected={isSel(o.id)} onPick={onPick} disabled={blocked} compact lang={lang}/>
         ))}
       </div>
     );
@@ -74,7 +159,7 @@ function MarketCard({ market, selection, onPick, lang }){
       <div className="mt-4 max-h-[420px] overflow-y-auto pr-1 no-scrollbar">
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {market.outcomes.map((o)=>(
-            <OutcomeButton key={o.id} market={market} outcome={o} selected={isSel(o.id)} onPick={onPick} compact lang={lang}/>
+            <OutcomeButton key={o.id} market={market} outcome={o} selected={isSel(o.id)} onPick={onPick} disabled={blocked} compact lang={lang}/>
           ))}
         </div>
       </div>
@@ -90,7 +175,7 @@ function MarketCard({ market, selection, onPick, lang }){
 }
 
 /* ---------- order ticket inner ---------- */
-function TicketPanel({ market, outcome, wallet, onConnect, onBuy, onSell, openPosition, onClear, lang }){
+function TicketPanel({ market, outcome, wallet, onConnect, onBuy, onSell, onClaim, onResolve, onRefresh, marketState, openPosition, onClear, lang }){
   const { t } = useT();
   const [amount, setAmount] = useState('');
   const [phase, setPhase] = useState('idle'); // idle | confirming | bought | sold
@@ -99,8 +184,11 @@ function TicketPanel({ market, outcome, wallet, onConnect, onBuy, onSell, openPo
   const amt = parseFloat(amount) || 0;
   const fee = amt * FEE_RATE;
   const net = amt - fee;
+  const marketOpen = isOpenForBetting(marketState);
+  const canResolve = canResolveState(marketState);
+  const hasClaim = !!marketState && marketState.claimableBnb > 0;
   const insufficient = wallet && amt > wallet.balance + 1e-9;
-  const valid = amt>0 && !insufficient;
+  const valid = marketOpen && amt>0 && !insufficient;
   const quicks = [0.1, 0.5, 1, 5];
   const hasPosition = !!openPosition;
 
@@ -121,6 +209,16 @@ function TicketPanel({ market, outcome, wallet, onConnect, onBuy, onSell, openPo
       setPhase('sold');
       setTimeout(()=>setPhase('idle'), 1700);
     } catch(e){ setPhase('idle'); }
+  };
+  const doResolve = async ()=>{
+    if (!canResolve || phase!=='idle') return;
+    setPhase('confirming');
+    try { await onResolve(market.marketId); await onRefresh?.(); setPhase('idle'); } catch(e){ setPhase('idle'); }
+  };
+  const doClaim = async ()=>{
+    if (!hasClaim || phase!=='idle') return;
+    setPhase('confirming');
+    try { await onClaim(market.marketId); await onRefresh?.(); setPhase('idle'); } catch(e){ setPhase('idle'); }
   };
 
   if (!outcome){
@@ -149,6 +247,15 @@ function TicketPanel({ market, outcome, wallet, onConnect, onBuy, onSell, openPo
           <button onClick={onClear} className="grid h-7 w-7 place-items-center rounded-full bg-white/8 text-white/50 hover:text-white"><Icon.close/></button>
         </div>
       </div>
+
+      {marketState && !marketOpen && (
+        <div className="mt-4 rounded-2xl border border-white/8 bg-ink-850 p-4 text-sm text-white/65">
+          <div className="font-bold text-white">{marketState.resolved ? 'Market resolved' : marketState.closedByTime ? 'Betting closed' : marketState.statusName}</div>
+          {marketState.viewerResolved && <div className="mt-1">WorldCupViewer result: <span className="text-acid">{marketState.viewerTeamName || marketState.viewerTeamId}</span></div>}
+          {canResolve && <button onClick={doResolve} disabled={phase!=='idle'} className="mt-3 h-10 w-full rounded-xl bg-white/8 font-bold text-white ring-1 ring-white/12 hover:ring-acid/50">{phase==='confirming'?'Confirming…':'Resolve market'}</button>}
+          {hasClaim && <button onClick={doClaim} disabled={phase!=='idle'} className="mt-3 h-10 w-full rounded-xl bg-acid font-bold text-ink-950">{phase==='confirming'?'Confirming…':`Claim ${marketState.claimableBnb.toFixed(4)} BNB`}</button>}
+        </div>
+      )}
 
       {!wallet ? (
         <div className="mt-4 rounded-2xl border border-white/8 bg-ink-850 p-5 text-center">
@@ -330,11 +437,12 @@ function EmptyState({ onClear }){
 }
 
 /* ---------- markets page ---------- */
-function MarketsPage({ wallet, onConnect, onBuy, onSell, positions=[] }){
+function MarketsPage({ wallet, onConnect, onBuy, onSell, onClaim, onResolve, positions=[] }){
   const { t, lang } = useT();
   const [tab, setTab] = useState('matches');
   const [q, setQ] = useState('');
   const [selection, setSelection] = useState(null); // {marketId, outcomeId}
+  const { states: marketStates, refresh: refreshMarketStates } = useOnchainMarketStates(wallet);
 
   const counts = useMemo(()=>({
     all: ALL_MARKETS.length, matches: MATCHES.length, groups: GROUP_MARKETS.length, tournament: 1,
@@ -344,17 +452,35 @@ function MarketsPage({ wallet, onConnect, onBuy, onSell, positions=[] }){
     let list = tab==='all' ? ALL_MARKETS : ALL_MARKETS.filter(m=>m.cat===tab);
     const query = q.trim().toLowerCase();
     if (query) list = list.filter(m=> m.searchKey.includes(query) || marketTitle(m,lang).toLowerCase().includes(query));
-    return list.slice().sort((a,b)=> a.titleEn.localeCompare(b.titleEn));
-  },[tab,q,lang]);
+    const nowSec = Math.floor(Date.now()/1000);
+    const isPast = (m)=>{
+      const s = marketStates[m.id];
+      if (s) return !!(s.closedByTime || s.resolved || s.cancelled || s.statusName === 'Locked' || s.statusName === 'Resolved' || s.statusName === 'Cancelled');
+      return Math.floor(m.closeTime/1000) <= nowSec || m.resolved || m.baseKind === 'closed' || m.baseKind === 'pending' || m.baseKind === 'resolved';
+    };
+    const closeOf = (m)=> marketStates[m.id]?.closeTime ?? Math.floor(m.closeTime/1000);
+    return list.slice().sort((a,b)=>{
+      const ap = isPast(a), bp = isPast(b);
+      if (ap !== bp) return ap ? 1 : -1;
+      const at = closeOf(a), bt = closeOf(b);
+      if (at !== bt) return ap ? bt - at : at - bt;
+      return a.titleEn.localeCompare(b.titleEn);
+    });
+  },[tab,q,lang,marketStates]);
 
-  const onPick = useCallback((market, outcome)=>{ setSelection({ marketId:market.id, outcomeId:outcome.id }); },[]);
+  const onPick = useCallback((market, outcome)=>{
+    const s = marketStates[market.id];
+    if (s && !isOpenForBetting(s)) return;
+    setSelection({ marketId:market.id, outcomeId:outcome.id });
+  },[marketStates]);
   const clear = ()=> setSelection(null);
 
   const selMarket = selection ? ALL_MARKETS.find(m=>m.id===selection.marketId) : null;
   const selOutcome = selMarket ? selMarket.outcomes.find(o=>o.id===selection.outcomeId) : null;
+  const selState = selMarket ? marketStates[selMarket.id] : null;
   const openPosition = selection ? positions.find(p=> p.status==='open' && p.marketId===selection.marketId && p.outcomeId===selection.outcomeId) : null;
 
-  const ticketProps = { market:selMarket, outcome:selOutcome, wallet, onConnect, onBuy, onSell, openPosition, onClear:clear, lang };
+  const ticketProps = { market:selMarket, outcome:selOutcome, wallet, onConnect, onBuy, onSell, onClaim, onResolve, onRefresh:refreshMarketStates, marketState:selState, openPosition, onClear:clear, lang };
   const tabSub = tab==='matches'?t('tab_matches_sub'):tab==='groups'?t('tab_groups_sub'):tab==='tournament'?t('tab_tournament_sub'):'';
 
   return (
@@ -384,7 +510,7 @@ function MarketsPage({ wallet, onConnect, onBuy, onSell, positions=[] }){
             {filtered.length===0
               ? <EmptyState onClear={()=>{ setQ(''); setTab('all'); }}/>
               : filtered.map(m=>(
-                  <MarketCard key={m.id} market={m} selection={selection} onPick={onPick} lang={lang}/>
+                  <MarketCard key={m.id} market={m} state={marketStates[m.id]} selection={selection} onPick={onPick} lang={lang}/>
                 ))}
           </div>
           {/* desktop ticket */}

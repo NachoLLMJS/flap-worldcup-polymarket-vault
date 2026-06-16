@@ -11,6 +11,9 @@ export const FLAP_VAULT_FACTORY_ADDRESS = import.meta.env.VITE_FLAP_VAULT_FACTOR
 export const FLAP_VAULT_IMPLEMENTATION_ADDRESS = import.meta.env.VITE_FLAP_VAULT_IMPLEMENTATION_ADDRESS as
   | `0x${string}`
   | undefined;
+export const FLAP_VAULT_BEACON_ADDRESS = import.meta.env.VITE_FLAP_VAULT_BEACON_ADDRESS as
+  | `0x${string}`
+  | undefined;
 export const BETTING_VAULT_ADDRESS = import.meta.env.VITE_BETTING_VAULT_ADDRESS as
   | `0x${string}`
   | undefined;

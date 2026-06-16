@@ -29,8 +29,34 @@ export const privyConfig = {
   config: {
     defaultChain: bsc,
     supportedChains: [bsc],
-    appearance: { theme: 'dark', accentColor: '#d7ff36', showWalletLoginFirst: false },
-    loginMethods: ['google', 'twitter', 'email', 'wallet'],
+    appearance: {
+      theme: 'dark',
+      accentColor: '#d7ff36',
+      showWalletLoginFirst: false,
+      walletList: ['metamask', 'binance'],
+      walletChainType: 'ethereum-only',
+    },
+    loginMethods: [
+      'google',
+      'discord',
+      'github',
+      'tiktok',
+      'email',
+    ],
+    // Privy's hosted modal tends to show the first four primary entries before
+    // it adds "More options". Keep Discord before GitHub so Discord stays on the first screen.
+    // Wallet entries such as MetaMask/Binance are controlled by appearance.walletList above.
+    loginMethodsAndOrder: {
+      primary: [
+        'metamask',
+        'google',
+        'discord',
+        'github',
+        'tiktok',
+        'email',
+      ],
+      overflow: ['binance'],
+    },
     embeddedWallets: { ethereum: { createOnLogin: 'users-without-wallets' } },
   },
 };
@@ -86,6 +112,8 @@ type WalletApi = {
   disconnect: () => void;
   buyPosition: (p: { marketId:number; teamId:number; amount:number; key:string; outcomeId:string }) => Promise<void> | void;
   sellPosition: (positionId: string) => Promise<void> | void;
+  claimMarket: (marketId: number) => Promise<void> | void;
+  resolveMarket: (marketId: number) => Promise<void> | void;
 };
 const WalletContext = createContext<WalletApi | null>(null);
 export const useWallet = () => useContext(WalletContext) as WalletApi;
@@ -126,7 +154,14 @@ export function MockWalletProvider({ children }: { children: React.ReactNode }){
     });
   },[]);
 
-  const api = useMemo<WalletApi>(()=>({ mode:'mock', wallet, positions, activity, connect, disconnect, buyPosition, sellPosition }),[wallet,positions,activity,connect,disconnect,buyPosition,sellPosition]);
+  const claimMarket = useCallback((marketId: number)=>{
+    setActivity(a=>[{ id:'a'+(_aid++), type:'claim', marketId:'m'+marketId, amount:0, ts:Date.now(), tx:txHash() }, ...a]);
+  },[]);
+  const resolveMarket = useCallback((marketId: number)=>{
+    setActivity(a=>[{ id:'a'+(_aid++), type:'resolve', marketId:'m'+marketId, amount:0, ts:Date.now(), tx:txHash() }, ...a]);
+  },[]);
+
+  const api = useMemo<WalletApi>(()=>({ mode:'mock', wallet, positions, activity, connect, disconnect, buyPosition, sellPosition, claimMarket, resolveMarket }),[wallet,positions,activity,connect,disconnect,buyPosition,sellPosition,claimMarket,resolveMarket]);
   return <WalletContext.Provider value={api}>{children}</WalletContext.Provider>;
 }
 
@@ -221,7 +256,27 @@ function LiveWalletProvider({ children }: { children: React.ReactNode }){
     refreshBalance();
   },[positions, refreshBalance]);
 
-  const api = useMemo<WalletApi>(()=>({ mode:'live', wallet, positions, activity, connect, disconnect, buyPosition, sellPosition }),[wallet,positions,activity,connect,disconnect,buyPosition,sellPosition]);
+  const resolveMarket = useCallback(async (marketId: number)=>{
+    if (!BETTING_VAULT_ADDRESS) throw new Error('Betting vault not configured');
+    const client = await getWalletClient();
+    const [account] = await client.getAddresses();
+    await publicClient.simulateContract({ account, address: BETTING_VAULT_ADDRESS, abi: bettingAbi, functionName:'resolveMarket', args:[BigInt(marketId)] });
+    const hash = await client.writeContract({ account, address: BETTING_VAULT_ADDRESS, abi: bettingAbi, functionName:'resolveMarket', args:[BigInt(marketId)] });
+    setActivity(a=>[{ id:'a'+(_aid++), type:'resolve', marketId:'m'+marketId, amount:0, ts:Date.now(), tx: shortAddr(hash) }, ...a]);
+    refreshBalance();
+  },[bscWallet, refreshBalance]);
+
+  const claimMarket = useCallback(async (marketId: number)=>{
+    if (!BETTING_VAULT_ADDRESS) throw new Error('Betting vault not configured');
+    const client = await getWalletClient();
+    const [account] = await client.getAddresses();
+    await publicClient.simulateContract({ account, address: BETTING_VAULT_ADDRESS, abi: bettingAbi, functionName:'claim', args:[BigInt(marketId)] });
+    const hash = await client.writeContract({ account, address: BETTING_VAULT_ADDRESS, abi: bettingAbi, functionName:'claim', args:[BigInt(marketId)] });
+    setActivity(a=>[{ id:'a'+(_aid++), type:'claim', marketId:'m'+marketId, amount:0, ts:Date.now(), tx: shortAddr(hash) }, ...a]);
+    refreshBalance();
+  },[bscWallet, refreshBalance]);
+
+  const api = useMemo<WalletApi>(()=>({ mode:'live', wallet, positions, activity, connect, disconnect, buyPosition, sellPosition, claimMarket, resolveMarket }),[wallet,positions,activity,connect,disconnect,buyPosition,sellPosition,claimMarket,resolveMarket]);
   return <WalletContext.Provider value={api}>{children}</WalletContext.Provider>;
 }
 

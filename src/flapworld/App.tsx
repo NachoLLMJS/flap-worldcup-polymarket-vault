@@ -14,7 +14,7 @@ import { MockWalletProvider, RealWalletProvider, useWallet } from './wallet';
 
 function App(){
   const [route, setRoute] = useState<string>(()=> sessionStorage.getItem('fw_route') || 'home');
-  const { wallet, positions, activity, connect, disconnect, buyPosition, sellPosition } = useWallet();
+  const { wallet, positions, activity, connect, disconnect, buyPosition, sellPosition, claimMarket, resolveMarket } = useWallet();
 
   const go = useCallback((r: string)=>{
     setRoute(r);
@@ -26,7 +26,7 @@ function App(){
     <>
       <Nav route={route} setRoute={go} wallet={wallet} onConnect={connect} onDisconnect={disconnect} overHero={route==='home'} />
       {route==='home' && <HomePage setRoute={go} />}
-      {route==='markets' && <MarketsPage wallet={wallet} onConnect={connect} positions={positions} onBuy={buyPosition} onSell={sellPosition} />}
+      {route==='markets' && <MarketsPage wallet={wallet} onConnect={connect} positions={positions} onBuy={buyPosition} onSell={sellPosition} onClaim={claimMarket} onResolve={resolveMarket} />}
       {route==='portfolio' && <PortfolioPage wallet={wallet} onConnect={connect} onDisconnect={disconnect} positions={positions} activity={activity} onSell={sellPosition} setRoute={go} />}
       {route==='about' && <AboutPage setRoute={go} />}
     </>

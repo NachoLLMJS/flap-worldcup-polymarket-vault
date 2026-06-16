@@ -8,6 +8,16 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useT, marketTitle, teamName } from './i18n';
 import { Logo, LangToggle, ConnectButton, Btn, Icon, FlagChip } from './components';
 import { MATCHES, GROUP_MARKETS, TOURNAMENT_MARKET, ALL_MARKETS, TEAM, marketStatus, fmtPct, fmtBNB } from './data';
+import {
+  BETTING_VAULT_ADDRESS,
+  FLAP_TOKEN_ADDRESS,
+  FLAP_VAULT_FACTORY_ADDRESS,
+  FLAP_VAULT_IMPLEMENTATION_ADDRESS,
+  FLAP_VAULT_BEACON_ADDRESS,
+  VAULT_ADDRESS,
+  WORLD_CUP_VIEWER_ADDRESS,
+} from '../lib/env';
+import { shortAddress } from '../lib/format';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -460,6 +470,68 @@ function AboutPage({ setRoute }){
     { k:t2('Custody','托管'), v:t2('Non-custodial','非托管') },
     { k:t2('Stack','技术栈'), v:'Privy · viem' },
   ];
+  const bscScan = (address?: string) => address ? `https://bscscan.com/address/${address}` : undefined;
+  const contractRows = [
+    {
+      label: t2('Flap vault factory','Flap 金库 Factory'),
+      value: FLAP_VAULT_FACTORY_ADDRESS,
+      note: t2('Fixed factory for the next final Flap launch.','下一次正式 Flap 发行使用的已修复 factory。'),
+    },
+    {
+      label: t2('Vault implementation','金库实现'),
+      value: FLAP_VAULT_IMPLEMENTATION_ADDRESS,
+      note: t2('Beacon implementation used by the factory-created vault proxies.','factory 创建的金库代理使用的 beacon implementation。'),
+    },
+    {
+      label: t2('Vault beacon','金库 Beacon'),
+      value: FLAP_VAULT_BEACON_ADDRESS,
+      note: t2('Guardian-controlled beacon used by the Flap vault factory.','Flap 金库 factory 使用的 Guardian 控制 beacon。'),
+    },
+    {
+      label: t2('Betting vault','投注金库'),
+      value: BETTING_VAULT_ADDRESS,
+      note: t2('Live BNB escrow for buy / sell / claim flows.','处理买入 / 卖出 / 领取流程的实时 BNB 托管合约。'),
+    },
+    {
+      label: t2('WorldCupViewer','WorldCupViewer'),
+      value: WORLD_CUP_VIEWER_ADDRESS,
+      note: t2('On-chain settlement truth source on BSC.','BSC 上的链上结算真相来源。'),
+    },
+    {
+      label: t2('Final Flap token','最终 Flap 代币'),
+      value: FLAP_TOKEN_ADDRESS,
+      note: t2('Unset here until the final token launch. The temporary launch is intentionally not used.','正式发行前这里保持未设置。临时发行不会被使用。'),
+      pending: true,
+    },
+    {
+      label: t2('Active Flap vault clone','当前 Flap 金库 clone'),
+      value: VAULT_ADDRESS,
+      note: t2('Unset until the final Flap token creates the real vault clone.','最终 Flap 代币创建真实金库 clone 前保持未设置。'),
+      pending: true,
+    },
+  ];
+  const rewardSteps = [
+    {
+      n: '01',
+      title: t2('Trade the Flap token','交易 Flap 代币'),
+      body: t2('When the final Flap token is live, its trading taxes are received by the Flap vault in BNB. The token/vault addresses stay unset here until that final launch.','最终 Flap 代币上线后，交易税会以 BNB 进入 Flap 金库。在正式发行前，代币 / 金库地址会保持未设置。'),
+    },
+    {
+      n: '02',
+      title: t2('Vault keeps taxes segregated','金库隔离税收'),
+      body: t2('In the audited mainnet deployment, BNB tax revenue remains in the Flap vault and is not commingled with the betting escrow. Any future reward route should be reviewed separately before being enabled.','在已审计主网部署中，BNB 税收保留在 Flap 金库内，不会与投注托管资金混合。任何未来奖励路由都应在启用前单独审查。'),
+    },
+    {
+      n: '03',
+      title: t2('Bettors use market positions','下注者使用市场仓位'),
+      body: t2('Bettors interact with the betting vault for market buys, pre-close withdrawals, claims and refunds. The current audited deployment disables betting-tax-reward claims and returns zero for deprecated reward-share views.','下注者通过投注金库进行买入、关闭前撤回、领取和退款。本次已审计部署禁用了投注税收奖励领取，已弃用的奖励份额视图返回零。'),
+    },
+    {
+      n: '04',
+      title: t2('Future reward route requires review','未来奖励路由需审查'),
+      body: t2('If token-tax reward forwarding is enabled in a future version, it should remain separate from match-winner payouts and be reviewed/audited before users rely on it.','如果未来版本启用代币税收奖励转发，它应继续与比赛胜者赔付分离，并在用户依赖前经过审查/审计。'),
+    },
+  ];
   const chapters = [
     { n:'01', t:t2('Architecture','架构'), ps:[
       t2('Polyflap runs entirely on BNB Smart Chain (BSC, chainId 56). Three on-chain roles: a betting vault that holds positions and processes buys and sells; the WorldCupViewer, the on-chain source of truth for results; and a factory + implementation pair that launches the Flap token and its vault.','Polyflap 完全运行在 BNB 智能链（BSC，链 ID 56）。三个链上角色：持有仓位并处理买卖的投注金库；作为结果链上真相来源的 WorldCupViewer；以及发行 Flap 代币及其金库的 factory + implementation。'),
@@ -477,7 +549,8 @@ function AboutPage({ setRoute }){
       t2('A single 1% protocol fee applies on each buy (PROTOCOL_FEE_BPS = 100), routed to the fee wallet hardcoded in the vault. There are no withdrawal or hidden fees beyond standard BSC gas.','每次买入收取单一的 1% 协议费（PROTOCOL_FEE_BPS = 100），发送到金库中硬编码的费用钱包。除标准 BSC gas 外，无提现费或隐藏费用。'),
     ] },
     { n:'05', t:t2('Flap token & vault','Flap 代币与金库'), ps:[
-      t2('The betting layer plugs into the Flap ecosystem. The Flap vault is created together with the Flap token when it launches through the factory (deployed from the implementation contract). Until launch, the vault address is unset.','投注层接入 Flap 生态。Flap 金库在代币通过 factory 发行时一并创建（由 implementation 合约部署）。发行前，金库地址尚未设置。'),
+      t2('The betting layer plugs into the Flap ecosystem. The Flap vault is created together with the Flap token when it launches through the audited factory. Until launch, the token and vault clone addresses stay unset in the web.','投注层接入 Flap 生态。Flap 金库会在代币通过已审计 factory 发行时一并创建。发行前，网页里的代币和金库 clone 地址保持未设置。'),
+      t2('That Flap vault belongs to the token: it receives BNB token-tax revenue and exposes the UI schema Flap needs. The betting vault remains the separate customer escrow for buys, withdrawals, claims and refunds.','该 Flap 金库属于代币：它接收 BNB 代币税收，并暴露 Flap 需要的 UI schema。投注金库仍是独立的客户托管层，用于买入、撤回、领取和退款。'),
     ] },
     { n:'06', t:t2('Security & trust','安全与信任'), ps:[
       t2('Non-custodial by design: funds live in the contract and every buy, sell or claim is a transaction you sign — Polyflap never holds your keys or your money.','设计上非托管：资金存于合约，每一次买入、卖出或领取都是你签名的交易 — Polyflap 从不持有你的私钥或资金。'),
@@ -515,6 +588,50 @@ function AboutPage({ setRoute }){
               <div className="font-mono mt-1.5 text-sm text-acid">{s.v}</div>
             </Reveal>
           ))}
+        </div>
+      </section>
+
+      {/* contracts */}
+      <section className="border-b border-white/8 bg-ink-950 py-16 sm:py-20">
+        <div className="mx-auto max-w-[1320px] px-5 sm:px-6">
+          <Reveal>
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-acid">{t2('Contracts','合约')}</span>
+            <h2 className="font-display mt-3 text-4xl leading-[0.95] text-white sm:text-5xl">{t2('Audited mainnet setup','已审计主网配置')}</h2>
+            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/50">{t2('The final Flap token and its vault clone remain placeholders until the real Flap launch creates them.','最终 Flap 代币和它的金库 clone 在真实 Flap 发行创建之前保持占位。')}</p>
+          </Reveal>
+          <div className="mt-9 grid gap-3 lg:grid-cols-2">
+            {contractRows.map((row,i)=>(
+              <Reveal key={row.label} delay={i*40}>
+                <a href={bscScan(row.value)} target="_blank" rel="noreferrer" className={`block rounded-2xl border border-white/8 bg-ink-900 p-5 transition-colors hover:border-acid/40 ${row.pending?'opacity-70':''}`}>
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <div className="text-xs font-bold uppercase tracking-[0.14em] text-white/40">{row.label}</div>
+                      <div className="mt-2 font-mono text-sm text-acid">{row.value ? shortAddress(row.value) : t2('Pending final launch','等待正式发行')}</div>
+                    </div>
+                    <span className="text-white/30"><Icon.arrow/></span>
+                  </div>
+                  <p className="mt-3 text-xs leading-relaxed text-white/45">{row.note}</p>
+                </a>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* vault flow */}
+      <section className="border-b border-white/8 bg-ink-950 py-16 sm:py-20">
+        <div className="mx-auto max-w-[1320px] px-5 sm:px-6">
+          <div className="grid gap-4 md:grid-cols-4">
+            {rewardSteps.map((step,i)=>(
+              <Reveal key={step.n} delay={i*50}>
+                <div className="h-full rounded-2xl border border-white/8 bg-ink-900 p-5">
+                  <div className="font-mono text-sm text-acid">{step.n}</div>
+                  <h3 className="font-display mt-5 text-xl text-white">{step.title}</h3>
+                  <p className="mt-2 text-xs leading-relaxed text-white/50">{step.body}</p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
         </div>
       </section>
 

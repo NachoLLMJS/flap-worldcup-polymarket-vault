@@ -25,24 +25,35 @@ Current package includes:
 Fixed Flap launch factory:
 
 ```text
-0x35dd03331ca995e90ca6304f45d60705c596e65d
+0x1f7A242CdF77C5beD1F80E9Fa421C691B7aA6aCe
 ```
 
 Launch URL for the next final launch:
 
 ```text
-https://flap.sh/launch?vaultfactory=0x35dd03331ca995e90ca6304f45d60705c596e65d
+https://flap.sh/launch?vaultfactory=0x1f7A242CdF77C5beD1F80E9Fa421C691B7aA6aCe
 ```
 
 Current configured contracts:
 
-- Vault implementation: `0xf9f63eb4c0ce81a1edd1f517b3247103867f8e04`
-- Betting vault: `0x0729614f2775b99d7825bf76405e38b10529ddb0`
+- Vault implementation: `0x95005A1c1A737c0CdF32df3fb893EA3c2E2934e3`
+- Vault beacon: `0xFa2aB705f0e4998cc5bC9aCE7EeB2E32953a64Da`
+- Flap launch factory: `0x1f7A242CdF77C5beD1F80E9Fa421C691B7aA6aCe`
+- Betting vault: `0x9a2cEe430A7dE1A0b56e12Af2B313f643d5b5FF3`
 - WorldCupViewer: `0x00036192958C2aaAF9F445d3Cdc2979995EA333e`
 - Active Flap token: unset until the final token launch.
 - Active Flap vault clone: unset until the final token/vault launch.
 
-Do not use the temporary token/vault launched during testing yet. Keep `VITE_FLAP_TOKEN_ADDRESS` and `VITE_FLAP_VAULT_ADDRESS` empty until the final launch creates the real token and concrete vault clone.
+Do not use any temporary token/vault launched during testing. Keep `VITE_FLAP_TOKEN_ADDRESS` and `VITE_FLAP_VAULT_ADDRESS` empty until the final launch creates the real token and concrete vault clone.
+
+ABI-encoded vaultData for the final token launch:
+
+```text
+0x00000000000000000000000000036192958c2aaaf9f445d3cdc2979995ea333e000000000000000000000000eb155312eeca8bbb3600f6e64b09fad04febf9d10000000000000000000000009a2cee430a7de1a0b56e12af2b313f643d5b5ff3
+```
+
+Latest auxiliary betting vault seed status: 85 markets created, 28 currently open, 57 past markets intentionally left closed/draft by on-chain timing guards.
+
 
 Old/deprecated addresses:
 

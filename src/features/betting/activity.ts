@@ -11,6 +11,10 @@ export type BetActivity = {
   amountBnb: string;
   txHash: string;
   createdAt: string;
+  blockNumber?: number;
+  blockTimestamp?: number;
+  withdrawUnlockTimestamp?: number;
+  onChainStakeWei?: string;
 };
 
 function canUseStorage() {

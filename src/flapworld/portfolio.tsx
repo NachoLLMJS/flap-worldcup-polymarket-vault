@@ -2,10 +2,11 @@
 /* ============================================================
    Polyflap — Portfolio / Profile
    ============================================================ */
-import { useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useT, marketTitle, teamName } from './i18n';
 import { Icon, Avatar, Btn, OutcomeMark, CatTag, Countdown, useNow } from './components';
 import { ALL_MARKETS, marketStatus } from './data';
+import { publicClient } from './wallet';
 
 /* ---------- helpers ---------- */
 function pfMkt(id){ return ALL_MARKETS.find(m=>m.id===id); }
@@ -43,6 +44,12 @@ function timeAgo(ts, t){
   if (m<60) return m+t('pf_ago_m');
   const h=Math.floor(m/60); if (h<24) return h+t('pf_ago_h');
   return Math.floor(h/24)+t('pf_ago_d');
+}
+function fmtDuration(ms){
+  const s = Math.max(0, Math.ceil(ms/1000));
+  const m = Math.floor(s/60);
+  const r = String(s%60).padStart(2,'0');
+  return `${m}:${r}`;
 }
 
 /* ---------- small bits ---------- */
@@ -207,12 +214,29 @@ function StatTiles({ stats }){
 function PositionCard({ pos, onSell, lang }){
   const { t } = useT();
   const now = useNow(1000);
+  const [chainNowMs, setChainNowMs] = useState(Date.now());
   const m = pfMkt(pos.marketId); const o = pfOutcome(m, pos.outcomeId);
   const status = m ? marketStatus(m, now) : 'open';
   const { value, pnl } = posMetrics(pos);
   const [phase, setPhase] = useState('idle');
   const tradable = status==='open' || status==='soon';
-  const withdraw = async ()=>{ if(phase!=='idle') return; setPhase('confirming'); try { await onSell(pos.id); } catch(e){ setPhase('idle'); } };
+  useEffect(()=>{
+    let cancelled = false;
+    const sync = async ()=>{
+      if (!pos.withdrawUnlockTimestamp) return;
+      try {
+        const block = await publicClient.getBlock({ blockTag: 'latest' });
+        if (!cancelled) setChainNowMs(Number(block.timestamp) * 1000);
+      } catch { if (!cancelled) setChainNowMs(Date.now()); }
+    };
+    sync();
+    const id = window.setInterval(sync, 15000);
+    return ()=>{ cancelled = true; window.clearInterval(id); };
+  }, [pos.withdrawUnlockTimestamp]);
+  const cooldownRemainingMs = pos.withdrawUnlockTimestamp ? (pos.withdrawUnlockTimestamp * 1000 - chainNowMs) : 0;
+  const cooldownActive = pos.onChain && cooldownRemainingMs > 0;
+  const canWithdraw = tradable && !cooldownActive && phase==='idle';
+  const withdraw = async ()=>{ if(!canWithdraw) return; setPhase('confirming'); try { await onSell(pos.id); } catch(e){ setPhase('idle'); } };
   if (!m || !o) return null;
   const Cell = ({ label, children })=>(<div><div className="text-[10px] uppercase tracking-wider text-white/35">{label}</div><div className="mt-0.5 font-mono text-sm tnum">{children}</div></div>);
   return (
@@ -236,9 +260,10 @@ function PositionCard({ pos, onSell, lang }){
         <Cell label={t('pf_net')}><span className="text-white/85">{pos.net.toFixed(2)}</span></Cell>
         <Cell label={t('closes')}><Countdown target={m.closeTime} status={status}/></Cell>
         <div className="text-right">
-          <button onClick={withdraw} disabled={!tradable || phase!=='idle'}
-            className={`h-8 rounded-lg px-3 text-xs font-bold uppercase tracking-wide ring-1 transition ${tradable&&phase==='idle'?'bg-ink-800 text-white ring-white/15 hover:ring-down/60 hover:text-down':'bg-ink-800/40 text-white/30 ring-white/8 cursor-not-allowed'}`}>
-            {phase==='confirming'?t('pf_withdrawing'):t('pf_withdraw')}
+          <button onClick={withdraw} disabled={!canWithdraw}
+            title={cooldownActive ? `Verified on-chain cooldown: withdraw unlocks in ${fmtDuration(cooldownRemainingMs)}` : undefined}
+            className={`h-8 rounded-lg px-3 text-xs font-bold uppercase tracking-wide ring-1 transition ${canWithdraw?'bg-ink-800 text-white ring-white/15 hover:ring-down/60 hover:text-down':'bg-ink-800/40 text-white/30 ring-white/8 cursor-not-allowed'}`}>
+            {phase==='confirming'?t('pf_withdrawing'):cooldownActive?`${t('pf_withdraw')} ${fmtDuration(cooldownRemainingMs)}`:t('pf_withdraw')}
           </button>
         </div>
       </div>

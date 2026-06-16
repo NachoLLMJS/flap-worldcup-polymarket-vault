@@ -1,6 +1,6 @@
 // @ts-nocheck -- ported claude.ai/design prototype; strict types pass is a follow-up
 /* ============================================================
-   Polyflap — Home / Landing
+   Polyflap - Home / Landing
    ============================================================ */
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { gsap } from 'gsap';
@@ -8,16 +8,6 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useT, marketTitle, teamName } from './i18n';
 import { Logo, LangToggle, ConnectButton, Btn, Icon, FlagChip } from './components';
 import { MATCHES, GROUP_MARKETS, TOURNAMENT_MARKET, ALL_MARKETS, TEAM, marketStatus, fmtPct, fmtBNB } from './data';
-import {
-  BETTING_VAULT_ADDRESS,
-  FLAP_TOKEN_ADDRESS,
-  FLAP_VAULT_FACTORY_ADDRESS,
-  FLAP_VAULT_IMPLEMENTATION_ADDRESS,
-  FLAP_VAULT_BEACON_ADDRESS,
-  VAULT_ADDRESS,
-  WORLD_CUP_VIEWER_ADDRESS,
-} from '../lib/env';
-import { shortAddress } from '../lib/format';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -177,7 +167,7 @@ function Hero({ setRoute }){
 
   return (
     <section ref={sectionRef} className="relative h-[100svh] min-h-[640px] w-full overflow-hidden">
-      {/* full-bleed footage at 100% opacity — no dark overlay box */}
+      {/* full-bleed footage at 100% opacity, no dark overlay box */}
       <video ref={videoRef} src={HERO_VIDEO_SRC} autoPlay={!HERO_SCROLL_SCRUB} loop={!HERO_SCROLL_SCRUB} muted playsInline preload="auto"
         className="absolute inset-0 h-full w-full object-cover"
         style={{ willChange:'transform' }} />
@@ -255,13 +245,13 @@ function HowItWorks({ setRoute }){
   const { t } = useT();
   const sw = { fill:'none', stroke:'currentColor', strokeWidth:1.8, strokeLinecap:'round', strokeLinejoin:'round' };
   const steps = [
-    // 01 Pick — crosshair / choose an outcome
+    // 01 Pick: crosshair / choose an outcome
     { n:'01', t:t('how_1t'), d:t('how_1d'), ic:(<svg viewBox="0 0 24 24" width="22" height="22" {...sw}><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.2"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3"/></svg>) },
-    // 02 Buy with BNB — BNB diamond
+    // 02 Buy with BNB: BNB diamond
     { n:'02', t:t('how_2t'), d:t('how_2d'), ic:(<svg viewBox="0 0 24 24" width="22" height="22" {...sw}><path d="M12 3.5l8.5 8.5-8.5 8.5L3.5 12z"/><path d="M9 12l3-3 3 3-3 3z"/></svg>) },
-    // 03 Sell before close — swap arrows
+    // 03 Sell before close: swap arrows
     { n:'03', t:t('how_3t'), d:t('how_3d'), ic:(<svg viewBox="0 0 24 24" width="22" height="22" {...sw}><path d="M4 9h13l-3.5-3.5"/><path d="M20 15H7l3.5 3.5"/></svg>) },
-    // 04 Settled on-chain — shield check
+    // 04 Settled on-chain: shield check
     { n:'04', t:t('how_4t'), d:t('how_4d'), ic:(<svg viewBox="0 0 24 24" width="22" height="22" {...sw}><path d="M12 3l7 3v5.5c0 4-3 6.8-7 8-4-1.2-7-4-7-8V6z"/><path d="M9 12l2 2 4-4"/></svg>) },
   ];
   return (
@@ -439,8 +429,8 @@ function Footer(){
             <Logo size={20}/>
             <p className="mt-4 text-sm leading-relaxed text-white/45">
               {lang==='zh'
-                ? 'BNB 链上的世界杯预测市场。结果由 BSC 上的 WorldCupViewer 合约链上结算。仅供演示，数据为示意。'
-                : 'World Cup prediction markets on BNB Chain. Outcomes settle on-chain via the WorldCupViewer contract on BSC. Demo build — figures are illustrative.'}
+                ? 'BNB 链上的世界杯预测市场。结果由 BSC 上的 WorldCupViewer 合约链上结算。数据为示意。'
+                : 'World Cup prediction markets on BNB Chain. Outcomes settle on-chain via the WorldCupViewer contract on BSC. Figures are illustrative.'}
             </p>
           </div>
           <div className="flex flex-wrap gap-x-12 gap-y-6 font-mono text-xs text-white/55">
@@ -463,99 +453,89 @@ function AboutPage({ setRoute }){
   const { lang } = useT();
   const t2 = (en,zh)=> lang==='zh'?zh:en;
   const specs = [
-    { k:t2('Network','网络'), v:'BNB Smart Chain · 56' },
-    { k:t2('Settlement','结算'), v:'WorldCupViewer' },
-    { k:t2('Protocol fee','协议费'), v:'1% / buy' },
-    { k:t2('Markets','市场'), v:'85' },
+    { k:t2('Network','网络'), v:'BNB Smart Chain' },
+    { k:t2('Login','登录'), v:t2('Privy · Google · Discord · GitHub · TikTok · Email · Wallets','Privy · Google · Discord · GitHub · TikTok · 邮箱 · 钱包') },
+    { k:t2('Markets','市场'), v:t2('World Cup 2026','2026 世界杯') },
+    { k:t2('Positions','仓位'), v:t2('Buy · Withdraw · Claim','买入 · 撤回 · 领取') },
     { k:t2('Custody','托管'), v:t2('Non-custodial','非托管') },
-    { k:t2('Stack','技术栈'), v:'Privy · viem' },
+    { k:t2('Transparency','透明度'), v:t2('On-chain records','链上记录') },
   ];
-  const bscScan = (address?: string) => address ? `https://bscscan.com/address/${address}` : undefined;
-  const contractRows = [
+  const productCards = [
     {
-      label: t2('Flap vault factory','Flap 金库 Factory'),
-      value: FLAP_VAULT_FACTORY_ADDRESS,
-      note: t2('Fixed factory for the next final Flap launch.','下一次正式 Flap 发行使用的已修复 factory。'),
+      n:'01',
+      title:t2('World Cup prediction markets','世界杯预测市场'),
+      body:t2('Polyflap lets fans back World Cup outcomes with BNB: match winners, group results and the tournament winner. You choose a market, pick an outcome and open a position from your wallet.','Polyflap 让球迷用 BNB 参与世界杯结果预测：单场胜者、小组结果和总冠军。你选择市场、选择结果，并从自己的钱包开仓。'),
     },
     {
-      label: t2('Vault implementation','金库实现'),
-      value: FLAP_VAULT_IMPLEMENTATION_ADDRESS,
-      note: t2('Beacon implementation used by the factory-created vault proxies.','factory 创建的金库代理使用的 beacon implementation。'),
+      n:'02',
+      title:t2('Simple account access','简单账户入口'),
+      body:t2('Sign in through Privy with MetaMask, Google, Discord, GitHub, TikTok, email or other supported wallet options. If a user does not already have a wallet, Privy can create one for them.','通过 Privy 使用 MetaMask、Google、Discord、GitHub、TikTok、邮箱或其他支持的钱包选项登录。如果用户还没有钱包，Privy 可以为他们创建一个。'),
     },
     {
-      label: t2('Vault beacon','金库 Beacon'),
-      value: FLAP_VAULT_BEACON_ADDRESS,
-      note: t2('Guardian-controlled beacon used by the Flap vault factory.','Flap 金库 factory 使用的 Guardian 控制 beacon。'),
+      n:'03',
+      title:t2('Your positions stay visible','你的仓位清晰可见'),
+      body:t2('The Portfolio page shows active positions, local activity and the actions available for each market: withdraw before close when allowed, claim if you win, or refund if a market is voided.','Portfolio 页面展示活跃仓位、本地活动记录，以及每个市场可执行的操作：允许时在截止前撤回，获胜后领取，市场作废时退款。'),
     },
     {
-      label: t2('Betting vault','投注金库'),
-      value: BETTING_VAULT_ADDRESS,
-      note: t2('Live BNB escrow for buy / sell / claim flows.','处理买入 / 卖出 / 领取流程的实时 BNB 托管合约。'),
-    },
-    {
-      label: t2('WorldCupViewer','WorldCupViewer'),
-      value: WORLD_CUP_VIEWER_ADDRESS,
-      note: t2('On-chain settlement truth source on BSC.','BSC 上的链上结算真相来源。'),
-    },
-    {
-      label: t2('Final Flap token','最终 Flap 代币'),
-      value: FLAP_TOKEN_ADDRESS,
-      note: t2('Unset here until the final token launch. The temporary launch is intentionally not used.','正式发行前这里保持未设置。临时发行不会被使用。'),
-      pending: true,
-    },
-    {
-      label: t2('Active Flap vault clone','当前 Flap 金库 clone'),
-      value: VAULT_ADDRESS,
-      note: t2('Unset until the final Flap token creates the real vault clone.','最终 Flap 代币创建真实金库 clone 前保持未设置。'),
-      pending: true,
+      n:'04',
+      title:t2('Built for on-chain verification','为链上验证而构建'),
+      body:t2('Important actions are signed by the user and recorded on BNB Chain. Polyflap does not ask customers to trust screenshots or private balances; positions and transactions can be checked on-chain.','重要操作由用户签名并记录在 BNB Chain 上。Polyflap 不要求客户相信截图或私有余额；仓位和交易都可以链上检查。'),
     },
   ];
-  const rewardSteps = [
+  const userFlow = [
     {
-      n: '01',
-      title: t2('Trade the Flap token','交易 Flap 代币'),
-      body: t2('When the final Flap token is live, its trading taxes are received by the Flap vault in BNB. The token/vault addresses stay unset here until that final launch.','最终 Flap 代币上线后，交易税会以 BNB 进入 Flap 金库。在正式发行前，代币 / 金库地址会保持未设置。'),
+      title:t2('1. Sign in','1. 登录'),
+      body:t2('Enter with MetaMask, Google, Discord, GitHub, TikTok, email or another supported option through Privy. New users can create a Privy embedded wallet during onboarding.','通过 Privy 使用 MetaMask、Google、Discord、GitHub、TikTok、邮箱或其他支持选项进入。新用户可以在入门流程中创建 Privy 嵌入式钱包。'),
     },
     {
-      n: '02',
-      title: t2('Vault keeps taxes segregated','金库隔离税收'),
-      body: t2('In the audited mainnet deployment, BNB tax revenue remains in the Flap vault and is not commingled with the betting escrow. Any future reward route should be reviewed separately before being enabled.','在已审计主网部署中，BNB 税收保留在 Flap 金库内，不会与投注托管资金混合。任何未来奖励路由都应在启用前单独审查。'),
+      title:t2('2. Fund your wallet','2. 给钱包充值'),
+      body:t2('Before trading, the wallet needs BNB on BNB Chain for the position and network gas. Users can fund their Privy wallet or use an already funded external wallet.','交易前，钱包需要在 BNB Chain 上有 BNB，用于开仓和支付网络 gas。用户可以给 Privy 钱包充值，或使用已有资金的外部钱包。'),
     },
     {
-      n: '03',
-      title: t2('Bettors use market positions','下注者使用市场仓位'),
-      body: t2('Bettors interact with the betting vault for market buys, pre-close withdrawals, claims and refunds. The current audited deployment disables betting-tax-reward claims and returns zero for deprecated reward-share views.','下注者通过投注金库进行买入、关闭前撤回、领取和退款。本次已审计部署禁用了投注税收奖励领取，已弃用的奖励份额视图返回零。'),
+      title:t2('3. Pick a market','3. 选择市场'),
+      body:t2('Browse World Cup markets by category. Each market shows the available outcomes and lets you build a bet slip before signing.','按分类浏览世界杯市场。每个市场显示可选结果，并允许你在签名前准备投注单。'),
     },
     {
-      n: '04',
-      title: t2('Future reward route requires review','未来奖励路由需审查'),
-      body: t2('If token-tax reward forwarding is enabled in a future version, it should remain separate from match-winner payouts and be reviewed/audited before users rely on it.','如果未来版本启用代币税收奖励转发，它应继续与比赛胜者赔付分离，并在用户依赖前经过审查/审计。'),
+      title:t2('4. Place and manage','4. 开仓并管理'),
+      body:t2('When you confirm, your wallet signs the transaction. After that, active positions can be monitored, withdrawn before close when allowed, or claimed after settlement.','确认后，你的钱包签署交易。之后可以查看活跃仓位，在允许时于截止前撤回，或在结算后领取。'),
     },
   ];
   const chapters = [
-    { n:'01', t:t2('Architecture','架构'), ps:[
-      t2('Polyflap runs entirely on BNB Smart Chain (BSC, chainId 56). Three on-chain roles: a betting vault that holds positions and processes buys and sells; the WorldCupViewer, the on-chain source of truth for results; and a factory + implementation pair that launches the Flap token and its vault.','Polyflap 完全运行在 BNB 智能链（BSC，链 ID 56）。三个链上角色：持有仓位并处理买卖的投注金库；作为结果链上真相来源的 WorldCupViewer；以及发行 Flap 代币及其金库的 factory + implementation。'),
-      t2('The web app is a thin client: it signs through Privy-managed wallets using viem, and dry-runs every call with simulateContract before you sign.','网页端是轻客户端：通过 Privy 管理的钱包用 viem 签名，并在你签名前用 simulateContract 预演每一次调用。'),
+    { n:'01', t:t2('What Polyflap is','Polyflap 是什么'), ps:[
+      t2('Polyflap is a customer-facing World Cup prediction market on BNB Chain. It combines a normal betting-style interface with self-custody wallet signing and public transaction records.','Polyflap 是面向客户的 BNB Chain 世界杯预测市场。它把普通投注式界面、自托管钱包签名和公开交易记录结合在一起。'),
+      t2('The goal is simple: make on-chain football markets feel clear enough for normal users while keeping the important money movements verifiable.','目标很简单：让普通用户也能看懂链上足球市场，同时保持关键资金流可验证。'),
     ] },
-    { n:'02', t:t2('Markets & positions','市场与仓位'), ps:[
-      t2('85 markets span the group stage, individual matches and the tournament winner. Each market exposes one outcome per team, plus reserved IDs 50 (Draw) and 49 (Others / the field).','85 个市场涵盖小组赛、单场比赛和总冠军。每个市场为每支球队提供一个结果，外加保留 ID 50（平局）和 49（其他 / 大盘）。'),
-      t2('You open a position with placeBet(marketId, teamId), sending BNB as the stake, and reduce or exit before close with withdrawBet(marketId, teamId, amount). Stakes per outcome form the pool that backs payouts.','用 placeBet(marketId, teamId) 开仓并以 BNB 作为本金，用 withdrawBet(marketId, teamId, amount) 在截止前减仓或退出。各结果的本金构成支撑赔付的资金池。'),
+    { n:'02', t:t2('What customers can do','客户可以做什么'), ps:[
+      t2('Customers can sign in through Privy with MetaMask, Google, Discord, GitHub, TikTok, email or supported wallet options. If they do not already have a wallet, Privy can create an embedded wallet for them.','客户可以通过 Privy 使用 MetaMask、Google、Discord、GitHub、TikTok、邮箱或支持的钱包选项登录。如果还没有钱包，Privy 可以为他们创建嵌入式钱包。'),
+      t2('To operate on the app, the wallet must have BNB on BNB Chain for both the market position and gas. Users can fund their Privy wallet or connect an external wallet that already has BNB.','要在应用中操作，钱包必须在 BNB Chain 上有 BNB，用于市场仓位和 gas。用户可以给 Privy 钱包充值，或连接已经有 BNB 的外部钱包。'),
+      t2('Once funded, customers can browse World Cup markets, place BNB-backed positions, monitor active bets, withdraw eligible open positions, and claim winning or refundable outcomes after settlement.','钱包有资金后，客户可以浏览世界杯市场、用 BNB 开仓、查看活跃投注、撤回符合条件的未结算仓位，并在结算后领取获胜或可退款结果。'),
     ] },
-    { n:'03', t:t2('Settlement & payouts','结算与赔付'), ps:[
-      t2('There is no manual oracle. When a match or stage resolves, the result is read on-chain from the WorldCupViewer (getWorldCupWinner, getGroupMatchWinners, getMatchResult).','没有人工预言机。当比赛或阶段结束时，结果从 WorldCupViewer 链上读取（getWorldCupWinner、getGroupMatchWinners、getMatchResult）。'),
-      t2('Winning positions become claimable; voided markets become refundable. Every step is verifiable on BscScan.','获胜仓位变为可领取；作废市场变为可退款。每一步都可在 BscScan 上验证。'),
+    { n:'03', t:t2('How funds are handled','资金如何处理'), ps:[
+      t2('Polyflap is non-custodial: customers keep their keys, and betting actions are transactions they approve from their own wallet. The app itself is not a deposit account and does not hold customer keys.','Polyflap 是非托管产品：客户保留自己的私钥，投注操作是他们从自己钱包批准的交易。应用本身不是充值账户，也不持有客户私钥。'),
+      t2('The betting contract handles market positions, withdrawals, claims and refunds. Standard BSC gas applies, and the app shows transaction state while actions confirm.','投注合约处理市场仓位、撤回、领取和退款。需要标准 BSC gas，应用会在操作确认期间显示交易状态。'),
     ] },
-    { n:'04', t:t2('Fees','费用'), ps:[
-      t2('A single 1% protocol fee applies on each buy (PROTOCOL_FEE_BPS = 100), routed to the fee wallet hardcoded in the vault. There are no withdrawal or hidden fees beyond standard BSC gas.','每次买入收取单一的 1% 协议费（PROTOCOL_FEE_BPS = 100），发送到金库中硬编码的费用钱包。除标准 BSC gas 外，无提现费或隐藏费用。'),
+    { n:'04', t:t2('Future ecosystem fit','未来生态定位'), ps:[
+      t2('Polyflap is designed to plug into the Flap ecosystem while keeping the customer product simple: markets, positions, withdrawals, claims and refunds. Token launch details stay off the public About page until they are final.','Polyflap 设计上可以接入 Flap 生态，同时保持客户产品简单：市场、仓位、撤回、领取和退款。代币发行细节在最终确定前不会出现在公开 About 页面。'),
+      t2('For now, the product should stay focused on clear World Cup markets and reliable user flows. Any future token-related feature should be added only when it is ready to explain clearly to normal users.','目前产品应专注于清晰的世界杯市场和可靠的用户流程。任何未来与代币相关的功能，都应在可以向普通用户清楚解释时再加入。'),
     ] },
-    { n:'05', t:t2('Flap token & vault','Flap 代币与金库'), ps:[
-      t2('The betting layer plugs into the Flap ecosystem. The Flap vault is created together with the Flap token when it launches through the audited factory. Until launch, the token and vault clone addresses stay unset in the web.','投注层接入 Flap 生态。Flap 金库会在代币通过已审计 factory 发行时一并创建。发行前，网页里的代币和金库 clone 地址保持未设置。'),
-      t2('That Flap vault belongs to the token: it receives BNB token-tax revenue and exposes the UI schema Flap needs. The betting vault remains the separate customer escrow for buys, withdrawals, claims and refunds.','该 Flap 金库属于代币：它接收 BNB 代币税收，并暴露 Flap 需要的 UI schema。投注金库仍是独立的客户托管层，用于买入、撤回、领取和退款。'),
+    { n:'05', t:t2('Trust and safety','信任与安全'), ps:[
+      t2('The About page intentionally avoids exposing internal addresses, operator details or deployment mechanics. Customers should understand what the product does without seeing sensitive or developer-only information.','About 页面故意不展示内部地址、操作员细节或部署机制。客户应该理解产品作用，而不需要看到敏感或仅开发者使用的信息。'),
+      t2('Polyflap is not affiliated with FIFA and does not provide financial advice. Users should only participate with funds they are willing to risk.','Polyflap 与 FIFA 无关联，也不提供财务建议。用户只应使用自己愿意承担风险的资金参与。'),
     ] },
-    { n:'06', t:t2('Security & trust','安全与信任'), ps:[
-      t2('Non-custodial by design: funds live in the contract and every buy, sell or claim is a transaction you sign — Polyflap never holds your keys or your money.','设计上非托管：资金存于合约，每一次买入、卖出或领取都是你签名的交易 — Polyflap 从不持有你的私钥或资金。'),
-      t2('Each call is dry-run with simulateContract first, so a closed or invalid market reverts before you spend gas. All contracts are public and verifiable on-chain.','每次调用先用 simulateContract 预演，因此已关闭或无效的市场会在你花费 gas 之前回滚。所有合约公开且链上可验证。'),
-    ] },
+  ];
+  const roadmap = [
+    {
+      step:t2('Sports first','先从体育开始'),
+      text:t2('Keep improving the World Cup experience, then expand into more sports markets when settlement rules are clear.','继续完善世界杯体验，并在结算规则清晰后扩展到更多体育市场。'),
+    },
+    {
+      step:t2('Meme-token event markets','Meme 代币事件市场'),
+      text:t2('If everything goes well, add selected markets around major meme-token events, launches and community moments.','如果一切顺利，加入围绕主要 meme 代币事件、发行和社区节点的精选市场。'),
+    },
+    {
+      step:t2('Public-topic markets','公共话题市场'),
+      text:t2('Later, Polyflap may explore broader public-topic markets, including politics, only where rules, settlement and risk controls are strong enough.','之后，Polyflap 可以探索更广泛的公共话题市场，包括政治类话题，但前提是规则、结算和风险控制足够成熟。'),
+    },
   ];
   return (
     <main className="bg-ink-950 pt-20">
@@ -565,9 +545,9 @@ function AboutPage({ setRoute }){
         <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full" style={{ background:'radial-gradient(circle, rgba(215,255,54,0.16), transparent 65%)' }}/>
         <div className="relative mx-auto grid max-w-[1320px] items-center gap-10 px-5 py-20 sm:px-6 sm:py-28 lg:grid-cols-[1.25fr_1fr]">
           <Reveal>
-            <span className="text-xs font-bold uppercase tracking-[0.2em] text-acid">{t2('About','关于')}</span>
-            <h1 className="font-display mt-3 text-5xl leading-[0.92] text-white sm:text-7xl">{t2('Bet the World Cup, on-chain.','链上竞猜世界杯。')}</h1>
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-white/60 sm:text-lg">{t2('Polyflap is a prediction market for the 2026 World Cup, built on BNB Chain. Back a team, a match or the tournament winner with BNB — every position is a transaction you own, settled on-chain.','Polyflap 是基于 BNB 链的 2026 世界杯预测市场。用 BNB 押注球队、比赛或总冠军 — 每个仓位都是你拥有的交易，链上结算。')}</p>
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-acid">{t2('About Polyflap','关于 Polyflap')}</span>
+            <h1 className="font-display mt-3 text-5xl leading-[0.92] text-white sm:text-7xl">{t2('A clearer way to play World Cup markets on-chain.','更清晰地参与链上世界杯市场。')}</h1>
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-white/60 sm:text-lg">{t2('Polyflap is a BNB Chain prediction-market app for football fans. Connect, choose a World Cup outcome, place a BNB-backed position, then manage withdrawals, claims or refunds from one simple portfolio.','Polyflap 是面向足球球迷的 BNB Chain 预测市场应用。连接账户，选择世界杯结果，用 BNB 开仓，然后在一个简单的 Portfolio 中管理撤回、领取或退款。')}</p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Btn onClick={()=>setRoute('markets')}>{t2('Explore markets','浏览市场')} <Icon.arrow/></Btn>
               <Btn variant="outline" onClick={()=>setRoute('portfolio')}>{t2('My portfolio','我的持仓')}</Btn>
@@ -591,43 +571,21 @@ function AboutPage({ setRoute }){
         </div>
       </section>
 
-      {/* contracts */}
+      {/* what it does */}
       <section className="border-b border-white/8 bg-ink-950 py-16 sm:py-20">
         <div className="mx-auto max-w-[1320px] px-5 sm:px-6">
           <Reveal>
-            <span className="text-xs font-bold uppercase tracking-[0.2em] text-acid">{t2('Contracts','合约')}</span>
-            <h2 className="font-display mt-3 text-4xl leading-[0.95] text-white sm:text-5xl">{t2('Audited mainnet setup','已审计主网配置')}</h2>
-            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/50">{t2('The final Flap token and its vault clone remain placeholders until the real Flap launch creates them.','最终 Flap 代币和它的金库 clone 在真实 Flap 发行创建之前保持占位。')}</p>
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-acid">{t2('What the app does','应用能做什么')}</span>
+            <h2 className="font-display mt-3 text-4xl leading-[0.95] text-white sm:text-5xl">{t2('Everything a customer needs, without developer clutter.','客户需要的功能，没有开发者杂音。')}</h2>
+            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/50">{t2('This page explains the product in plain language. Internal contract addresses, operator setup and deployment details are intentionally kept out of the customer About page.','本页面用简单语言解释产品。内部合约地址、操作员配置和部署细节故意不出现在客户 About 页面。')}</p>
           </Reveal>
-          <div className="mt-9 grid gap-3 lg:grid-cols-2">
-            {contractRows.map((row,i)=>(
-              <Reveal key={row.label} delay={i*40}>
-                <a href={bscScan(row.value)} target="_blank" rel="noreferrer" className={`block rounded-2xl border border-white/8 bg-ink-900 p-5 transition-colors hover:border-acid/40 ${row.pending?'opacity-70':''}`}>
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <div className="text-xs font-bold uppercase tracking-[0.14em] text-white/40">{row.label}</div>
-                      <div className="mt-2 font-mono text-sm text-acid">{row.value ? shortAddress(row.value) : t2('Pending final launch','等待正式发行')}</div>
-                    </div>
-                    <span className="text-white/30"><Icon.arrow/></span>
-                  </div>
-                  <p className="mt-3 text-xs leading-relaxed text-white/45">{row.note}</p>
-                </a>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* vault flow */}
-      <section className="border-b border-white/8 bg-ink-950 py-16 sm:py-20">
-        <div className="mx-auto max-w-[1320px] px-5 sm:px-6">
-          <div className="grid gap-4 md:grid-cols-4">
-            {rewardSteps.map((step,i)=>(
-              <Reveal key={step.n} delay={i*50}>
+          <div className="mt-9 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {productCards.map((card,i)=>(
+              <Reveal key={card.n} delay={i*50}>
                 <div className="h-full rounded-2xl border border-white/8 bg-ink-900 p-5">
-                  <div className="font-mono text-sm text-acid">{step.n}</div>
-                  <h3 className="font-display mt-5 text-xl text-white">{step.title}</h3>
-                  <p className="mt-2 text-xs leading-relaxed text-white/50">{step.body}</p>
+                  <div className="font-mono text-sm text-acid">{card.n}</div>
+                  <h3 className="font-display mt-5 text-xl text-white">{card.title}</h3>
+                  <p className="mt-2 text-xs leading-relaxed text-white/50">{card.body}</p>
                 </div>
               </Reveal>
             ))}
@@ -635,12 +593,32 @@ function AboutPage({ setRoute }){
         </div>
       </section>
 
-      {/* whitepaper */}
+      {/* customer flow */}
+      <section className="border-b border-white/8 bg-ink-950 py-16 sm:py-20">
+        <div className="mx-auto max-w-[1320px] px-5 sm:px-6">
+          <Reveal>
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-acid">{t2('Customer flow','客户流程')}</span>
+            <h2 className="font-display mt-3 text-4xl leading-[0.95] text-white sm:text-5xl">{t2('From login to payout.','从登录到领取。')}</h2>
+          </Reveal>
+          <div className="mt-9 grid gap-4 md:grid-cols-4">
+            {userFlow.map((step,i)=>(
+              <Reveal key={step.title} delay={i*50}>
+                <div className="h-full rounded-2xl border border-white/8 bg-ink-900 p-5">
+                  <h3 className="font-display text-xl text-white">{step.title}</h3>
+                  <p className="mt-3 text-xs leading-relaxed text-white/50">{step.body}</p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* guide */}
       <section className="bg-ink-950 py-20 sm:py-24">
         <div className="mx-auto max-w-[920px] px-5 sm:px-6">
           <Reveal>
-            <span className="text-xs font-bold uppercase tracking-[0.2em] text-acid">{t2('Protocol','协议')}</span>
-            <h2 className="font-display mt-3 text-4xl leading-[0.95] text-white sm:text-5xl">{t2('How Polyflap works','Polyflap 如何运作')}</h2>
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-acid">{t2('Customer guide','Guía para clientes')}</span>
+            <h2 className="font-display mt-3 text-4xl leading-[0.95] text-white sm:text-5xl">{t2('How Polyflap works','Cómo funciona Polyflap')}</h2>
           </Reveal>
           <div className="mt-14 flex flex-col gap-12">
             {chapters.map((c,i)=>(
@@ -658,7 +636,23 @@ function AboutPage({ setRoute }){
             ))}
           </div>
           <Reveal>
-            <p className="mt-14 border-t border-white/8 pt-6 text-xs leading-relaxed text-white/35">{t2('Demo build — figures may be illustrative until on-chain volume exists. Not financial advice. Not affiliated with FIFA. Bet responsibly.','演示版本 — 在产生链上交易量之前，数据可能为示意。非财务建议。与 FIFA 无关。请理性下注。')}</p>
+            <div className="mt-16 rounded-3xl border border-acid/20 bg-acid/[0.04] p-6 sm:p-8">
+              <span className="text-xs font-bold uppercase tracking-[0.2em] text-acid">{t2('Roadmap','路线图')}</span>
+              <h3 className="font-display mt-3 text-3xl leading-none text-white sm:text-4xl">{t2('Where Polyflap can go next','Polyflap 下一步可以走向哪里')}</h3>
+              <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/55">{t2('If everything goes well, Polyflap can grow from football into a broader prediction app. New categories should be added carefully, with clear rules before users rely on them.','如果一切顺利，Polyflap 可以从足球扩展为更广泛的预测应用。新类别应谨慎加入，并在用户依赖前具备清晰规则。')}</p>
+              <div className="mt-7 grid gap-4 md:grid-cols-3">
+                {roadmap.map((item,i)=>(
+                  <div key={item.step} className="rounded-2xl border border-white/8 bg-ink-900/80 p-5">
+                    <div className="font-mono text-sm text-acid">0{i+1}</div>
+                    <h4 className="font-display mt-4 text-xl text-white">{item.step}</h4>
+                    <p className="mt-2 text-xs leading-relaxed text-white/50">{item.text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Reveal>
+          <Reveal>
+            <p className="mt-14 border-t border-white/8 pt-6 text-xs leading-relaxed text-white/35">{t2('Customer information only. Not financial advice. Not affiliated with FIFA. Betting involves risk; participate responsibly.','仅供客户了解产品。非财务建议。与 FIFA 无关。投注有风险，请理性参与。')}</p>
           </Reveal>
         </div>
       </section>

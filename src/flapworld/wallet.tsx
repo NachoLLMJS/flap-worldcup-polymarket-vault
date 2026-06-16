@@ -20,7 +20,25 @@ import { readBetActivity, recordBetActivity } from '../features/betting/activity
 import { FEE_RATE, TEAM, ALL_MARKETS, MATCHES, GROUP_MARKETS, TOURNAMENT_MARKET } from './data';
 
 /* viem read client (BSC mainnet) */
-const publicClient = createPublicClient({ chain: bsc, transport: http(BSC_RPC_URL) });
+export const publicClient = createPublicClient({ chain: bsc, transport: http(BSC_RPC_URL) });
+
+const WITHDRAW_COOLDOWN_SECONDS = 5 * 60;
+
+async function confirmedBetTiming(hash: `0x${string}`){
+  const receipt = await publicClient.waitForTransactionReceipt({ hash, confirmations: 1 });
+  const block = await publicClient.getBlock({ blockNumber: receipt.blockNumber });
+  const openedBlockTimestamp = Number(block.timestamp);
+  return {
+    blockNumber: Number(receipt.blockNumber),
+    openedBlockTimestamp,
+    withdrawUnlockTimestamp: openedBlockTimestamp + WITHDRAW_COOLDOWN_SECONDS,
+  };
+}
+
+async function latestChainTimestamp(){
+  const block = await publicClient.getBlock({ blockTag: 'latest' });
+  return Number(block.timestamp);
+}
 
 /* Privy config — matches the new acid theme */
 export const privyConfig = {
@@ -225,12 +243,21 @@ function LiveWalletProvider({ children }: { children: React.ReactNode }){
       account, address: BETTING_VAULT_ADDRESS, abi: bettingAbi, functionName: 'placeBet',
       args: [BigInt(marketId), BigInt(teamId)], value: parseEther(String(amount)),
     });
+    const timing = await confirmedBetTiming(hash as `0x${string}`);
+    const onchainStake = await publicClient.readContract({
+      address: BETTING_VAULT_ADDRESS,
+      abi: bettingAbi,
+      functionName: 'getUserBet',
+      args: [BigInt(marketId), account, BigInt(teamId)],
+    }) as bigint;
+    if (onchainStake <= 0n) throw new Error('Bet transaction confirmed, but no on-chain stake was found');
     const m = ALL_MARKETS.find(x=>x.id===key); const o: any = m?.outcomes.find((x:any)=>x.id===outcomeId);
     const fee = +(amount*FEE_RATE).toFixed(4), net = +(amount-fee).toFixed(4);
-    const pos = { id:'p'+(_pid++), marketId:key, outcomeId, chainMarketId:marketId, teamId, entry:amount, fee, net, mult:o?.mult??1, entryProb:o?.prob??0, openedAt:Date.now(), status:'open', markFactor:1.0, fresh:true, onChain:true, tx:hash };
+    const openedAt = timing.openedBlockTimestamp * 1000;
+    const pos = { id:'p'+(_pid++), marketId:key, outcomeId, chainMarketId:marketId, teamId, entry:amount, fee, net, mult:o?.mult??1, entryProb:o?.prob??0, openedAt, openedBlockNumber:timing.blockNumber, openedBlockTimestamp:timing.openedBlockTimestamp, withdrawUnlockTimestamp:timing.withdrawUnlockTimestamp, onChainStakeWei:onchainStake.toString(), status:'open', markFactor:1.0, fresh:true, onChain:true, tx:hash };
     setPositions(ps=>[pos, ...ps]);
-    setActivity(a=>[{ id:'a'+(_aid++), type:'buy', marketId:key, outcomeId, amount, ts:Date.now(), tx: shortAddr(hash) }, ...a]);
-    recordBetActivity({ action:'buy', marketId, marketTitle:m?.titleEn||'', outcomeName:o?.kind==='team'?TEAM(o.oid).en:(o?.id||''), outcomeFlag:o?.kind==='team'?TEAM(o.oid).flag:'', teamId, amountBnb:String(amount), txHash:hash });
+    setActivity(a=>[{ id:'a'+(_aid++), type:'buy', marketId:key, outcomeId, amount, ts:openedAt, tx: shortAddr(hash) }, ...a]);
+    recordBetActivity({ action:'buy', marketId, marketTitle:m?.titleEn||'', outcomeName:o?.kind==='team'?TEAM(o.oid).en:(o?.id||''), outcomeFlag:o?.kind==='team'?TEAM(o.oid).flag:'', teamId, amountBnb:String(amount), txHash:hash, blockNumber:timing.blockNumber, blockTimestamp:timing.openedBlockTimestamp, withdrawUnlockTimestamp:timing.withdrawUnlockTimestamp, onChainStakeWei:onchainStake.toString() });
     refreshBalance();
   },[bscWallet, refreshBalance]);
 
@@ -241,10 +268,28 @@ function LiveWalletProvider({ children }: { children: React.ReactNode }){
     const client = await getWalletClient();
     const [account] = await client.getAddresses();
     let amountWei = parseEther(String(p.net));
+    let openedBlockTimestamp = p.openedBlockTimestamp;
+    if (!openedBlockTimestamp && p.tx){
+      const receipt = await publicClient.getTransactionReceipt({ hash: p.tx as `0x${string}` });
+      const block = await publicClient.getBlock({ blockNumber: receipt.blockNumber });
+      openedBlockTimestamp = Number(block.timestamp);
+    }
+    let verifiedOnchainStake = false;
     try {
       const onchain = await publicClient.readContract({ address: BETTING_VAULT_ADDRESS, abi: bettingAbi, functionName:'getUserBet', args:[BigInt(p.chainMarketId), account, BigInt(p.teamId)] }) as bigint;
-      if (onchain > 0n) amountWei = onchain;
-    } catch { /* fall back to net */ }
+      if (onchain <= 0n) throw new Error('No on-chain stake found for this position');
+      amountWei = onchain;
+      verifiedOnchainStake = true;
+    } catch (err) {
+      if (p.onChain) throw err;
+      /* mock/preview fallback only */
+    }
+    if (p.onChain && !verifiedOnchainStake) throw new Error('No verified on-chain stake found for this position');
+    if (openedBlockTimestamp){
+      const chainNow = await latestChainTimestamp();
+      const unlockAt = openedBlockTimestamp + WITHDRAW_COOLDOWN_SECONDS;
+      if (chainNow < unlockAt) throw new Error(`Withdraw unlocks in ${unlockAt - chainNow}s`);
+    }
     await publicClient.simulateContract({ account, address: BETTING_VAULT_ADDRESS, abi: bettingAbi, functionName:'withdrawBet', args:[BigInt(p.chainMarketId), BigInt(p.teamId), amountWei] });
     const hash = await client.writeContract({
       account, address: BETTING_VAULT_ADDRESS, abi: bettingAbi, functionName:'withdrawBet',

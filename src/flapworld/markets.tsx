@@ -11,7 +11,7 @@ import { createPublicClient, formatEther, http, parseAbi } from 'viem';
 import { bsc } from 'viem/chains';
 import { useT, marketTitle, teamName } from './i18n';
 import { Icon, BnbMark, OutcomeMark, Btn, CatTag } from './components';
-import { FEE_RATE, ALL_MARKETS, MATCHES, GROUP_MARKETS } from './data';
+import { FEE_RATE, ALL_MARKETS } from './data';
 import { bettingAbi } from './abi';
 import { BETTING_VAULT_ADDRESS, BSC_RPC_URL, WORLD_CUP_VIEWER_ADDRESS } from '../lib/env';
 
@@ -32,8 +32,9 @@ function viewerCallFor(m){
 }
 function useOnchainMarketStates(wallet){
   const [states, setStates] = useState({});
+  const [loaded, setLoaded] = useState(false);
   const refresh = useCallback(async ()=>{
-    if (!BETTING_VAULT_ADDRESS) return;
+    if (!BETTING_VAULT_ADDRESS) { setLoaded(true); return; }
     try {
       const marketCalls = ALL_MARKETS.map(m=>({ address: BETTING_VAULT_ADDRESS, abi: bettingAbi, functionName:'getMarket', args:[BigInt(m.marketId)] }));
       const viewerCalls = ALL_MARKETS.map(viewerCallFor);
@@ -81,12 +82,14 @@ function useOnchainMarketStates(wallet){
         };
       });
       setStates(next);
+      setLoaded(true);
     } catch (err) {
-      console.warn('[Polyflap] market state refresh failed; keeping markets interactive', err);
+      console.warn('[Polyflap] market state refresh failed; keeping current on-chain market list', err);
+      setLoaded(true);
     }
   },[wallet?.address]);
   useEffect(()=>{ refresh(); const id = setInterval(refresh, 30000); return ()=>clearInterval(id); }, [refresh]);
-  return { states, refresh };
+  return { states, loaded, refresh };
 }
 
 /* ---------- a single tappable outcome ---------- */
@@ -391,10 +394,9 @@ function MobileTicket(props){
 
 /* ---------- toolbar (tabs + search) ---------- */
 const TABS = [
-  { k:'all', key:'tab_all' },
-  { k:'matches', key:'tab_matches' },
   { k:'groups', key:'tab_groups' },
   { k:'tournament', key:'tab_tournament' },
+  { k:'matches', key:'tab_matches' },
 ];
 function Toolbar({ tab, setTab, q, setQ, counts }){
   const { t } = useT();
@@ -439,34 +441,33 @@ function EmptyState({ onClear }){
 /* ---------- markets page ---------- */
 function MarketsPage({ wallet, onConnect, onBuy, onSell, onClaim, onResolve, positions=[] }){
   const { t, lang } = useT();
-  const [tab, setTab] = useState('matches');
+  const [tab, setTab] = useState('groups');
   const [q, setQ] = useState('');
   const [selection, setSelection] = useState(null); // {marketId, outcomeId}
-  const { states: marketStates, refresh: refreshMarketStates } = useOnchainMarketStates(wallet);
+  const { states: marketStates, loaded: marketsLoaded, refresh: refreshMarketStates } = useOnchainMarketStates(wallet);
+
+  const visibleMarkets = useMemo(()=>{
+    if (!marketsLoaded) return [];
+    return ALL_MARKETS.filter(m=>isOpenForBetting(marketStates[m.id]));
+  },[marketsLoaded, marketStates]);
 
   const counts = useMemo(()=>({
-    all: ALL_MARKETS.length, matches: MATCHES.length, groups: GROUP_MARKETS.length, tournament: 1,
-  }),[]);
+    matches: visibleMarkets.filter(m=>m.cat==='matches').length,
+    groups: visibleMarkets.filter(m=>m.cat==='groups').length,
+    tournament: visibleMarkets.filter(m=>m.cat==='tournament').length,
+  }),[visibleMarkets]);
 
   const filtered = useMemo(()=>{
-    let list = tab==='all' ? ALL_MARKETS : ALL_MARKETS.filter(m=>m.cat===tab);
+    let list = visibleMarkets.filter(m=>m.cat===tab);
     const query = q.trim().toLowerCase();
     if (query) list = list.filter(m=> m.searchKey.includes(query) || marketTitle(m,lang).toLowerCase().includes(query));
-    const nowSec = Math.floor(Date.now()/1000);
-    const isPast = (m)=>{
-      const s = marketStates[m.id];
-      if (s) return !!(s.closedByTime || s.resolved || s.cancelled || s.statusName === 'Locked' || s.statusName === 'Resolved' || s.statusName === 'Cancelled');
-      return Math.floor(m.closeTime/1000) <= nowSec || m.resolved || m.baseKind === 'closed' || m.baseKind === 'pending' || m.baseKind === 'resolved';
-    };
     const closeOf = (m)=> marketStates[m.id]?.closeTime ?? Math.floor(m.closeTime/1000);
     return list.slice().sort((a,b)=>{
-      const ap = isPast(a), bp = isPast(b);
-      if (ap !== bp) return ap ? 1 : -1;
       const at = closeOf(a), bt = closeOf(b);
-      if (at !== bt) return ap ? bt - at : at - bt;
+      if (at !== bt) return at - bt;
       return a.titleEn.localeCompare(b.titleEn);
     });
-  },[tab,q,lang,marketStates]);
+  },[tab,q,lang,marketStates,visibleMarkets]);
 
   const onPick = useCallback((market, outcome)=>{
     const s = marketStates[market.id];
@@ -493,7 +494,7 @@ function MarketsPage({ wallet, onConnect, onBuy, onSell, onClaim, onResolve, pos
             <h1 className="font-display mt-1 text-4xl leading-none text-white sm:text-6xl">{t('mk_title')}</h1>
           </div>
           <div className="hidden text-right sm:block">
-            <div className="font-mono text-sm text-white/50">{t('showing')} <span className="text-white">{filtered.length}</span> {t('of')} {tab==='all'?counts.all:counts[tab]}</div>
+            <div className="font-mono text-sm text-white/50">{t('showing')} <span className="text-white">{filtered.length}</span> {t('of')} {counts[tab] || 0}</div>
             {tabSub && <div className="mt-1 text-xs uppercase tracking-wider text-white/35">{tabSub}</div>}
           </div>
         </div>
@@ -508,7 +509,7 @@ function MarketsPage({ wallet, onConnect, onBuy, onSell, onClaim, onResolve, pos
           {/* markets grid */}
           <div className={`grid gap-4 ${tab==='tournament'?'grid-cols-1':'sm:grid-cols-2'} content-start`}>
             {filtered.length===0
-              ? <EmptyState onClear={()=>{ setQ(''); setTab('all'); }}/>
+              ? <EmptyState onClear={()=>{ setQ(''); setTab('groups'); }}/>
               : filtered.map(m=>(
                   <MarketCard key={m.id} market={m} state={marketStates[m.id]} selection={selection} onPick={onPick} lang={lang}/>
                 ))}

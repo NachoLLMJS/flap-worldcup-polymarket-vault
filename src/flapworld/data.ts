@@ -8,6 +8,7 @@
    Reserved outcome ids: 49 = "Others", 50 = "Draw".
    ============================================================ */
 import { marketFixtures } from '../data/markets';
+import { FIXTURE_KICKOFFS } from '../data/fixture-dates';
 import type { MarketFixture } from '../features/markets/types';
 
 const CHAIN = { name: 'BNB Chain', short: 'BSC', id: 56, symbol: 'BNB' };
@@ -50,15 +51,14 @@ function matchOdds(rnd: ()=>number){
   return { pHome, pDraw, pAway };
 }
 
-/* ---- schedule: a spread of live states relative to "now" ---- */
-function scheduleFor(gi: number){
-  if (gi === 3 || gi === 26 || gi === 54) return { close: NOW0 - (1.6 + gi%3)*DAY, kind:'resolved' as const };
-  if (gi === 7 || gi === 41)              return { close: NOW0 - (35 + gi)*MIN,    kind:'pending'  as const };
-  if (gi === 12 || gi === 49)             return { close: NOW0 - 6*MIN,            kind:'closed'   as const };
-  if (gi % 13 === 5)                      return { close: NOW0 + (1.4 + (gi%4))*HOUR, kind:'soon' as const };
-  const day = 1.5 + (gi % 9);
-  const hourOffset = (gi % 5) * 2.5;
-  return { close: NOW0 + day*DAY + hourOffset*HOUR, kind:'open' as const };
+/* ---- status from a real kickoff timestamp ---- */
+function kickoffSched(kickoff: number){
+  const now = Date.now();
+  const delta = kickoff - now;
+  if (delta > 6*HOUR)  return { close: kickoff, kind:'open'     as const };
+  if (delta > 0)       return { close: kickoff, kind:'soon'     as const };
+  if (delta > -2.2*HOUR) return { close: kickoff, kind:'closed' as const };
+  return                      { close: kickoff, kind:'pending'  as const };
 }
 
 /* ---- build one design-model market from a real fixture ---- */
@@ -93,7 +93,10 @@ function buildMarket(fix: MarketFixture, gi: number){
     if (outcomes[0]){ outcomes[0].prob = round2(outcomes[0].prob + drift); outcomes[0].mult = multFromProb(outcomes[0].prob); }
   }
 
-  const sched = mtype==='match' ? scheduleFor(gi) : { close: NOW0 + (3 + gi*0.4)*DAY, kind:'open' as const };
+  const realKickoff = mtype==='match' ? FIXTURE_KICKOFFS[fix.marketId] : undefined;
+  const sched = realKickoff
+    ? kickoffSched(realKickoff)
+    : { close: NOW0 + (3 + gi*0.4)*DAY, kind:'open' as const };
   const resolved = sched.kind==='resolved';
   let winner: string | null = null;
   if (resolved) winner = outcomes.slice().sort((a,b)=>b.prob-a.prob)[0].id;

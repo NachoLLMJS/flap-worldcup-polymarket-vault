@@ -7,16 +7,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useT, marketTitle, teamName } from './i18n';
 import { Logo, LangToggle, ConnectButton, Btn, Icon, FlagChip } from './components';
-import { MATCHES, GROUP_MARKETS, TOURNAMENT_MARKET, ALL_MARKETS, fmtPct } from './data';
-import {
-  BETTING_VAULT_ADDRESS,
-  FLAP_TOKEN_ADDRESS,
-  FLAP_VAULT_FACTORY_ADDRESS,
-  FLAP_VAULT_IMPLEMENTATION_ADDRESS,
-  VAULT_ADDRESS,
-  WORLD_CUP_VIEWER_ADDRESS,
-} from '../lib/env';
-import { shortAddress } from '../lib/format';
+import { MATCHES, GROUP_MARKETS, TOURNAMENT_MARKET, ALL_MARKETS, TEAM, marketStatus, fmtPct, fmtBNB } from './data';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -289,6 +280,121 @@ function HowItWorks({ setRoute }){
   );
 }
 
+/* ---------- match schedule ---------- */
+function MatchSchedule({ setRoute }){
+  const { lang } = useT();
+  const [now, setNow] = useState(()=>Date.now());
+
+  useEffect(()=>{
+    const id = setInterval(()=>setNow(Date.now()), 60_000);
+    return ()=>clearInterval(id);
+  },[]);
+
+  const upcoming = useMemo(()=>
+    MATCHES
+      .filter(m=>{ const s=marketStatus(m,now); return s==='open'||s==='soon'; })
+      .sort((a,b)=>a.closeTime-b.closeTime)
+      .slice(0,12)
+  ,[now]);
+
+  const fmtDay  = (ts)=>new Date(ts).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+  const fmtTime = (ts)=>new Date(ts).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false});
+  const tzLabel = useMemo(()=>{
+    try { return new Date().toLocaleTimeString('en-US',{timeZoneName:'short'}).split(' ').pop() || 'local'; }
+    catch { return 'local'; }
+  },[]);
+
+  const days = useMemo(()=>{
+    const map = new Map();
+    upcoming.forEach(m=>{
+      const key = new Date(m.closeTime).toDateString();
+      if(!map.has(key)) map.set(key,{ label:fmtDay(m.closeTime), matches:[] });
+      map.get(key).matches.push(m);
+    });
+    return [...map.values()];
+  },[upcoming]);
+
+  if(!upcoming.length) return null;
+
+  return (
+    <section className="bg-ink-950 border-t border-white/8 py-20 sm:py-28">
+      <div className="mx-auto max-w-[1320px] px-5 sm:px-6">
+        <Reveal>
+          <span className="text-xs font-bold uppercase tracking-[0.2em] text-acid">
+            {lang==='zh'?'赛程':'Schedule'}
+          </span>
+          <h2 className="font-display mt-3 text-4xl leading-[0.95] text-white sm:text-5xl">
+            {lang==='zh'?'近期赛事':'Upcoming matches'}
+          </h2>
+          <p className="mt-3 text-sm text-white/45">
+            {lang==='zh'
+              ?`投注在开赛时关闭 · 时间为本地时间 (${tzLabel})`
+              :`Betting closes at kickoff · All times in your local timezone (${tzLabel})`}
+          </p>
+        </Reveal>
+
+        <div className="mt-10 overflow-hidden rounded-2xl border border-white/8 bg-ink-900">
+          {days.map(({label,matches})=>(
+            <div key={label}>
+              <div className="border-b border-white/8 bg-ink-950/50 px-5 py-2.5">
+                <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-acid/70">{label}</span>
+              </div>
+              {matches.map(m=>{
+                const home = TEAM(m.teams[0]);
+                const away = TEAM(m.teams[1]??m.teams[0]);
+                const homeOut = m.outcomes.find(o=>o.id==='home')||m.outcomes[0];
+                const drawOut = m.outcomes.find(o=>o.kind==='draw')||m.outcomes[1];
+                const awayOut = m.outcomes.find(o=>o.id==='away')||m.outcomes[2];
+                const isSoon  = marketStatus(m,now)==='soon';
+                return (
+                  <div key={m.id} onClick={()=>setRoute('markets')}
+                    className="group flex flex-col gap-3 border-b border-white/6 px-5 py-4 last:border-0 cursor-pointer transition-colors hover:bg-white/[0.03] sm:flex-row sm:items-center sm:gap-0">
+                    {/* home */}
+                    <div className="flex min-w-0 flex-1 items-center gap-2.5">
+                      <FlagChip code={home.code} size={32}/>
+                      <span className="truncate text-sm font-semibold text-white">{lang==='zh'?home.zh:home.en}</span>
+                    </div>
+                    {/* odds */}
+                    <div className="flex shrink-0 items-center gap-1.5 sm:px-5">
+                      <span className="rounded-md bg-white/8 px-2.5 py-1.5 font-mono text-xs text-white">{fmtPct(homeOut.prob)}</span>
+                      <span className="rounded-md bg-white/5 px-2.5 py-1 font-mono text-xs text-white/35">{fmtPct(drawOut.prob)}</span>
+                      <span className="rounded-md bg-white/8 px-2.5 py-1.5 font-mono text-xs text-white">{fmtPct(awayOut.prob)}</span>
+                    </div>
+                    {/* away */}
+                    <div className="flex min-w-0 flex-1 items-center gap-2.5 sm:flex-row-reverse">
+                      <FlagChip code={away.code} size={32}/>
+                      <span className="truncate text-sm font-semibold text-white sm:text-right">{lang==='zh'?away.zh:away.en}</span>
+                    </div>
+                    {/* meta */}
+                    <div className="flex shrink-0 items-center gap-3 sm:border-l sm:border-white/8 sm:pl-6">
+                      {isSoon&&(
+                        <span className="rounded-full bg-acid/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-acid">
+                          {lang==='zh'?'即将':'SOON'}
+                        </span>
+                      )}
+                      <div className="text-right">
+                        <div className="font-mono text-sm text-white/70">{fmtTime(m.closeTime)}</div>
+                        <div className="font-mono text-[11px] text-white/30">{fmtBNB(m.poolBNB)} BNB</div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-6 flex justify-center">
+          <Btn size="lg" variant="outline" onClick={()=>setRoute('markets')}>
+            {lang==='zh'?`查看全部 ${MATCHES.length} 场比赛`:`View all ${MATCHES.length} matches`}
+            <Icon.arrow/>
+          </Btn>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ---------- closing CTA ---------- */
 function ClosingCTA({ setRoute }){
   const { t } = useT();
@@ -354,88 +460,28 @@ function AboutPage({ setRoute }){
     { k:t2('Custody','托管'), v:t2('Non-custodial','非托管') },
     { k:t2('Stack','技术栈'), v:'Privy · viem' },
   ];
-  const bscScan = (address?: string) => address ? `https://bscscan.com/address/${address}` : undefined;
-  const contractRows = [
-    {
-      label: t2('Flap vault factory','Flap 金库 Factory'),
-      value: FLAP_VAULT_FACTORY_ADDRESS,
-      note: t2('Fixed factory for the next final Flap launch.','下一次正式 Flap 发行使用的已修复 factory。'),
-    },
-    {
-      label: t2('Vault implementation','金库实现'),
-      value: FLAP_VAULT_IMPLEMENTATION_ADDRESS,
-      note: t2('Clone implementation used by the fixed factory.','已修复 factory 使用的 clone implementation。'),
-    },
-    {
-      label: t2('Betting vault','投注金库'),
-      value: BETTING_VAULT_ADDRESS,
-      note: t2('Live BNB escrow for buy / sell / claim flows.','处理买入 / 卖出 / 领取流程的实时 BNB 托管合约。'),
-    },
-    {
-      label: t2('WorldCupViewer','WorldCupViewer'),
-      value: WORLD_CUP_VIEWER_ADDRESS,
-      note: t2('On-chain settlement truth source on BSC.','BSC 上的链上结算真相来源。'),
-    },
-    {
-      label: t2('Final Flap token','最终 Flap 代币'),
-      value: FLAP_TOKEN_ADDRESS,
-      note: t2('Unset here until the final token launch. The temporary launch is intentionally not used.','正式发行前这里保持未设置。临时发行不会被使用。'),
-      pending: true,
-    },
-    {
-      label: t2('Active Flap vault clone','当前 Flap 金库 clone'),
-      value: VAULT_ADDRESS,
-      note: t2('Unset until the final Flap token creates the real vault clone.','最终 Flap 代币创建真实金库 clone 前保持未设置。'),
-      pending: true,
-    },
-  ];
-  const rewardSteps = [
-    {
-      n: '01',
-      title: t2('Trade the Flap token','交易 Flap 代币'),
-      body: t2('When the final Flap token is live, its trading taxes are received by the Flap vault in BNB. The token/vault addresses stay unset here until that final launch.','最终 Flap 代币上线后，交易税会以 BNB 进入 Flap 金库。在正式发行前，代币 / 金库地址会保持未设置。'),
-    },
-    {
-      n: '02',
-      title: t2('Vault forwards taxes','金库转发税收'),
-      body: t2('The vault does not distribute token taxes to passive holders. The operator/guardian can forward collected BNB tax revenue into the betting vault reward pool.','金库不会把代币税分给被动持有人。operator/guardian 可以把收集到的 BNB 税收转入投注金库奖励池。'),
-    },
-    {
-      n: '03',
-      title: t2('Bettors earn reward shares','下注者获得奖励份额'),
-      body: t2('Only users who place real BNB bets receive reward shares. Shares are based on net stake after the 1% entry fee; withdrawing an open bet removes the withdrawn shares.','只有真实用 BNB 下注的用户会获得奖励份额。份额按扣除 1% 入场费后的净本金计算；在市场关闭前撤回下注会移除对应份额。'),
-    },
-    {
-      n: '04',
-      title: t2('Bettors claim tax rewards','下注者领取税收奖励'),
-      body: t2('When tax rewards are deposited, they are allocated pro-rata to current betting reward shares. Claiming is done by bettors from the betting vault, separate from match-winner payouts.','税收奖励存入后，会按当前投注奖励份额按比例分配。领取由下注者在投注金库完成，和比赛胜者赔付是两条独立流程。'),
-    },
-  ];
   const chapters = [
-    { n:'01', t:t2('What Polyflap is','Polyflap 是什么'), ps:[
-      t2('Polyflap is a World Cup prediction-market product built on BNB Smart Chain. Clients use a Privy wallet, pick a World Cup market, and place BNB behind the outcome they believe will win.','Polyflap 是构建在 BNB Smart Chain 上的世界杯预测市场产品。客户使用 Privy 钱包，选择世界杯市场，并用 BNB 支持自己认为会获胜的结果。'),
-      t2('The experience is simple for users, but the accounting is on-chain: every bet, sell/withdraw, claim, refund and tax-reward claim is a transaction that can be checked on BscScan.','用户体验保持简单，但账本在链上：每次下注、卖出/撤回、领取、退款和税收奖励领取都可在 BscScan 上验证。'),
+    { n:'01', t:t2('Architecture','架构'), ps:[
+      t2('Polyflap runs entirely on BNB Smart Chain (BSC, chainId 56). Three on-chain roles: a betting vault that holds positions and processes buys and sells; the WorldCupViewer, the on-chain source of truth for results; and a factory + implementation pair that launches the Flap token and its vault.','Polyflap 完全运行在 BNB 智能链（BSC，链 ID 56）。三个链上角色：持有仓位并处理买卖的投注金库；作为结果链上真相来源的 WorldCupViewer；以及发行 Flap 代币及其金库的 factory + implementation。'),
+      t2('The web app is a thin client: it signs through Privy-managed wallets using viem, and dry-runs every call with simulateContract before you sign.','网页端是轻客户端：通过 Privy 管理的钱包用 viem 签名，并在你签名前用 simulateContract 预演每一次调用。'),
     ] },
-    { n:'02', t:t2('Two vaults, two jobs','两个金库，两种职责'), ps:[
-      t2('The Flap vault belongs to the Flap token. It receives BNB tax revenue from the token and exposes the clean UI schema that lets Flap render the product correctly.','Flap 金库属于 Flap 代币。它接收来自代币的 BNB 税收，并暴露干净的 UI schema，让 Flap 能正确渲染产品。'),
-      t2('The betting vault is the customer-facing escrow. It holds user BNB stakes, tracks every market and position, pays winners, refunds cancelled markets, and distributes forwarded tax rewards to bettors.','投注金库是面向客户的托管层。它持有用户 BNB 本金，记录每个市场和仓位，向赢家支付，给取消市场退款，并把转入的税收奖励分配给下注者。'),
+    { n:'02', t:t2('Markets & positions','市场与仓位'), ps:[
+      t2('85 markets span the group stage, individual matches and the tournament winner. Each market exposes one outcome per team, plus reserved IDs 50 (Draw) and 49 (Others / the field).','85 个市场涵盖小组赛、单场比赛和总冠军。每个市场为每支球队提供一个结果，外加保留 ID 50（平局）和 49（其他 / 大盘）。'),
+      t2('You open a position with placeBet(marketId, teamId), sending BNB as the stake, and reduce or exit before close with withdrawBet(marketId, teamId, amount). Stakes per outcome form the pool that backs payouts.','用 placeBet(marketId, teamId) 开仓并以 BNB 作为本金，用 withdrawBet(marketId, teamId, amount) 在截止前减仓或退出。各结果的本金构成支撑赔付的资金池。'),
     ] },
-    { n:'03', t:t2('How betting works','下注如何运作'), ps:[
-      t2('85 markets cover match winners, group winners and the tournament winner. Each outcome has a teamId; Draw and Others are reserved outcomes where needed.','85 个市场覆盖单场胜者、小组胜者和总冠军。每个结果都有 teamId；需要时使用 Draw 和 Others 作为保留结果。'),
-      t2('A buy calls placeBet(marketId, teamId) with BNB. The 1% entry fee is paid immediately and the remaining net stake enters that outcome pool. Before the market closes, users can reduce or exit with withdrawBet; only the net stake is withdrawable, not the already-paid fee.','买入会调用 placeBet(marketId, teamId) 并发送 BNB。1% 入场费会立即支付，剩余净本金进入对应结果池。市场关闭前，用户可以用 withdrawBet 减仓或退出；可撤回的是净本金，不包括已经支付的费用。'),
+    { n:'03', t:t2('Settlement & payouts','结算与赔付'), ps:[
+      t2('There is no manual oracle. When a match or stage resolves, the result is read on-chain from the WorldCupViewer (getWorldCupWinner, getGroupMatchWinners, getMatchResult).','没有人工预言机。当比赛或阶段结束时，结果从 WorldCupViewer 链上读取（getWorldCupWinner、getGroupMatchWinners、getMatchResult）。'),
+      t2('Winning positions become claimable; voided markets become refundable. Every step is verifiable on BscScan.','获胜仓位变为可领取；作废市场变为可退款。每一步都可在 BscScan 上验证。'),
     ] },
-    { n:'04', t:t2('Who can claim token-tax rewards','谁能领取代币税收奖励'), ps:[
-      t2('This is the key mechanic: Flap token tax revenue is not a passive holder dividend. It is designed as an incentive for people who actually participate in the World Cup betting markets.','这是核心机制：Flap 代币税收不是被动持币分红。它被设计成给真正参与世界杯预测市场的用户的激励。'),
-      t2('When BNB tax revenue reaches the Flap vault, it can be forwarded to the betting vault. The betting vault allocates that BNB pro-rata by betting reward shares, so only wallets with betting activity and reward shares can claim it.','当 BNB 税收到达 Flap 金库后，可以转入投注金库。投注金库会按投注奖励份额按比例分配这些 BNB，因此只有有下注活动和奖励份额的钱包可以领取。'),
-      t2('Match winnings and tax rewards are separate. Winning a market lets you claim the market payout; having reward shares lets you claim your share of forwarded token-tax rewards.','比赛赔付和税收奖励是两条独立流程。赢得市场可以领取市场赔付；拥有奖励份额可以领取转入的代币税收奖励。'),
+    { n:'04', t:t2('Fees','费用'), ps:[
+      t2('A single 1% protocol fee applies on each buy (PROTOCOL_FEE_BPS = 100), routed to the fee wallet hardcoded in the vault. There are no withdrawal or hidden fees beyond standard BSC gas.','每次买入收取单一的 1% 协议费（PROTOCOL_FEE_BPS = 100），发送到金库中硬编码的费用钱包。除标准 BSC gas 外，无提现费或隐藏费用。'),
     ] },
-    { n:'05', t:t2('Settlement and payouts','结算与赔付'), ps:[
-      t2('There is no manual oracle. When a match or stage resolves, the result is read on-chain from Flap’s WorldCupViewer contract: tournament winner, group winners, or individual match results.','没有人工预言机。当比赛或阶段结束时，结果从 Flap 的 WorldCupViewer 合约链上读取：总冠军、小组胜者或单场比赛结果。'),
-      t2('Anyone can trigger settlement after the configured time, but the winning team still comes from WorldCupViewer. Winning positions become claimable; cancelled or voided markets become refundable.','到达配置时间后任何人都可以触发结算，但获胜队伍仍只来自 WorldCupViewer。获胜仓位变为可领取；取消或无效市场变为可退款。'),
+    { n:'05', t:t2('Flap token & vault','Flap 代币与金库'), ps:[
+      t2('The betting layer plugs into the Flap ecosystem. The Flap vault is created together with the Flap token when it launches through the factory (deployed from the implementation contract). Until launch, the vault address is unset.','投注层接入 Flap 生态。Flap 金库在代币通过 factory 发行时一并创建（由 implementation 合约部署）。发行前，金库地址尚未设置。'),
     ] },
-    { n:'06', t:t2('Security and trust model','安全与信任模型'), ps:[
-      t2('Polyflap is non-custodial: users keep their wallets, sign their own transactions, and funds live in contracts rather than in a company account.','Polyflap 是非托管的：用户保留自己的钱包，自己签名交易，资金存在合约中而不是公司账户中。'),
-      t2('Every write is dry-run with simulateContract before the wallet asks for a signature, so closed markets, invalid outcomes or impossible withdrawals fail before users spend gas.','每个写入操作都会在钱包请求签名前先用 simulateContract 预演，因此已关闭市场、无效结果或不可能的撤回会在用户花费 gas 前失败。'),
+    { n:'06', t:t2('Security & trust','安全与信任'), ps:[
+      t2('Non-custodial by design: funds live in the contract and every buy, sell or claim is a transaction you sign — Polyflap never holds your keys or your money.','设计上非托管：资金存于合约，每一次买入、卖出或领取都是你签名的交易 — Polyflap 从不持有你的私钥或资金。'),
+      t2('Each call is dry-run with simulateContract first, so a closed or invalid market reverts before you spend gas. All contracts are public and verifiable on-chain.','每次调用先用 simulateContract 预演，因此已关闭或无效的市场会在你花费 gas 之前回滚。所有合约公开且链上可验证。'),
     ] },
   ];
   return (
@@ -448,7 +494,7 @@ function AboutPage({ setRoute }){
           <Reveal>
             <span className="text-xs font-bold uppercase tracking-[0.2em] text-acid">{t2('About','关于')}</span>
             <h1 className="font-display mt-3 text-5xl leading-[0.92] text-white sm:text-7xl">{t2('Bet the World Cup, on-chain.','链上竞猜世界杯。')}</h1>
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-white/60 sm:text-lg">{t2('Polyflap is a World Cup prediction market on BNB Chain where betting is also the participation layer for token-tax rewards. Back a team with BNB, receive betting reward shares, and claim eligible rewards on-chain.','Polyflap 是 BNB 链上的世界杯预测市场，投注也是代币税收奖励的参与层。用 BNB 支持球队，获得投注奖励份额，并在链上领取符合条件的奖励。')}</p>
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-white/60 sm:text-lg">{t2('Polyflap is a prediction market for the 2026 World Cup, built on BNB Chain. Back a team, a match or the tournament winner with BNB — every position is a transaction you own, settled on-chain.','Polyflap 是基于 BNB 链的 2026 世界杯预测市场。用 BNB 押注球队、比赛或总冠军 — 每个仓位都是你拥有的交易，链上结算。')}</p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Btn onClick={()=>setRoute('markets')}>{t2('Explore markets','浏览市场')} <Icon.arrow/></Btn>
               <Btn variant="outline" onClick={()=>setRoute('portfolio')}>{t2('My portfolio','我的持仓')}</Btn>
@@ -469,73 +515,6 @@ function AboutPage({ setRoute }){
               <div className="font-mono mt-1.5 text-sm text-acid">{s.v}</div>
             </Reveal>
           ))}
-        </div>
-      </section>
-
-      {/* tax reward flow */}
-      <section className="border-b border-white/8 bg-ink-950 py-14 sm:py-16">
-        <div className="mx-auto max-w-[1320px] px-5 sm:px-6">
-          <Reveal>
-            <div className="max-w-3xl">
-              <span className="text-xs font-bold uppercase tracking-[0.2em] text-acid">{t2('Token tax rewards','代币税收奖励')}</span>
-              <h2 className="font-display mt-3 text-4xl leading-[0.95] text-white sm:text-5xl">{t2('Token taxes reward bettors, not passive holders.','代币税奖励下注者，而不是被动持有人。')}</h2>
-              <p className="mt-4 text-base leading-relaxed text-white/55">{t2('Polyflap connects a Flap tax vault with a betting vault. Token trading taxes can be converted into a reward pool, but the right to claim that pool comes from betting activity: real BNB stake creates reward shares.','Polyflap 将 Flap 税收金库和投注金库连接起来。代币交易税可以变成奖励池，但领取这个奖励池的权利来自投注行为：真实 BNB 本金会产生奖励份额。')}</p>
-            </div>
-          </Reveal>
-          <div className="mt-8 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-            {rewardSteps.map((step, i) => (
-              <Reveal key={step.n} delay={i * 60} className="rounded-3xl border border-acid/10 bg-acid/[0.045] p-5">
-                <div className="font-mono text-xl text-acid/80">{step.n}</div>
-                <h3 className="font-display mt-4 text-2xl leading-none text-white">{step.title}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-white/55">{step.body}</p>
-              </Reveal>
-            ))}
-          </div>
-          <Reveal>
-            <div className="mt-6 rounded-3xl border border-white/10 bg-white/[0.035] p-5 text-sm leading-relaxed text-white/55">
-              <strong className="text-white">{t2('Plain English:', '简单来说：')}</strong>{' '}
-              {t2('holding the token alone does not make a wallet eligible for these BNB tax rewards. A user must participate in the markets, receive betting reward shares, and then claim from the betting vault when rewards are available.','仅持有代币不会让钱包自动获得这些 BNB 税收奖励资格。用户必须参与市场，获得投注奖励份额，并在奖励可用时从投注金库领取。')}
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* contract registry */}
-      <section className="border-b border-white/8 bg-ink-950 py-14 sm:py-16">
-        <div className="mx-auto max-w-[1320px] px-5 sm:px-6">
-          <Reveal>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <span className="text-xs font-bold uppercase tracking-[0.2em] text-acid">{t2('Contracts','合约')}</span>
-                <h2 className="font-display mt-2 text-3xl leading-none text-white sm:text-4xl">{t2('Current BSC deployment map','当前 BSC 部署地图')}</h2>
-              </div>
-              <p className="max-w-xl text-sm leading-relaxed text-white/45">{t2('The temporary Flap token/vault from the test launch is intentionally not configured here. Only the fixed factory, implementation, betting vault and WorldCupViewer are active until the final launch.','测试发行中的临时 Flap 代币 / 金库不会配置在这里。正式发行前只启用已修复 factory、implementation、投注金库和 WorldCupViewer。')}</p>
-            </div>
-          </Reveal>
-          <div className="mt-8 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-            {contractRows.map((row, i) => {
-              const href = bscScan(row.value);
-              return (
-                <Reveal key={row.label} delay={i * 45} className="rounded-3xl border border-white/10 bg-white/[0.035] p-5 shadow-[0_20px_80px_rgba(0,0,0,0.20)]">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">{row.label}</div>
-                      <div className="mt-2 font-mono text-sm text-acid">{row.value ? shortAddress(row.value) : t2('Unset','未设置')}</div>
-                    </div>
-                    {row.pending && <span className="rounded-full border border-yellow-300/25 bg-yellow-300/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-yellow-200">{t2('pending','待定')}</span>}
-                  </div>
-                  <p className="mt-3 min-h-[44px] text-xs leading-relaxed text-white/45">{row.note}</p>
-                  {href ? (
-                    <a href={href} target="_blank" rel="noreferrer" className="mt-4 inline-flex items-center gap-2 rounded-full border border-white/10 px-3 py-2 text-xs font-semibold text-white/70 transition hover:border-acid/40 hover:text-acid">
-                      {t2('View on BscScan','在 BscScan 查看')} <Icon.arrow/>
-                    </a>
-                  ) : (
-                    <div className="mt-4 rounded-full border border-dashed border-white/10 px-3 py-2 text-xs text-white/30">{t2('Will be added after final launch','正式发行后添加')}</div>
-                  )}
-                </Reveal>
-              );
-            })}
-          </div>
         </div>
       </section>
 
@@ -580,10 +559,11 @@ function HomePage({ setRoute }){
       <Hero setRoute={setRoute} />
       <StatsStrip/>
       <HowItWorks setRoute={setRoute}/>
+      <MatchSchedule setRoute={setRoute}/>
       <ClosingCTA setRoute={setRoute}/>
       <Footer/>
     </main>
   );
 }
 
-export { HERO_VIDEO_SRC, Reveal, Nav, Ticker, Hero, StatsStrip, HowItWorks, ClosingCTA, Footer, HomePage, AboutPage };
+export { HERO_VIDEO_SRC, Reveal, Nav, Ticker, Hero, StatsStrip, HowItWorks, MatchSchedule, ClosingCTA, Footer, HomePage, AboutPage };

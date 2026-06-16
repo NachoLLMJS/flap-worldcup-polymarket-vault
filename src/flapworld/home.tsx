@@ -55,6 +55,7 @@ function Nav({ route, setRoute, wallet, onConnect, onDisconnect, overHero=false 
     { k:'markets', label:t('nav_markets'), go:()=>setRoute('markets') },
     { k:'portfolio', label:t('nav_portfolio'), go:()=>setRoute('portfolio') },
     { k:'about', label:t('nav_about'), go:()=>setRoute('about') },
+    { k:'x', label:'X/TWITTER', href:'https://x.com/PolyFlapWC' },
   ];
   return (
     <header className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${solid?'bg-ink-950/85 backdrop-blur-xl border-b border-white/8':'bg-transparent'}`}>
@@ -62,12 +63,19 @@ function Nav({ route, setRoute, wallet, onConnect, onDisconnect, overHero=false 
         <Logo onClick={()=>setRoute('home')} size={28} />
         <nav className="ml-5 hidden items-center gap-1.5 md:flex">
           {links.map(l=>(
-            <button key={l.k} onClick={l.go}
-              className={`group relative rounded-lg px-4 py-2.5 text-[16px] font-semibold transition-colors ${route===l.k?'text-acid':'text-white hover:text-acid'} ${l.soon?'cursor-default':''}`}>
-              {l.label}
-              {l.soon && <span className="ml-1.5 rounded bg-white/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white/50 align-middle">{t('soon_badge')}</span>}
-              {route===l.k && <span className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-acid"/>}
-            </button>
+            l.href ? (
+              <a key={l.k} href={l.href} target="_blank" rel="noopener noreferrer"
+                className="group relative rounded-lg px-4 py-2.5 text-[16px] font-semibold text-white transition-colors hover:text-acid">
+                {l.label}
+              </a>
+            ) : (
+              <button key={l.k} onClick={l.go}
+                className={`group relative rounded-lg px-4 py-2.5 text-[16px] font-semibold transition-colors ${route===l.k?'text-acid':'text-white hover:text-acid'} ${l.soon?'cursor-default':''}`}>
+                {l.label}
+                {l.soon && <span className="ml-1.5 rounded bg-white/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white/50 align-middle">{t('soon_badge')}</span>}
+                {route===l.k && <span className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-acid"/>}
+              </button>
+            )
           ))}
         </nav>
         <div className="ml-auto hidden items-center gap-3 md:flex">
@@ -90,10 +98,17 @@ function Nav({ route, setRoute, wallet, onConnect, onDisconnect, overHero=false 
             </div>
             <div className="mt-7 flex flex-col gap-1">
               {links.map(l=>(
-                <button key={l.k} onClick={()=>{ l.go && l.go(); setMenu(false); }}
-                  className={`flex items-center justify-between rounded-xl px-3 py-3.5 text-left text-lg font-bold uppercase tracking-tight ${route===l.k?'bg-acid/12 text-acid':'text-white/85'}`}>
-                  {l.label}{l.soon && <span className="rounded bg-white/10 px-2 py-0.5 text-[10px] text-white/50">{t('soon_badge')}</span>}
-                </button>
+                l.href ? (
+                  <a key={l.k} href={l.href} target="_blank" rel="noopener noreferrer" onClick={()=>setMenu(false)}
+                    className="flex items-center justify-between rounded-xl px-3 py-3.5 text-left text-lg font-bold uppercase tracking-tight text-white/85">
+                    {l.label}
+                  </a>
+                ) : (
+                  <button key={l.k} onClick={()=>{ l.go && l.go(); setMenu(false); }}
+                    className={`flex items-center justify-between rounded-xl px-3 py-3.5 text-left text-lg font-bold uppercase tracking-tight ${route===l.k?'bg-acid/12 text-acid':'text-white/85'}`}>
+                    {l.label}{l.soon && <span className="rounded bg-white/10 px-2 py-0.5 text-[10px] text-white/50">{t('soon_badge')}</span>}
+                  </button>
+                )
               ))}
             </div>
             <div className="mt-7"><LangToggle/></div>

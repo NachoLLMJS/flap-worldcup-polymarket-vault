@@ -21,6 +21,9 @@ export const WORLD_CUP_VIEWER_ADDRESS = import.meta.env.VITE_WORLD_CUP_VIEWER_AD
   | `0x${string}`
   | undefined;
 export const BSC_RPC_URL = import.meta.env.VITE_BSC_RPC_URL as string | undefined;
+export const BETTING_VAULT_DEPLOY_BLOCK = import.meta.env.VITE_BETTING_VAULT_DEPLOY_BLOCK
+  ? BigInt(import.meta.env.VITE_BETTING_VAULT_DEPLOY_BLOCK)
+  : undefined;
 
 export const BSC_CHAIN_ID = bsc.id;
 

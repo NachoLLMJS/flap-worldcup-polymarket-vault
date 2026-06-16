@@ -4,16 +4,16 @@
    Two providers behind one context:
    - MockWalletProvider: no Privy (preview/demo) — seeded book.
    - RealWalletProvider: Privy login + viem placeBet/withdrawBet on BSC.
-     Portfolio reflects the user's REAL session trades (starts empty;
-     on-chain pools are empty until there's volume).
+     Portfolio is reconstructed from on-chain getUserBet reads after connect/refresh,
+     with local activity only used as metadata for cooldown timestamps.
    Root picks the provider via isPrivyConfigured. Trading always goes
    through the wallet's signature prompt — never auto-executed.
    ============================================================ */
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { PrivyProvider, usePrivy, useWallets } from '@privy-io/react-auth';
 import { bsc } from 'viem/chains';
-import { createPublicClient, createWalletClient, custom, http, parseEther, formatEther } from 'viem';
-import { PRIVY_APP_ID, PRIVY_CLIENT_ID, BETTING_VAULT_ADDRESS, BSC_RPC_URL, BSC_CHAIN_ID } from '../lib/env';
+import { createPublicClient, createWalletClient, custom, http, parseEther, formatEther, parseAbiItem } from 'viem';
+import { PRIVY_APP_ID, PRIVY_CLIENT_ID, BETTING_VAULT_ADDRESS, BSC_RPC_URL, BSC_CHAIN_ID, BETTING_VAULT_DEPLOY_BLOCK } from '../lib/env';
 import { pickBscWallet, pickTwitterProfile, type BscWalletLike } from '../features/wallet/walletHelpers';
 import { bettingAbi } from './abi';
 import { readBetActivity, recordBetActivity } from '../features/betting/activity';
@@ -38,6 +38,88 @@ async function confirmedBetTiming(hash: `0x${string}`){
 async function latestChainTimestamp(){
   const block = await publicClient.getBlock({ blockTag: 'latest' });
   return Number(block.timestamp);
+}
+
+const BET_PLACED_EVENT = parseAbiItem('event BetPlaced(uint256 indexed marketId, address indexed user, uint256 indexed teamId, uint256 amount)');
+
+function sameAddress(a?: string, b?: string){ return !!a && !!b && a.toLowerCase() === b.toLowerCase(); }
+
+function localBuyFor(address: string, marketId: number, teamId: number){
+  return readBetActivity()
+    .filter((a)=> a.action === 'buy' && a.marketId === marketId && a.teamId === teamId && (!a.userAddress || sameAddress(a.userAddress, address)))
+    .sort((a,b)=> Date.parse(b.createdAt) - Date.parse(a.createdAt))[0];
+}
+
+async function betPlacedTimingFromLogs(address: `0x${string}`, marketId: number, teamId: number){
+  if (!BETTING_VAULT_ADDRESS) return null;
+  const latest = await publicClient.getBlockNumber();
+  const fromBlocks = [
+    BETTING_VAULT_DEPLOY_BLOCK ?? 0n,
+    latest > 500000n ? latest - 500000n : 0n,
+  ];
+  for (const fromBlock of fromBlocks){
+    try {
+      const logs = await publicClient.getLogs({
+        address: BETTING_VAULT_ADDRESS,
+        event: BET_PLACED_EVENT,
+        args: { marketId: BigInt(marketId), user: address, teamId: BigInt(teamId) },
+        fromBlock,
+        toBlock: 'latest',
+      });
+      const last = logs[logs.length - 1];
+      if (!last) continue;
+      const block = await publicClient.getBlock({ blockNumber: last.blockNumber });
+      const openedBlockTimestamp = Number(block.timestamp);
+      return {
+        txHash: last.transactionHash,
+        blockNumber: Number(last.blockNumber),
+        openedBlockTimestamp,
+        withdrawUnlockTimestamp: openedBlockTimestamp + WITHDRAW_COOLDOWN_SECONDS,
+      };
+    } catch (err) {
+      console.warn('[Polyflap] BetPlaced log lookup failed', { marketId, teamId, fromBlock: fromBlock.toString(), err });
+    }
+  }
+  return null;
+}
+
+function positionFromStake({ market, outcome, stakeWei, timing, txHash }: any){
+  const net = Number(formatEther(stakeWei));
+  const entry = +(net / (1 - FEE_RATE)).toFixed(6);
+  const fee = +(entry - net).toFixed(6);
+  const openedAt = timing?.openedBlockTimestamp ? timing.openedBlockTimestamp * 1000 : Date.now();
+  return {
+    id: `chain-${market.marketId}-${outcome.oid}`,
+    marketId: market.id,
+    outcomeId: outcome.id,
+    chainMarketId: market.marketId,
+    teamId: outcome.oid,
+    entry,
+    fee,
+    net,
+    mult: outcome.mult ?? 1,
+    entryProb: outcome.prob ?? 0,
+    openedAt,
+    openedBlockNumber: timing?.blockNumber,
+    openedBlockTimestamp: timing?.openedBlockTimestamp,
+    withdrawUnlockTimestamp: timing?.withdrawUnlockTimestamp,
+    onChainStakeWei: stakeWei.toString(),
+    status: 'open',
+    markFactor: 1.0,
+    onChain: true,
+    tx: txHash,
+  };
+}
+
+function mergeOnchainPositions(current: any[], synced: any[]){
+  const byKey = new Map<string, any>();
+  current.filter((p)=>p.status !== 'open' || !p.onChain).forEach((p)=>byKey.set(p.id, p));
+  [...current.filter((p)=>p.status === 'open' && p.onChain), ...synced].forEach((p)=>{
+    const key = `${p.chainMarketId}:${p.teamId}`;
+    const prev = byKey.get(key);
+    byKey.set(key, { ...(prev || {}), ...p, id: prev?.id || p.id });
+  });
+  return Array.from(byKey.values()).sort((a,b)=>(b.openedAt||0)-(a.openedAt||0));
 }
 
 /* Privy config — matches the new acid theme */
@@ -202,11 +284,13 @@ function LiveWalletProvider({ children }: { children: React.ReactNode }){
   useEffect(()=>{ if (authenticated && address) refreshBalance(); }, [authenticated, address, refreshBalance]);
   useEffect(()=>{
     if (authenticated && address && activity.length===0){
-      const persisted = readBetActivity().map((ba)=>{
-        const key = 'm'+ba.marketId;
-        const o: any = ALL_MARKETS.find(x=>x.id===key)?.outcomes.find((x:any)=>x.oid===ba.teamId);
-        return { id:ba.id, type:ba.action, marketId:key, outcomeId:o?.id, amount:Number(ba.amountBnb), ts:Date.parse(ba.createdAt), tx: shortAddr(ba.txHash) };
-      });
+      const persisted = readBetActivity()
+        .filter((ba)=> !ba.userAddress || sameAddress(ba.userAddress, address))
+        .map((ba)=>{
+          const key = 'm'+ba.marketId;
+          const o: any = ALL_MARKETS.find(x=>x.id===key)?.outcomes.find((x:any)=>x.oid===ba.teamId);
+          return { id:ba.id, type:ba.action, marketId:key, outcomeId:o?.id, amount:Number(ba.amountBnb), ts:Date.parse(ba.createdAt), tx: shortAddr(ba.txHash) };
+        });
       setActivity([{ id:'a'+(_aid++), type:'connect', ts:Date.now(), tx:txHash() }, ...persisted]);
     }
   }, [authenticated, address]); // eslint-disable-line
@@ -229,6 +313,47 @@ function LiveWalletProvider({ children }: { children: React.ReactNode }){
     if (!provider) throw new Error('Wallet provider not ready');
     return createWalletClient({ chain: bsc, transport: custom(provider as any) });
   }
+
+  const syncOpenPositions = useCallback(async ()=>{
+    if (!BETTING_VAULT_ADDRESS || !authenticated || !address) return;
+    const account = address as `0x${string}`;
+    const metas: any[] = [];
+    const contracts = ALL_MARKETS.flatMap((m)=> m.outcomes.map((o: any)=>{
+      metas.push({ market:m, outcome:o });
+      return { address: BETTING_VAULT_ADDRESS, abi: bettingAbi, functionName:'getUserBet', args:[BigInt(m.marketId), account, BigInt(o.oid)] };
+    }));
+    try {
+      const results = await publicClient.multicall({ contracts, allowFailure: true });
+      const found: any[] = [];
+      for (let i=0; i<results.length; i++){
+        const r: any = results[i];
+        if (r.status !== 'success') continue;
+        const stakeWei = r.result as bigint;
+        if (!stakeWei || stakeWei <= 0n) continue;
+        const { market, outcome } = metas[i];
+        const local = localBuyFor(address, market.marketId, outcome.oid);
+        let timing = local?.blockTimestamp ? {
+          blockNumber: local.blockNumber,
+          openedBlockTimestamp: local.blockTimestamp,
+          withdrawUnlockTimestamp: local.withdrawUnlockTimestamp ?? local.blockTimestamp + WITHDRAW_COOLDOWN_SECONDS,
+        } : null;
+        let txHash = local?.txHash;
+        if (!timing){
+          const logTiming = await betPlacedTimingFromLogs(account, market.marketId, outcome.oid);
+          if (logTiming){
+            timing = logTiming;
+            txHash = logTiming.txHash;
+          }
+        }
+        found.push(positionFromStake({ market, outcome, stakeWei, timing, txHash }));
+      }
+      setPositions((ps)=>mergeOnchainPositions(ps, found));
+    } catch (err) {
+      console.warn('[Polyflap] on-chain position sync failed', err);
+    }
+  }, [authenticated, address]);
+
+  useEffect(()=>{ if (authenticated && address) syncOpenPositions(); }, [authenticated, address, syncOpenPositions]);
 
   const connect = useCallback(()=>{ login(); },[login]);
   const disconnect = useCallback(()=>{ logout(); setPositions([]); setActivity([]); setBalance(0); },[logout]);
@@ -257,7 +382,7 @@ function LiveWalletProvider({ children }: { children: React.ReactNode }){
     const pos = { id:'p'+(_pid++), marketId:key, outcomeId, chainMarketId:marketId, teamId, entry:amount, fee, net, mult:o?.mult??1, entryProb:o?.prob??0, openedAt, openedBlockNumber:timing.blockNumber, openedBlockTimestamp:timing.openedBlockTimestamp, withdrawUnlockTimestamp:timing.withdrawUnlockTimestamp, onChainStakeWei:onchainStake.toString(), status:'open', markFactor:1.0, fresh:true, onChain:true, tx:hash };
     setPositions(ps=>[pos, ...ps]);
     setActivity(a=>[{ id:'a'+(_aid++), type:'buy', marketId:key, outcomeId, amount, ts:openedAt, tx: shortAddr(hash) }, ...a]);
-    recordBetActivity({ action:'buy', marketId, marketTitle:m?.titleEn||'', outcomeName:o?.kind==='team'?TEAM(o.oid).en:(o?.id||''), outcomeFlag:o?.kind==='team'?TEAM(o.oid).flag:'', teamId, amountBnb:String(amount), txHash:hash, blockNumber:timing.blockNumber, blockTimestamp:timing.openedBlockTimestamp, withdrawUnlockTimestamp:timing.withdrawUnlockTimestamp, onChainStakeWei:onchainStake.toString() });
+    recordBetActivity({ action:'buy', marketId, marketTitle:m?.titleEn||'', outcomeName:o?.kind==='team'?TEAM(o.oid).en:(o?.id||''), outcomeFlag:o?.kind==='team'?TEAM(o.oid).flag:'', teamId, amountBnb:String(amount), txHash:hash, blockNumber:timing.blockNumber, blockTimestamp:timing.openedBlockTimestamp, withdrawUnlockTimestamp:timing.withdrawUnlockTimestamp, onChainStakeWei:onchainStake.toString(), userAddress:account });
     refreshBalance();
   },[bscWallet, refreshBalance]);
 
@@ -297,7 +422,7 @@ function LiveWalletProvider({ children }: { children: React.ReactNode }){
     });
     setPositions(ps=> ps.map(x=> x.id===positionId ? { ...x, status:'withdrawn', payout:p.net, settledAt:Date.now() } : x));
     setActivity(a=>[{ id:'a'+(_aid++), type:'sell', marketId:p.marketId, outcomeId:p.outcomeId, amount:p.net, ts:Date.now(), tx: shortAddr(hash) }, ...a]);
-    recordBetActivity({ action:'sell', marketId:p.chainMarketId, marketTitle:'', outcomeName:TEAM(p.teamId).en, outcomeFlag:TEAM(p.teamId).flag, teamId:p.teamId, amountBnb:String(p.net), txHash:hash });
+    recordBetActivity({ action:'sell', marketId:p.chainMarketId, marketTitle:'', outcomeName:TEAM(p.teamId).en, outcomeFlag:TEAM(p.teamId).flag, teamId:p.teamId, amountBnb:String(p.net), txHash:hash, userAddress:account });
     refreshBalance();
   },[positions, refreshBalance]);
 

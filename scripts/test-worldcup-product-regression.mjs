@@ -63,6 +63,11 @@ assert.match(main, /Polyflap/, 'web must use the product name Polyflap');
 assert.match(main, /Buy|Sell \/ withdraw|withdrawBet/, 'web must expose buy and sell/withdraw actions');
 assert.match(main, /PortfolioPage/, 'web must include a Portfolio surface');
 assert.match(main, /Open positions|polyflap\.betActivity\.v1/, 'portfolio must surface open positions / on-chain bet activity');
+assert.match(main, /function syncOpenPositions|syncOpenPositions\s*=\s*useCallback/, 'live portfolio must reconstruct open positions after refresh');
+assert.match(main, /getUserBet[\s\S]*multicall|multicall[\s\S]*getUserBet/, 'position sync must verify real on-chain user stakes');
+assert.match(main, /BetPlaced[\s\S]*getLogs|BET_PLACED_EVENT/, 'position sync must recover buy timestamps from BetPlaced logs when local activity is missing');
+assert.match(main, /withdrawUnlockTimestamp[\s\S]*WITHDRAW_COOLDOWN_SECONDS/, 'withdraw button must keep a 5 minute cooldown timestamp');
+assert.match(main, /userAddress/, 'persisted bet activity must be scoped to the connected wallet');
 assert.match(main, /marketFixtures|ALL_MARKETS/, 'web must expose the full WorldCupViewer market catalog, not a tiny preview');
 assert.match(main, /WorldCupViewer/, 'web must frame settlement as on-chain via WorldCupViewer');
 

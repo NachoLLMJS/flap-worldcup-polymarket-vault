@@ -25,6 +25,12 @@ const readClient = createPublicClient({ chain: bsc, transport: http(BSC_RPC_URL 
 const viewerAddress = WORLD_CUP_VIEWER_ADDRESS || '0x00036192958C2aaAF9F445d3Cdc2979995EA333e';
 const isOpenForBetting = (s)=> s && s.statusName === 'Open' && Math.floor(Date.now()/1000) < s.closeTime;
 const canResolveState = (s)=> s && (s.statusName === 'Locked' || (s.statusName === 'Open' && Math.floor(Date.now()/1000) >= s.closeTime)) && Math.floor(Date.now()/1000) >= s.resolveAfter && s.viewerResolved && !s.resolved;
+function fmtDuration(ms){
+  const s = Math.max(0, Math.ceil(ms/1000));
+  const m = Math.floor(s/60);
+  const r = String(s%60).padStart(2,'0');
+  return `${m}:${r}`;
+}
 function viewerCallFor(m){
   if (m.type === 'tournament') return { address: viewerAddress, abi: viewerAbi, functionName: 'getWorldCupWinner' };
   if (m.type === 'group') return { address: viewerAddress, abi: viewerAbi, functionName: 'getGroupMatchWinners', args: [BigInt(m.viewerMatchId)] };
@@ -182,7 +188,21 @@ function TicketPanel({ market, outcome, wallet, onConnect, onBuy, onSell, onClai
   const { t } = useT();
   const [amount, setAmount] = useState('');
   const [phase, setPhase] = useState('idle'); // idle | confirming | bought | sold
+  const [chainNowMs, setChainNowMs] = useState(Date.now());
   useEffect(()=>{ setPhase('idle'); }, [market?.id, outcome?.id]);
+  useEffect(()=>{
+    let cancelled = false;
+    const sync = async ()=>{
+      if (!openPosition?.withdrawUnlockTimestamp) return;
+      try {
+        const block = await readClient.getBlock({ blockTag: 'latest' });
+        if (!cancelled) setChainNowMs(Number(block.timestamp) * 1000);
+      } catch { if (!cancelled) setChainNowMs(Date.now()); }
+    };
+    sync();
+    const id = window.setInterval(sync, 15000);
+    return ()=>{ cancelled = true; window.clearInterval(id); };
+  }, [openPosition?.withdrawUnlockTimestamp]);
 
   const amt = parseFloat(amount) || 0;
   const fee = amt * FEE_RATE;
@@ -191,9 +211,12 @@ function TicketPanel({ market, outcome, wallet, onConnect, onBuy, onSell, onClai
   const canResolve = canResolveState(marketState);
   const hasClaim = !!marketState && marketState.claimableBnb > 0;
   const insufficient = wallet && amt > wallet.balance + 1e-9;
-  const valid = marketOpen && amt>0 && !insufficient;
   const quicks = [0.1, 0.5, 1, 5];
   const hasPosition = !!openPosition;
+  const cooldownRemainingMs = openPosition?.withdrawUnlockTimestamp ? (openPosition.withdrawUnlockTimestamp * 1000 - chainNowMs) : 0;
+  const cooldownActive = !!(openPosition?.onChain && cooldownRemainingMs > 0);
+  const canSell = hasPosition && !cooldownActive && phase==='idle';
+  const valid = marketOpen && amt>0 && !insufficient && !hasPosition;
 
   const doBuy = async ()=>{
     if (!valid || phase!=='idle') return;
@@ -205,7 +228,7 @@ function TicketPanel({ market, outcome, wallet, onConnect, onBuy, onSell, onClai
     } catch(e){ setPhase('idle'); }
   };
   const doSell = async ()=>{
-    if (!hasPosition || phase!=='idle') return;
+    if (!canSell) return;
     setPhase('confirming');
     try {
       await onSell(openPosition.id);
@@ -316,10 +339,11 @@ function TicketPanel({ market, outcome, wallet, onConnect, onBuy, onSell, onClai
                 ${valid&&phase==='idle'?'bg-acid text-ink-950 hover:bg-acid-600 shadow-[0_6px_24px_-8px_rgba(215,255,54,0.6)]':'bg-acid/30 text-ink-950/50 cursor-not-allowed'}`}>
               {phase==='confirming'?t('buying'):phase==='bought'?<span className="inline-flex items-center gap-1.5"><Icon.check/>{t('bought')}</span>:t('buy')}
             </button>
-            <button disabled={!hasPosition || phase!=='idle'} onClick={doSell}
+            <button disabled={!canSell} onClick={doSell}
+              title={cooldownActive ? `Verified on-chain cooldown: withdraw unlocks in ${fmtDuration(cooldownRemainingMs)}` : undefined}
               className={`h-12 rounded-xl font-bold uppercase tracking-wide ring-1 transition
-                ${hasPosition&&phase==='idle'?'bg-ink-800 text-white ring-white/15 hover:ring-down/60 hover:text-down':'bg-ink-800/50 text-white/30 ring-white/8 cursor-not-allowed'}`}>
-              {phase==='sold'?<span className="inline-flex items-center gap-1.5"><Icon.check/>{t('sold')}</span>:t('sell')}
+                ${canSell?'bg-ink-800 text-white ring-white/15 hover:ring-down/60 hover:text-down':'bg-ink-800/50 text-white/30 ring-white/8 cursor-not-allowed'}`}>
+              {phase==='sold'?<span className="inline-flex items-center gap-1.5"><Icon.check/>{t('sold')}</span>:cooldownActive?`${t('sell')} ${fmtDuration(cooldownRemainingMs)}`:t('sell')}
             </button>
           </div>
           <p className="mt-2.5 text-[11px] leading-snug text-white/35">{t('sell_note')}</p>

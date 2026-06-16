@@ -15,6 +15,7 @@ export type BetActivity = {
   blockTimestamp?: number;
   withdrawUnlockTimestamp?: number;
   onChainStakeWei?: string;
+  userAddress?: string;
 };
 
 function canUseStorage() {

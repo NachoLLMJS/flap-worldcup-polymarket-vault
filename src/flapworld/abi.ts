@@ -3,6 +3,24 @@
    Reads: getMarket / getUserBet / claimable. */
 export const bettingAbi = [
   {
+    type: 'event', name: 'BetPlaced', anonymous: false,
+    inputs: [
+      { name: 'marketId', type: 'uint256', indexed: true },
+      { name: 'user', type: 'address', indexed: true },
+      { name: 'teamId', type: 'uint256', indexed: true },
+      { name: 'amount', type: 'uint256', indexed: false },
+    ],
+  },
+  {
+    type: 'event', name: 'BetWithdrawn', anonymous: false,
+    inputs: [
+      { name: 'marketId', type: 'uint256', indexed: true },
+      { name: 'user', type: 'address', indexed: true },
+      { name: 'teamId', type: 'uint256', indexed: true },
+      { name: 'amount', type: 'uint256', indexed: false },
+    ],
+  },
+  {
     type: 'function', name: 'placeBet', stateMutability: 'payable',
     inputs: [{ name: 'marketId', type: 'uint256' }, { name: 'teamId', type: 'uint256' }],
     outputs: [],

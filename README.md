@@ -1,10 +1,6 @@
 # Polyflap WorldCup — BNB Chain Prediction Markets
 
 <p align="center">
-  <img src="docs/assets/readme/polyflap-hero.png" alt="Polyflap WorldCup landing hero: Pick a side, back it with BNB" width="100%" />
-</p>
-
-<p align="center">
   <strong>Wallet-first World Cup 2026 prediction markets on BNB Smart Chain.</strong><br />
   Pick an outcome, back it with BNB, manage positions from Portfolio, and verify public activity through on-chain data.
 </p>

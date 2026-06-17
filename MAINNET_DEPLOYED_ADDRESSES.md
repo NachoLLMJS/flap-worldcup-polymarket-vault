@@ -1,7 +1,27 @@
-# Mainnet deployment addresses
+# Legacy mainnet deployment addresses
+
+> This file is historical and is **not** the current source of truth.
+> Current V2 testing contracts are documented in `POLYFLAP_V2_MAINNET_HANDOFF.md` and `.env.example`.
+> Use V2 for testing now; after audit, launch again and replace V2 with the audited production contracts.
+
+## Current V2 testing contracts
+
+| Contract | Address |
+| --- | --- |
+| POLYFLAP token | `0xed6dd658F936CcE7bE097C98eA79Bcd36Cb37777` |
+| Flap vault clone | `0x82fa3c8d11B3E7A26Ab6C8dDb7B8d8281192a4f6` |
+| WorldCupBettingVault V2 | `0x5E14Fd7faC9a3D4386621c1F44BDdB631ee00D7b` |
+| WorldCupPolymarketVault implementation V2 | `0x6B31fA70f11558B226f6eE929CbB4dE407b5B38a` |
+| WorldCupPolymarketVaultBeacon V2 | `0x894bfDA41620D0837cAcB4393968a177519F5D40` |
+| WorldCupPolymarketVaultFactory V2 | `0x7Afff3D66e62B597c9C0431228407F3a0Cf7dbbD` |
+| WorldCupViewer | `0x00036192958C2aaAF9F445d3Cdc2979995EA333e` |
+
+---
+
+## Historical deployment below
 
 Network: BNB Chain mainnet (chainId 56)
-Deployer / current operator wallet: `0xEB155312Eeca8Bbb3600f6e64B09fAd04FeBf9D1`
+Deployer / current operator wallet at that time: `0xEB155312Eeca8Bbb3600f6e64B09fAd04FeBf9D1`
 
 ## Deployed contracts
 

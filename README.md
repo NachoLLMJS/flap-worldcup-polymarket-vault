@@ -143,27 +143,32 @@ This repository contains both the customer-facing frontend and the Solidity work
 
 | Contract | Address |
 | --- | --- |
-| Vault implementation | `0x95005A1c1A737c0CdF32df3fb893EA3c2E2934e3` |
-| Vault beacon | `0xFa2aB705f0e4998cc5bC9aCE7EeB2E32953a64Da` |
-| Flap launch factory | `0x1f7A242CdF77C5beD1F80E9Fa421C691B7aA6aCe` |
-| Betting vault | `0x9a2cEe430A7dE1A0b56e12Af2B313f643d5b5FF3` |
+| POLYFLAP token | `0xed6dd658F936CcE7bE097C98eA79Bcd36Cb37777` |
+| Flap vault clone | `0x82fa3c8d11B3E7A26Ab6C8dDb7B8d8281192a4f6` |
+| WorldCupBettingVault V2 | `0x5E14Fd7faC9a3D4386621c1F44BDdB631ee00D7b` |
+| WorldCupPolymarketVault implementation V2 | `0x6B31fA70f11558B226f6eE929CbB4dE407b5B38a` |
+| WorldCupPolymarketVaultBeacon V2 | `0x894bfDA41620D0837cAcB4393968a177519F5D40` |
+| WorldCupPolymarketVaultFactory V2 | `0x7Afff3D66e62B597c9C0431228407F3a0Cf7dbbD` |
 | WorldCupViewer | `0x00036192958C2aaAF9F445d3Cdc2979995EA333e` |
-| Active Flap token | Unset until final token launch |
-| Active Flap vault clone | Unset until final token/vault launch |
+| Operator / deployer | `0xEB155312Eeca8Bbb3600f6e64B09fAd04FeBf9D1` |
+| Guardian | `0x9e27098dcD8844bcc6287a557E0b4D09C86B8a4b` |
+| Fee wallet | `0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e` |
 
-Fixed Flap launch URL:
+These are the current V2 contracts used for development and testing. After the audit passes, Polyflap should launch again and replace these with the new audited production contracts.
 
-```text
-https://flap.sh/launch?vaultfactory=0x1f7A242CdF77C5beD1F80E9Fa421C691B7aA6aCe
-```
-
-ABI-encoded `vaultData` for the final token launch:
+Flap V2 factory:
 
 ```text
-0x00000000000000000000000000036192958c2aaaf9f445d3cdc2979995ea333e000000000000000000000000eb155312eeca8bbb3600f6e64b09fad04febf9d10000000000000000000000009a2cee430a7de1a0b56e12af2b313f643d5b5ff3
+0x7Afff3D66e62B597c9C0431228407F3a0Cf7dbbD
 ```
 
-Important: do not use temporary token/vault deployments for production. Keep `VITE_FLAP_TOKEN_ADDRESS` and `VITE_FLAP_VAULT_ADDRESS` empty until the final launch creates the real token and vault clone.
+ABI-encoded V2 `vaultData` used for the current test launch:
+
+```text
+0x00000000000000000000000000036192958c2aaaf9f445d3cdc2979995ea333e000000000000000000000000eb155312eeca8bbb3600f6e64b09fad04febf9d10000000000000000000000005e14fd7fac9a3d4386621c1f44bddb631ee00d7b
+```
+
+Current source of truth: `POLYFLAP_V2_MAINNET_HANDOFF.md` and `.env.example`.
 
 ### Deprecated addresses
 
@@ -171,9 +176,16 @@ These addresses are kept for historical context only and should not be used in p
 
 | Address | Reason |
 | --- | --- |
+| `0x5E14Fd7faC9a3D4386621c1F44BDdB631ee00D7b` | Current V2 BettingVault for testing until audited contracts are launched. |
+| `0x7Afff3D66e62B597c9C0431228407F3a0Cf7dbbD` | Current V2 Flap factory for testing until audited contracts are launched. |
+| `0x82fa3c8d11B3E7A26Ab6C8dDb7B8d8281192a4f6` | Current V2 Flap vault clone connected to the test/live web environment. |
+| `0xb5d939b361fcd2ca16cda6d9c32b952c8a7ebd8b` | Legacy earlier BettingVault deployment; superseded by V2. |
+| `0xb5e6ecd590bb03db5b1caf15a1bcf3f80e01bf71` | Legacy earlier vault implementation; superseded by V2. |
+| `0x95005A1c1A737c0CdF32df3fb893EA3c2E2934e3` | Intermediate deployment previously documented in README; superseded by V2. |
+| `0x9a2cEe430A7dE1A0b56e12Af2B313f643d5b5FF3` | Intermediate BettingVault previously documented in README; superseded by V2. |
 | `0x8257f357cee6c3ee77f5b89818d9ee9bfecd72f6` | Malformed EIP-1167 clone bytecode and generic ThirdParty UI fallback. |
-| `0xc6f9e1e06699209507c95e4eb23b6ee68901afa3` | Older visual-good factory, superseded by the fixed three-field factory. |
-| `0xbf4fc44eedc13aff33633d29383323068d348125` | Old admin-heavy UI implementation/factory path. |
+| `0xc6f9e1e06699209507c95e4eb23b6ee68901afa3` | Older visual-good factory, superseded by the V2 factory. |
+| `0xbf4fc44eedc13aff33633d29383323068d348125` | Legacy admin-heavy/testing factory; not the current V2 factory. |
 
 ---
 

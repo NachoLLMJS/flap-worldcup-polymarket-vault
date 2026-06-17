@@ -137,25 +137,25 @@ export const privyConfig = {
       walletChainType: 'ethereum-only',
     },
     loginMethods: [
-      'google',
-      'discord',
-      'github',
       'tiktok',
+      'discord',
+      'binance',
+      'google',
+      'github',
       'email',
     ],
-    // Privy's hosted modal tends to show the first four primary entries before
-    // it adds "More options". Keep Discord before GitHub so Discord stays on the first screen.
-    // Wallet entries such as MetaMask/Binance are controlled by appearance.walletList above.
+    // Privy's hosted modal follows this visual order. TikTok takes Google's old
+    // visible slot, and Binance Wallet takes GitHub's old visible slot.
     loginMethodsAndOrder: {
       primary: [
         'metamask',
-        'google',
-        'discord',
-        'github',
         'tiktok',
+        'discord',
+        'binance',
+        'google',
         'email',
       ],
-      overflow: ['binance'],
+      overflow: ['github'],
     },
     embeddedWallets: { ethereum: { createOnLogin: 'users-without-wallets' } },
   },

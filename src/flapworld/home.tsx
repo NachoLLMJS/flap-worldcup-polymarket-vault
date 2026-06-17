@@ -55,7 +55,8 @@ function Nav({ route, setRoute, wallet, onConnect, onDisconnect, overHero=false 
     { k:'markets', label:t('nav_markets'), go:()=>setRoute('markets') },
     { k:'portfolio', label:t('nav_portfolio'), go:()=>setRoute('portfolio') },
     { k:'about', label:t('nav_about'), go:()=>setRoute('about') },
-    { k:'x', label:'X/TWITTER', href:'https://x.com/PolyFlapWC' },
+    { k:'x', label:'X/Twitter', href:'https://x.com/PolyFlapWC' },
+    { k:'leaderboard', label:'Leaderboard', go:()=>setRoute('leaderboard') },
   ];
   return (
     <header className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${solid?'bg-ink-950/85 backdrop-blur-xl border-b border-white/8':'bg-transparent'}`}>

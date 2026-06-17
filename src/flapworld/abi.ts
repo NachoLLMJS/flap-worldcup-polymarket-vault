@@ -105,4 +105,36 @@ export const bettingAbi = [
       { name: 'previousEpochClaimable', type: 'uint256' },
     ],
   },
+  {
+    type: 'function', name: 'getTopBettors', stateMutability: 'view',
+    inputs: [],
+    outputs: [
+      { name: 'wallets', type: 'address[]' },
+      { name: 'wagered', type: 'uint256[]' },
+      { name: 'activeBets', type: 'uint256[]' },
+      { name: 'lastMarketIds', type: 'uint256[]' },
+      { name: 'lastTeamIds', type: 'uint256[]' },
+      { name: 'lastTimestamps', type: 'uint256[]' },
+    ],
+  },
+  {
+    type: 'function', name: 'getEpochTopBettors', stateMutability: 'view',
+    inputs: [{ name: 'epoch', type: 'uint256' }],
+    outputs: [
+      { name: 'wallets', type: 'address[]' },
+      { name: 'wagered', type: 'uint256[]' },
+      { name: 'bonusBps', type: 'uint256[]' },
+      { name: 'weightedWagers', type: 'uint256[]' },
+    ],
+  },
+  {
+    type: 'function', name: 'getMarketTopBettors', stateMutability: 'view',
+    inputs: [{ name: 'marketId', type: 'uint256' }],
+    outputs: [
+      { name: 'wallets', type: 'address[]' },
+      { name: 'wagered', type: 'uint256[]' },
+      { name: 'lastTeamIds', type: 'uint256[]' },
+      { name: 'lastTimestamps', type: 'uint256[]' },
+    ],
+  },
 ] as const;

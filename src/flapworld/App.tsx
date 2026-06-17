@@ -9,6 +9,7 @@ import { isPrivyConfigured } from '../lib/env';
 import { LangProvider } from './i18n';
 import { Nav, HomePage, AboutPage } from './home';
 import { MarketsPage } from './markets';
+import { LeaderboardPage } from './leaderboard';
 import { PortfolioPage } from './portfolio';
 import { MockWalletProvider, RealWalletProvider, useWallet } from './wallet';
 
@@ -27,6 +28,7 @@ function App(){
       <Nav route={route} setRoute={go} wallet={wallet} onConnect={connect} onDisconnect={disconnect} overHero={route==='home'} />
       {route==='home' && <HomePage setRoute={go} />}
       {route==='markets' && <MarketsPage wallet={wallet} onConnect={connect} positions={positions} onBuy={buyPosition} onSell={sellPosition} onClaim={claimMarket} onResolve={resolveMarket} />}
+      {route==='leaderboard' && <LeaderboardPage setRoute={go} />}
       {route==='portfolio' && <PortfolioPage wallet={wallet} onConnect={connect} onDisconnect={disconnect} positions={positions} activity={activity} onSell={sellPosition} taxRewards={taxRewards} onClaimTaxRewards={claimTaxRewards} onRefreshTaxRewards={refreshTaxRewards} setRoute={go} />}
       {route==='about' && <AboutPage setRoute={go} />}
     </>

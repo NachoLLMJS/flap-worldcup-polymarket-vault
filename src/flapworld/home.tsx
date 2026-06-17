@@ -470,87 +470,86 @@ function AboutPage({ setRoute }){
   const t2 = (en,zh)=> lang==='zh'?zh:en;
   const specs = [
     { k:t2('Network','网络'), v:'BNB Smart Chain' },
-    { k:t2('Login','登录'), v:t2('Privy · Google · Discord · GitHub · TikTok · Email · Wallets','Privy · Google · Discord · GitHub · TikTok · 邮箱 · 钱包') },
+    { k:t2('Login','登录'), v:t2('Wallet-first via Privy','通过 Privy 优先钱包登录') },
+    { k:t2('Main wallet','主钱包'), v:'MetaMask / BNB wallets' },
     { k:t2('Markets','市场'), v:t2('World Cup 2026','2026 世界杯') },
-    { k:t2('Positions','仓位'), v:t2('Buy · Withdraw · Claim','买入 · 撤回 · 领取') },
+    { k:t2('Leaderboard','排行榜'), v:t2('On-chain top bettors','链上投注排行榜') },
     { k:t2('Custody','托管'), v:t2('Non-custodial','非托管') },
-    { k:t2('Transparency','透明度'), v:t2('On-chain records','链上记录') },
   ];
   const productCards = [
     {
       n:'01',
-      title:t2('World Cup prediction markets','世界杯预测市场'),
-      body:t2('Polyflap lets fans back World Cup outcomes with BNB: match winners, group results and the tournament winner. You choose a market, pick an outcome and open a position from your wallet.','Polyflap 让球迷用 BNB 参与世界杯结果预测：单场胜者、小组结果和总冠军。你选择市场、选择结果，并从自己的钱包开仓。'),
+      title:t2('World Cup markets with real wallet signing','真实钱包签名的世界杯市场'),
+      body:t2('Users connect a BNB Chain wallet, choose a World Cup market and sign each position from their own wallet. The app never places a bet without a wallet confirmation.','用户连接 BNB Chain 钱包，选择世界杯市场，并从自己的钱包签名每个仓位。应用不会在没有钱包确认的情况下下注。'),
     },
     {
       n:'02',
-      title:t2('Simple account access','简单账户入口'),
-      body:t2('Sign in through Privy with MetaMask, Google, Discord, GitHub, TikTok, email or other supported wallet options. If a user does not already have a wallet, Privy can create one for them.','通过 Privy 使用 MetaMask、Google、Discord、GitHub、TikTok、邮箱或其他支持的钱包选项登录。如果用户还没有钱包，Privy 可以为他们创建一个。'),
+      title:t2('Wallet-first access','优先钱包登录'),
+      body:t2('The current flow is focused on MetaMask and other BNB-compatible wallets through Privy. Social login can stay optional, but wallet login is the primary path for the live product.','当前流程通过 Privy 重点支持 MetaMask 和其他兼容 BNB 的钱包。社交登录可以作为可选入口，但钱包登录是线上产品的主要路径。'),
     },
     {
       n:'03',
-      title:t2('Your positions stay visible','你的仓位清晰可见'),
-      body:t2('The Portfolio page shows active positions, local activity and the actions available for each market: withdraw before close when allowed, claim if you win, or refund if a market is voided.','Portfolio 页面展示活跃仓位、本地活动记录，以及每个市场可执行的操作：允许时在截止前撤回，获胜后领取，市场作废时退款。'),
+      title:t2('Portfolio built from live positions','基于实时仓位的 Portfolio'),
+      body:t2("After connecting, the Portfolio shows the user's active positions and available actions: withdraw while a market is open, claim winning outcomes, or receive refunds when a market is voided.",'连接后，Portfolio 显示用户的活跃仓位和可用操作：市场开放时撤回、获胜后领取，或在市场作废时退款。'),
     },
     {
       n:'04',
-      title:t2('Built for on-chain verification','为链上验证而构建'),
-      body:t2('Important actions are signed by the user and recorded on BNB Chain. Polyflap does not ask customers to trust screenshots or private balances; positions and transactions can be checked on-chain.','重要操作由用户签名并记录在 BNB Chain 上。Polyflap 不要求客户相信截图或私有余额；仓位和交易都可以链上检查。'),
+      title:t2('Public leaderboard','公开排行榜'),
+      body:t2('The Leaderboard ranks real wallets from BNB Chain contract reads. It shows top bettors, active bet count, latest market activity and the current reward epoch without needing a private database.','Leaderboard 通过 BNB Chain 合约读取真实钱包排名。它显示顶级投注者、活跃投注数量、最新市场活动和当前奖励周期，不需要私有数据库。'),
     },
   ];
   const userFlow = [
     {
-      title:t2('1. Sign in','1. 登录'),
-      body:t2('Enter with MetaMask, Google, Discord, GitHub, TikTok, email or another supported option through Privy. New users can create a Privy embedded wallet during onboarding.','通过 Privy 使用 MetaMask、Google、Discord、GitHub、TikTok、邮箱或其他支持选项进入。新用户可以在入门流程中创建 Privy 嵌入式钱包。'),
+      title:t2('1. Connect wallet','1. 连接钱包'),
+      body:t2('Open the app and connect with MetaMask or another supported BNB Chain wallet through Privy. Wallet login is the recommended live path.','打开应用，通过 Privy 使用 MetaMask 或其他支持的 BNB Chain 钱包连接。钱包登录是推荐的线上路径。'),
     },
     {
-      title:t2('2. Fund your wallet','2. 给钱包充值'),
-      body:t2('Before trading, the wallet needs BNB on BNB Chain for the position and network gas. Users can fund their Privy wallet or use an already funded external wallet.','交易前，钱包需要在 BNB Chain 上有 BNB，用于开仓和支付网络 gas。用户可以给 Privy 钱包充值，或使用已有资金的外部钱包。'),
+      title:t2('2. Use BNB on BSC','2. 使用 BSC 上的 BNB'),
+      body:t2('The connected wallet needs BNB on BNB Smart Chain for the position amount and gas. Every market action is confirmed from the wallet.','连接的钱包需要在 BNB Smart Chain 上有 BNB，用于仓位金额和 gas。每个市场操作都从钱包确认。'),
     },
     {
-      title:t2('3. Pick a market','3. 选择市场'),
-      body:t2('Browse World Cup markets by category. Each market shows the available outcomes and lets you build a bet slip before signing.','按分类浏览世界杯市场。每个市场显示可选结果，并允许你在签名前准备投注单。'),
+      title:t2('3. Pick and sign','3. 选择并签名'),
+      body:t2('Browse match, group and tournament markets, choose an outcome, enter BNB amount and sign the transaction. The app shows fee and net stake before confirmation.','浏览单场、小组和锦标赛市场，选择结果，输入 BNB 金额并签名交易。应用在确认前显示费用和净仓位。'),
     },
     {
-      title:t2('4. Place and manage','4. 开仓并管理'),
-      body:t2('When you confirm, your wallet signs the transaction. After that, active positions can be monitored, withdrawn before close when allowed, or claimed after settlement.','确认后，你的钱包签署交易。之后可以查看活跃仓位，在允许时于截止前撤回，或在结算后领取。'),
+      title:t2('4. Track, withdraw, claim','4. 跟踪、撤回、领取'),
+      body:t2('Portfolio keeps positions organized, while Leaderboard shows public top-bettor activity. Users can withdraw eligible open positions or claim after settlement.','Portfolio 管理仓位，Leaderboard 展示公开的顶级投注者活动。用户可撤回符合条件的开放仓位，或在结算后领取。'),
     },
   ];
   const chapters = [
-    { n:'01', t:t2('What Polyflap is','Polyflap 是什么'), ps:[
-      t2('Polyflap is a customer-facing World Cup prediction market on BNB Chain. It combines a normal betting-style interface with self-custody wallet signing and public transaction records.','Polyflap 是面向客户的 BNB Chain 世界杯预测市场。它把普通投注式界面、自托管钱包签名和公开交易记录结合在一起。'),
-      t2('The goal is simple: make on-chain football markets feel clear enough for normal users while keeping the important money movements verifiable.','目标很简单：让普通用户也能看懂链上足球市场，同时保持关键资金流可验证。'),
+    { n:'01', t:t2('What Polyflap is now','现在的 Polyflap 是什么'), ps:[
+      t2('Polyflap is a wallet-first World Cup prediction market running on BNB Chain. It is built around markets, signed BNB positions, a user Portfolio and a public on-chain Leaderboard.','Polyflap 是运行在 BNB Chain 上、优先使用钱包的世界杯预测市场。它围绕市场、签名 BNB 仓位、用户 Portfolio 和公开链上 Leaderboard 构建。'),
+      t2('The product should feel simple for normal football fans, but the important money movement remains verifiable through wallet signatures and public chain reads.','产品应让普通足球球迷也能轻松使用，同时关键资金流通过钱包签名和公开链上读取保持可验证。'),
     ] },
-    { n:'02', t:t2('What customers can do','客户可以做什么'), ps:[
-      t2('Customers can sign in through Privy with MetaMask, Google, Discord, GitHub, TikTok, email or supported wallet options. If they do not already have a wallet, Privy can create an embedded wallet for them.','客户可以通过 Privy 使用 MetaMask、Google、Discord、GitHub、TikTok、邮箱或支持的钱包选项登录。如果还没有钱包，Privy 可以为他们创建嵌入式钱包。'),
-      t2('To operate on the app, the wallet must have BNB on BNB Chain for both the market position and gas. Users can fund their Privy wallet or connect an external wallet that already has BNB.','要在应用中操作，钱包必须在 BNB Chain 上有 BNB，用于市场仓位和 gas。用户可以给 Privy 钱包充值，或连接已经有 BNB 的外部钱包。'),
-      t2('Once funded, customers can browse World Cup markets, place BNB-backed positions, monitor active bets, withdraw eligible open positions, and claim winning or refundable outcomes after settlement.','钱包有资金后，客户可以浏览世界杯市场、用 BNB 开仓、查看活跃投注、撤回符合条件的未结算仓位，并在结算后领取获胜或可退款结果。'),
+    { n:'02', t:t2('How users enter','用户如何进入'), ps:[
+      t2('The current live flow should be explained as wallet-first: connect MetaMask or another supported BNB wallet through Privy, then operate on BNB Smart Chain.','当前线上流程应解释为优先钱包：通过 Privy 连接 MetaMask 或其他支持的 BNB 钱包，然后在 BNB Smart Chain 上操作。'),
+      t2('Social login is not the core promise of the page. If it is enabled later, it should be presented as an optional onboarding method, not as the required trading path.','社交登录不是本页的核心承诺。如果之后启用，它应作为可选入门方式展示，而不是必需的交易路径。'),
     ] },
-    { n:'03', t:t2('How funds are handled','资金如何处理'), ps:[
+    { n:'03', t:t2('What users can do','用户可以做什么'), ps:[
+      t2('Users can browse World Cup markets, place BNB-backed positions, monitor active positions, withdraw eligible open positions, and claim winning or refundable outcomes after settlement.','用户可以浏览世界杯市场、开立 BNB 支持的仓位、查看活跃仓位、撤回符合条件的开放仓位，并在结算后领取获胜或可退款结果。'),
+      t2('Portfolio is the private management area for the connected wallet. Leaderboard is the public area for top-bettor activity and reward-epoch visibility.','Portfolio 是连接钱包的私人管理区域。Leaderboard 是展示顶级投注者活动和奖励周期的公开区域。'),
+    ] },
+    { n:'04', t:t2('How funds and records work','资金和记录如何运作'), ps:[
       t2('Polyflap is non-custodial: customers keep their keys, and betting actions are transactions they approve from their own wallet. The app itself is not a deposit account and does not hold customer keys.','Polyflap 是非托管产品：客户保留自己的私钥，投注操作是他们从自己钱包批准的交易。应用本身不是充值账户，也不持有客户私钥。'),
-      t2('The betting contract handles market positions, withdrawals, claims and refunds. Standard BSC gas applies, and the app shows transaction state while actions confirm.','投注合约处理市场仓位、撤回、领取和退款。需要标准 BSC gas，应用会在操作确认期间显示交易状态。'),
-    ] },
-    { n:'04', t:t2('Future ecosystem fit','未来生态定位'), ps:[
-      t2('Polyflap is designed to plug into the Flap ecosystem while keeping the customer product simple: markets, positions, withdrawals, claims and refunds. Token launch details stay off the public About page until they are final.','Polyflap 设计上可以接入 Flap 生态，同时保持客户产品简单：市场、仓位、撤回、领取和退款。代币发行细节在最终确定前不会出现在公开 About 页面。'),
-      t2('For now, the product should stay focused on clear World Cup markets and reliable user flows. Any future token-related feature should be added only when it is ready to explain clearly to normal users.','目前产品应专注于清晰的世界杯市场和可靠的用户流程。任何未来与代币相关的功能，都应在可以向普通用户清楚解释时再加入。'),
+      t2('The betting contract handles positions, withdrawals, claims, refunds and leaderboard accounting. Standard BSC gas applies, and the app shows transaction state while actions confirm.','投注合约处理仓位、撤回、领取、退款和排行榜统计。需要标准 BSC gas，应用会在操作确认期间显示交易状态。'),
     ] },
     { n:'05', t:t2('Trust and safety','信任与安全'), ps:[
-      t2('The About page intentionally avoids exposing internal addresses, operator details or deployment mechanics. Customers should understand what the product does without seeing sensitive or developer-only information.','About 页面故意不展示内部地址、操作员细节或部署机制。客户应该理解产品作用，而不需要看到敏感或仅开发者使用的信息。'),
+      t2('The About page avoids internal deployment details while still explaining the customer-facing mechanics: wallet connection, BNB markets, portfolio actions and public leaderboard reads.','About 页面避免内部部署细节，同时解释面向客户的机制：钱包连接、BNB 市场、Portfolio 操作和公开排行榜读取。'),
       t2('Polyflap is not affiliated with FIFA and does not provide financial advice. Users should only participate with funds they are willing to risk.','Polyflap 与 FIFA 无关联，也不提供财务建议。用户只应使用自己愿意承担风险的资金参与。'),
     ] },
   ];
   const roadmap = [
     {
-      step:t2('Sports first','先从体育开始'),
-      text:t2('Keep improving the World Cup experience, then expand into more sports markets when settlement rules are clear.','继续完善世界杯体验，并在结算规则清晰后扩展到更多体育市场。'),
+      step:t2('Stabilize wallet-first flow','稳定优先钱包流程'),
+      text:t2('Keep the live product focused on MetaMask/BNB wallet access, clear transaction states and reliable Portfolio reads.','让线上产品专注于 MetaMask/BNB 钱包入口、清晰交易状态和可靠的 Portfolio 读取。'),
     },
     {
-      step:t2('Meme-token event markets','Meme 代币事件市场'),
-      text:t2('If everything goes well, add selected markets around major meme-token events, launches and community moments.','如果一切顺利，加入围绕主要 meme 代币事件、发行和社区节点的精选市场。'),
+      step:t2('Improve on-chain visibility','提升链上可见性'),
+      text:t2('Expand the Leaderboard and reward-epoch views around real contract data, keeping public stats easy to understand.','围绕真实合约数据扩展 Leaderboard 和奖励周期视图，让公开统计易于理解。'),
     },
     {
-      step:t2('Public-topic markets','公共话题市场'),
-      text:t2('Later, Polyflap may explore broader public-topic markets, including politics, only where rules, settlement and risk controls are strong enough.','之后，Polyflap 可以探索更广泛的公共话题市场，包括政治类话题，但前提是规则、结算和风险控制足够成熟。'),
+      step:t2('More market types later','之后添加更多市场类型'),
+      text:t2('After the World Cup flow is solid, Polyflap can add selected sports or event markets where rules, settlement and risk controls are clear.','世界杯流程稳定后，Polyflap 可以添加规则、结算和风险控制清晰的精选体育或事件市场。'),
     },
   ];
   return (

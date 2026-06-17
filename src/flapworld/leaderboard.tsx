@@ -136,7 +136,6 @@ function LeaderboardPage({ setRoute }){
           <button onClick={()=>setRoute('markets')} className="mb-4 inline-flex items-center gap-2 text-sm font-bold text-white/45 hover:text-acid">← Back to markets</button>
           <div className="inline-flex rounded-full bg-acid/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-acid ring-1 ring-acid/25">On-chain getters · No DB</div>
           <h1 className="font-display mt-4 text-5xl tracking-tight text-white md:text-7xl">Leaderboard</h1>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/55">Real top bettors read directly from `getTopBettors()` and `getEpochTopBettors()` on the BettingVault. No database, no off-chain indexer.</p>
         </div>
         <div className="flex gap-2">
           <Btn variant="outline" onClick={load}>{state.loading ? 'Syncing…' : 'Refresh on-chain'}</Btn>

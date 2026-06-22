@@ -2,11 +2,13 @@
 /* ============================================================
    Polyflap — Portfolio / Profile
    ============================================================ */
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
+import { formatEther } from 'viem';
 import { useT, marketTitle, teamName } from './i18n';
 import { Icon, Avatar, Btn, OutcomeMark, CatTag, Countdown, useNow } from './components';
 import { ALL_MARKETS, marketStatus } from './data';
 import { publicClient } from './wallet';
+import { bettingAbi } from './abi';
 import { BETTING_VAULT_ADDRESS, FLAP_TOKEN_ADDRESS, VAULT_ADDRESS } from '../lib/env';
 
 /* ---------- helpers ---------- */
@@ -51,6 +53,58 @@ function fmtDuration(ms){
   const m = Math.floor(s/60);
   const r = String(s%60).padStart(2,'0');
   return `${m}:${r}`;
+}
+const STATUS_NAMES = ['Draft','Open','Locked','Resolved','Cancelled'];
+const isResolvableSettlement = (s)=> s && (s.statusName === 'Locked' || (s.statusName === 'Open' && s.closedByTime)) && !s.resolved && !s.cancelled && s.resolveReady;
+
+function usePortfolioSettlementStates(wallet, positions){
+  const [states, setStates] = useState({});
+  const refresh = useCallback(async ()=>{
+    if (!BETTING_VAULT_ADDRESS || !wallet?.address || !positions?.length) { setStates({}); return; }
+    const openPositions = positions.filter(p=>p.status==='open' && p.chainMarketId);
+    if (!openPositions.length) { setStates({}); return; }
+    try {
+      const uniqueMarketIds = [...new Set(openPositions.map(p=>p.chainMarketId))];
+      const [marketResults, claimResults, claimedResults, latestBlock] = await Promise.all([
+        publicClient.multicall({ contracts: uniqueMarketIds.map(id=>({ address: BETTING_VAULT_ADDRESS, abi: bettingAbi, functionName:'getMarket', args:[BigInt(id)] })), allowFailure: true }),
+        publicClient.multicall({ contracts: uniqueMarketIds.map(id=>({ address: BETTING_VAULT_ADDRESS, abi: bettingAbi, functionName:'claimable', args:[BigInt(id), wallet.address] })), allowFailure: true }),
+        publicClient.multicall({ contracts: uniqueMarketIds.map(id=>({ address: BETTING_VAULT_ADDRESS, abi: bettingAbi, functionName:'claimed', args:[BigInt(id), wallet.address] })), allowFailure: true }),
+        publicClient.getBlock(),
+      ]);
+      const chainNow = Number(latestBlock.timestamp);
+      const byMarket = {};
+      uniqueMarketIds.forEach((id, i)=>{
+        const mr = marketResults[i];
+        if (mr.status !== 'success') return;
+        const view = mr.result?.view_ || mr.result?.[0] || mr.result;
+        const market = view.market;
+        const status = Number(market.status);
+        const closeTime = Number(market.closeTime);
+        const resolveAfter = Number(market.resolveAfter);
+        const claimableWei = claimResults[i]?.status === 'success' ? claimResults[i].result : 0n;
+        const didClaim = claimedResults[i]?.status === 'success' ? !!claimedResults[i].result : false;
+        byMarket[id] = {
+          status,
+          statusName: STATUS_NAMES[status] || String(status),
+          resolved: status === 3,
+          cancelled: status === 4,
+          closedByTime: chainNow >= closeTime,
+          resolveReady: chainNow >= resolveAfter,
+          winningTeamId: Number(market.winningTeamId),
+          claimableWei: claimableWei.toString(),
+          claimableBnb: Number(formatEther(claimableWei || 0n)),
+          claimed: didClaim,
+        };
+      });
+      const next = {};
+      openPositions.forEach(p=>{ if (byMarket[p.chainMarketId]) next[p.id] = byMarket[p.chainMarketId]; });
+      setStates(next);
+    } catch (err) {
+      console.warn('[Polyflap] portfolio settlement refresh failed', err);
+    }
+  }, [wallet?.address, positions]);
+  useEffect(()=>{ refresh(); const id = window.setInterval(refresh, 30000); return ()=>window.clearInterval(id); }, [refresh]);
+  return { states, refresh };
 }
 
 /* ---------- small bits ---------- */
@@ -212,7 +266,7 @@ function StatTiles({ stats }){
 }
 
 /* ---------- open position card ---------- */
-function PositionCard({ pos, onSell, lang }){
+function PositionCard({ pos, onSell, onResolve, onClaim, onRefreshSettlement, settlement, lang }){
   const { t } = useT();
   const now = useNow(1000);
   const [chainNowMs, setChainNowMs] = useState(Date.now());
@@ -237,7 +291,13 @@ function PositionCard({ pos, onSell, lang }){
   const cooldownRemainingMs = pos.withdrawUnlockTimestamp ? (pos.withdrawUnlockTimestamp * 1000 - chainNowMs) : 0;
   const cooldownActive = pos.onChain && cooldownRemainingMs > 0;
   const canWithdraw = tradable && !cooldownActive && phase==='idle';
+  const canResolve = isResolvableSettlement(settlement) && phase==='idle';
+  const canClaim = !!settlement && settlement.claimableBnb > 0 && phase==='idle';
+  const isLost = !!settlement && settlement.resolved && settlement.claimableBnb <= 0 && !settlement.claimed && Number(pos.teamId) !== Number(settlement.winningTeamId);
+  const isWonClaimed = !!settlement && settlement.resolved && settlement.claimed;
   const withdraw = async ()=>{ if(!canWithdraw) return; setPhase('confirming'); try { await onSell(pos.id); } catch(e){ setPhase('idle'); } };
+  const resolve = async ()=>{ if(!canResolve) return; setPhase('confirming'); try { await onResolve(pos.chainMarketId); await onRefreshSettlement?.(); setPhase('idle'); } catch(e){ setPhase('idle'); } };
+  const claim = async ()=>{ if(!canClaim) return; setPhase('confirming'); try { await onClaim(pos.chainMarketId); await onRefreshSettlement?.(); setPhase('idle'); } catch(e){ setPhase('idle'); } };
   if (!m || !o) return null;
   const Cell = ({ label, children })=>(<div><div className="text-[10px] uppercase tracking-wider text-white/35">{label}</div><div className="mt-0.5 font-mono text-sm tnum">{children}</div></div>);
   return (
@@ -256,6 +316,27 @@ function PositionCard({ pos, onSell, lang }){
           <div className="mt-1 font-mono text-[10px] text-white/40 tnum">{t('pf_value_now')} {value.toFixed(3)}</div>
         </div>
       </div>
+      {settlement && !tradable && (
+        <div className={`mt-3 rounded-xl border p-3 ${canClaim?'border-acid/30 bg-acid/10':isLost?'border-down/25 bg-down/10':isWonClaimed?'border-acid/20 bg-acid/8':'border-white/10 bg-white/[0.04]'}`}>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div className={`text-xs font-bold uppercase tracking-[0.16em] ${canClaim||isWonClaimed?'text-acid':isLost?'text-down':'text-white/55'}`}>
+                {canClaim ? 'Winning position' : isWonClaimed ? 'Winnings claimed' : isLost ? 'Lost' : canResolve ? 'Ready to resolve' : settlement.resolved ? 'Resolved' : 'Closed'}
+              </div>
+              <div className="mt-1 text-sm text-white/65">
+                {canClaim ? <>Claimable payout: <span className="font-mono font-bold text-white">{settlement.claimableBnb.toFixed(8)} BNB</span></>
+                  : isWonClaimed ? 'This winning payout has already been claimed.'
+                  : isLost ? <>Winner: <span className="font-bold text-white">{teamName(settlement.winningTeamId, lang)}</span></>
+                  : canResolve ? 'WorldCupViewer can settle this market now.'
+                  : settlement.resolved ? <>Winner: <span className="font-bold text-white">{teamName(settlement.winningTeamId, lang)}</span></>
+                  : 'Betting is closed. Waiting for settlement.'}
+              </div>
+            </div>
+            {canClaim && <button onClick={claim} disabled={!canClaim} className="h-9 rounded-lg bg-acid px-4 text-xs font-bold uppercase tracking-wide text-ink-950 transition hover:bg-acid-600 disabled:bg-acid/35">{phase==='confirming'?'Confirming…':'Claim winnings'}</button>}
+            {!canClaim && canResolve && <button onClick={resolve} disabled={!canResolve} className="h-9 rounded-lg bg-white/8 px-4 text-xs font-bold uppercase tracking-wide text-white ring-1 ring-white/12 transition hover:ring-acid/50 disabled:text-white/35">{phase==='confirming'?'Confirming…':'Resolve'}</button>}
+          </div>
+        </div>
+      )}
       <div className="mt-3 grid grid-cols-4 items-end gap-2 border-t border-white/8 pt-3">
         <Cell label={t('pf_entry')}><span className="text-white/85">{pos.entry.toFixed(2)}</span></Cell>
         <Cell label={t('pf_net')}><span className="text-white/85">{pos.net.toFixed(2)}</span></Cell>
@@ -302,8 +383,8 @@ function ActivityRow({ a, lang }){
   const { t } = useT();
   const m = a.marketId ? pfMkt(a.marketId) : null;
   const o = m ? pfOutcome(m, a.outcomeId) : null;
-  const meta = { buy:{i:'+',c:'text-acid bg-acid/12'}, sell:{i:'↩',c:'text-white/70 bg-white/8'}, settle:{i: a.win?'★':'×', c:a.win?'text-acid bg-acid/12':'text-down bg-down/12'}, claim:{i:'✓',c:'text-acid bg-acid/12'}, taxClaim:{i:'◆',c:'text-acid bg-acid/12'}, connect:{i:'⬡',c:'text-cool bg-cool/12'} }[a.type] || {i:'•',c:'text-white/60 bg-white/8'};
-  const label = a.type==='buy'?t('act_buy'):a.type==='sell'?t('act_sell'):a.type==='settle'?(a.win?t('act_settle_won'):t('act_settle_lost')):a.type==='claim'?'Claimed market winnings':a.type==='taxClaim'?'Claimed tax rewards':t('act_connect');
+  const meta = { buy:{i:'+',c:'text-acid bg-acid/12'}, sell:{i:'↩',c:'text-white/70 bg-white/8'}, settle:{i: a.win?'★':'×', c:a.win?'text-acid bg-acid/12':'text-down bg-down/12'}, claim:{i:'✓',c:'text-acid bg-acid/12'}, taxClaim:{i:'◆',c:'text-acid bg-acid/12'}, walletWithdraw:{i:'→',c:'text-cool bg-cool/12'}, connect:{i:'⬡',c:'text-cool bg-cool/12'} }[a.type] || {i:'•',c:'text-white/60 bg-white/8'};
+  const label = a.type==='buy'?t('act_buy'):a.type==='sell'?t('act_sell'):a.type==='settle'?(a.win?t('act_settle_won'):t('act_settle_lost')):a.type==='claim'?'Claimed market winnings':a.type==='taxClaim'?'Claimed tax rewards':a.type==='walletWithdraw'?'Wallet withdraw':t('act_connect');
   return (
     <div className="flex items-center gap-3 px-1 py-2.5">
       <span className={`grid h-8 w-8 flex-none place-items-center rounded-lg text-sm font-bold ${meta.c}`}>{meta.i}</span>
@@ -354,14 +435,9 @@ function PfEmpty({ title, sub, cta, onCta }){
 /* ---------- tax rewards ---------- */
 function TaxRewardsCard({ taxRewards, onClaimTaxRewards, onRefreshTaxRewards }){
   const [phase, setPhase] = useState('idle');
-  const claimable = Number(taxRewards?.claimableBnb || 0);
-  const canClaim = claimable > 0 && phase === 'idle' && !taxRewards?.loading;
-  const claim = async ()=>{
-    if (!canClaim) return;
-    setPhase('confirming');
-    try { await onClaimTaxRewards(); setPhase('idle'); }
-    catch(e){ console.error('[Polyflap] tax reward claim failed', e); setPhase('idle'); }
-  };
+  const claimable = 0;
+  const canClaim = false;
+  const claim = async ()=>{};
   return (
     <div className="mb-4 overflow-hidden rounded-2xl border border-acid/25 bg-ink-900 p-4">
       <div className="flex items-start justify-between gap-4">
@@ -370,7 +446,7 @@ function TaxRewardsCard({ taxRewards, onClaimTaxRewards, onRefreshTaxRewards }){
             <span className="text-acid"><Icon.bolt/></span>
             <h2 className="font-display text-xl text-white">Tax rewards</h2>
           </div>
-          <p className="mt-1 text-sm text-white/45">Claim forwarded Flap-vault BNB rewards. Requires 1000+ POLYFLAP and an active bet.</p>
+          <p className="mt-1 text-sm text-white/45">Disabled in the audited production package. Flap token/vault launch is pending, and no betting tax rewards are claimable from this contract version.</p>
         </div>
         <button onClick={onRefreshTaxRewards} disabled={taxRewards?.loading} className="rounded-lg bg-white/6 px-3 py-2 text-xs font-bold text-white/60 ring-1 ring-white/10 hover:text-acid">
           {taxRewards?.loading ? 'Syncing…' : 'Refresh'}
@@ -389,24 +465,89 @@ function TaxRewardsCard({ taxRewards, onClaimTaxRewards, onRefreshTaxRewards }){
         <a className="truncate rounded-lg bg-white/5 px-2 py-1.5 hover:text-acid" href={`https://bscscan.com/address/${FLAP_TOKEN_ADDRESS}`} target="_blank" rel="noreferrer">Token {FLAP_TOKEN_ADDRESS ? FLAP_TOKEN_ADDRESS.slice(0,6)+'…'+FLAP_TOKEN_ADDRESS.slice(-4) : 'unset'}</a>
       </div>
       <button onClick={claim} disabled={!canClaim} className={`mt-4 h-11 w-full rounded-xl font-bold transition ${canClaim?'bg-acid text-ink-950 hover:brightness-110':'bg-white/6 text-white/35 cursor-not-allowed'}`}>
-        {phase==='confirming' ? 'Confirm in wallet…' : claimable > 0 ? `Claim ${claimable.toFixed(6)} BNB rewards` : 'No tax rewards claimable yet'}
+        {phase==='confirming' ? 'Confirm in wallet…' : 'Tax rewards disabled in audited package'}
+      </button>
+    </div>
+  );
+}
+
+function WalletWithdrawCard({ wallet, onSendWalletBnb }){
+  const [to, setTo] = useState('');
+  const [amount, setAmount] = useState('');
+  const [phase, setPhase] = useState('idle');
+  const [err, setErr] = useState('');
+  const [hash, setHash] = useState('');
+  const balance = Number(wallet?.balance || 0);
+  const parsed = Number(amount || 0);
+  const canSend = !!onSendWalletBnb && /^0x[a-fA-F0-9]{40}$/.test(to.trim()) && Number.isFinite(parsed) && parsed > 0 && parsed + 0.0003 <= balance && phase !== 'confirming';
+  const setPct = (pct)=>{
+    const spendable = Math.max(0, balance - 0.0003);
+    setAmount((spendable * pct).toFixed(6).replace(/0+$/,'').replace(/\.$/,''));
+  };
+  const submit = async ()=>{
+    if (!canSend) return;
+    setErr(''); setHash(''); setPhase('confirming');
+    try {
+      const tx = await onSendWalletBnb(to.trim(), amount.trim());
+      setHash(tx);
+      setPhase('done');
+      setAmount('');
+    } catch(e){
+      setErr(e?.shortMessage || e?.message || 'Could not send BNB');
+      setPhase('idle');
+    }
+  };
+  return (
+    <div className="mb-4 rounded-2xl border border-white/10 bg-ink-900 p-4 shadow-soft">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="text-acid"><Icon.wallet/></span>
+            <h2 className="font-display text-xl text-white">Withdraw from wallet</h2>
+          </div>
+          <p className="mt-1 text-sm text-white/45">Send BNB from your connected Privy/MetaMask wallet to another wallet.</p>
+        </div>
+        <div className="rounded-xl bg-white/5 px-3 py-2 text-right">
+          <div className="text-[10px] uppercase tracking-wider text-white/35">Available</div>
+          <div className="font-mono text-sm text-white tnum">{balance.toFixed(6)} BNB</div>
+        </div>
+      </div>
+      <div className="mt-4 grid gap-3 sm:grid-cols-[1.4fr_0.8fr]">
+        <label className="block">
+          <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-white/35">Destination wallet</span>
+          <input value={to} onChange={e=>setTo(e.target.value)} placeholder="0x…" className="mt-1 h-11 w-full rounded-xl border border-white/10 bg-ink-950 px-3 font-mono text-sm text-white outline-none transition placeholder:text-white/20 focus:border-acid/50" />
+        </label>
+        <label className="block">
+          <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-white/35">Amount BNB</span>
+          <input value={amount} onChange={e=>setAmount(e.target.value)} inputMode="decimal" placeholder="0.01" className="mt-1 h-11 w-full rounded-xl border border-white/10 bg-ink-950 px-3 font-mono text-sm text-white outline-none transition placeholder:text-white/20 focus:border-acid/50" />
+        </label>
+      </div>
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        {[0.25,0.5,0.75,1].map(p=><button key={p} onClick={()=>setPct(p)} className="rounded-lg bg-white/6 px-3 py-1.5 text-xs font-bold text-white/55 ring-1 ring-white/8 hover:text-acid">{p===1?'Max - gas':`${Math.round(p*100)}%`}</button>)}
+      </div>
+      <p className="mt-3 text-xs text-white/35">Keeps a 0.0003 BNB gas buffer. The wallet will show a confirmation before sending.</p>
+      {err && <div className="mt-3 rounded-xl bg-down/10 px-3 py-2 text-sm text-down ring-1 ring-down/20">{err}</div>}
+      {hash && <a href={`https://bscscan.com/tx/${hash}`} target="_blank" rel="noreferrer" className="mt-3 block rounded-xl bg-acid/10 px-3 py-2 text-sm text-acid ring-1 ring-acid/20">Sent: {String(hash).slice(0,10)}…{String(hash).slice(-6)}</a>}
+      <button onClick={submit} disabled={!canSend} className={`mt-4 h-11 w-full rounded-xl font-bold transition ${canSend?'bg-acid text-ink-950 hover:brightness-110':'bg-white/6 text-white/35 cursor-not-allowed'}`}>
+        {phase==='confirming' ? 'Confirm in wallet…' : 'Withdraw BNB to wallet'}
       </button>
     </div>
   );
 }
 
 /* ---------- page ---------- */
-function PortfolioPage({ wallet, onConnect, onDisconnect, positions, activity, onSell, taxRewards, onClaimTaxRewards, onRefreshTaxRewards, setRoute }){
+function PortfolioPage({ wallet, onConnect, onDisconnect, positions, activity, onSell, onSendWalletBnb, onResolve, onClaim, taxRewards, onClaimTaxRewards, onRefreshTaxRewards, setRoute }){
   const { t, lang } = useT();
   const [tab, setTab] = useState('open');
   const [sharing, setSharing] = useState(false);
   const [shareErr, setShareErr] = useState(false);
   const shareRef = useRef(null);
+  const open = useMemo(()=>positions.filter(p=>p.status==='open'), [positions]);
+  const settled = useMemo(()=>positions.filter(p=>p.status!=='open').sort((a,b)=>(b.settledAt||0)-(a.settledAt||0)), [positions]);
+  const { states: settlementStates, refresh: refreshSettlementStates } = usePortfolioSettlementStates(wallet, open);
   if (!wallet) return <PfConnectEmpty onConnect={onConnect}/>;
 
   const stats = computeStats(positions, wallet);
-  const open = positions.filter(p=>p.status==='open');
-  const settled = positions.filter(p=>p.status!=='open').sort((a,b)=>(b.settledAt||0)-(a.settledAt||0));
 
   // share via the server-rendered OG card: /api/share carries the meta tags so X renders the card (with the X photo)
   const handleShare = async ()=>{
@@ -460,8 +601,7 @@ function PortfolioPage({ wallet, onConnect, onDisconnect, positions, activity, o
 
         <div className="mt-7 grid gap-6 pb-24 lg:grid-cols-[1fr_360px]">
           <div>
-            <TaxRewardsCard taxRewards={taxRewards} onClaimTaxRewards={onClaimTaxRewards} onRefreshTaxRewards={onRefreshTaxRewards}/>
-            {/* sub-tabs */}
+            {/* positions first */}
             <div className="mb-4 flex gap-1.5">
               {[['open', t('pf_open_pos'), open.length],['history', t('pf_settled'), settled.length]].map(([k,label,count])=>(
                 <button key={k} onClick={()=>setTab(k)}
@@ -471,16 +611,21 @@ function PortfolioPage({ wallet, onConnect, onDisconnect, positions, activity, o
               ))}
             </div>
 
-            {tab==='open' && (
-              open.length===0
-                ? <PfEmpty title={t('pf_no_open')} sub={t('pf_no_open_sub')} cta={t('pf_explore')} onCta={()=>setRoute('markets')}/>
-                : <div className="grid gap-3">{open.map(p=><PositionCard key={p.id} pos={p} onSell={onSell} lang={lang}/>)}</div>
-            )}
-            {tab==='history' && (
-              settled.length===0
-                ? <PfEmpty title={t('pf_no_hist')}/>
-                : <div className="grid gap-2.5">{settled.map(p=><SettledRow key={p.id} pos={p} lang={lang}/>)}</div>
-            )}
+            <div className="mb-4">
+              {tab==='open' && (
+                open.length===0
+                  ? <PfEmpty title={t('pf_no_open')} sub={t('pf_no_open_sub')} cta={t('pf_explore')} onCta={()=>setRoute('markets')}/>
+                  : <div className="grid gap-3">{open.map(p=><PositionCard key={p.id} pos={p} settlement={settlementStates[p.id]} onSell={onSell} onResolve={onResolve} onClaim={onClaim} onRefreshSettlement={refreshSettlementStates} lang={lang}/>)}</div>
+              )}
+              {tab==='history' && (
+                settled.length===0
+                  ? <PfEmpty title={t('pf_no_hist')}/>
+                  : <div className="grid gap-2.5">{settled.map(p=><SettledRow key={p.id} pos={p} lang={lang}/>)}</div>
+              )}
+            </div>
+
+            <TaxRewardsCard taxRewards={taxRewards} onClaimTaxRewards={onClaimTaxRewards} onRefreshTaxRewards={onRefreshTaxRewards}/>
+            <WalletWithdrawCard wallet={wallet} onSendWalletBnb={onSendWalletBnb}/>
           </div>
 
           <ActivityFeed activity={activity} lang={lang}/>

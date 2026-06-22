@@ -74,6 +74,11 @@ export const bettingAbi = [
     outputs: [{ name: '', type: 'uint256' }],
   },
   {
+    type: 'function', name: 'claimed', stateMutability: 'view',
+    inputs: [{ name: 'marketId', type: 'uint256' }, { name: 'user', type: 'address' }],
+    outputs: [{ name: '', type: 'bool' }],
+  },
+  {
     type: 'function', name: 'claimTaxRewards', stateMutability: 'nonpayable',
     inputs: [],
     outputs: [],

@@ -5,7 +5,7 @@ import fs from 'node:fs';
 
 const RPC = process.env.BSC_RPC_URL || 'https://bsc-dataseed.binance.org';
 const PRIVATE_KEY = process.env.PRIVATE_KEY || process.env.BSC_PRIVATE_KEY;
-const BETTING_VAULT = process.env.BETTING_VAULT || '0x5E14Fd7faC9a3D4386621c1F44BDdB631ee00D7b';
+const BETTING_VAULT = process.env.BETTING_VAULT || '0xfc069b80829304BD7dbC52772c3645BCF41B0c59';
 const CONTRACT_OUTPUT = process.env.CONTRACT_OUTPUT || '/mnt/c/Users/nacho/Desktop/POLYFLAP CONTRACTS 1.2/standard-json-output-polyflap-current.json';
 const FIXTURE_DATES = process.env.FIXTURE_DATES || 'src/data/fixture-dates.ts';
 const CUTOFF = Math.floor(Date.parse(process.env.CUTOFF_ISO || '2026-06-18T00:00:00Z') / 1000);

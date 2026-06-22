@@ -151,13 +151,39 @@ function OutcomeButton({ market, outcome, selected, onPick, compact, lang, disab
 }
 
 /* ---------- market card (teams + title only) ---------- */
-function MarketCard({ market, selection, onPick, lang, state }){
+function MarketCard({ market, selection, onPick, lang, state, wallet, onConnect, onResolve, onClaim, onRefresh }){
   // Do not lock the UI while BSC state is still loading or an RPC call fails.
   // Unknown state should remain browsable/selectable; only a confirmed closed/resolved
   // on-chain state disables outcomes.
+  const [phase, setPhase] = useState('idle');
   const blocked = state ? !isOpenForBetting(state) : false;
+  const canResolve = canResolveState(state);
+  const hasClaim = !!state && state.claimableBnb > 0;
+  const awaitingResult = state && blocked && !state.resolved && !state.cancelled && state.closedByTime && !state.viewerResolved;
   const isSel = (oid)=> selection && selection.marketId===market.id && selection.outcomeId===oid;
-  const statusLabel = state ? state.resolved ? `Resolved: ${state.viewerTeamName || teamName(state.winningTeamId, lang)}` : state.viewerResolved && state.closedByTime ? `Result: ${state.viewerTeamName}` : state.closedByTime ? 'Closed' : state.statusName : 'Loading chain state';
+  const statusLabel = state ? state.resolved ? `Resolved: ${state.viewerTeamName || teamName(state.winningTeamId, lang)}` : state.viewerResolved && state.closedByTime ? `Ready to resolve: ${state.viewerTeamName}` : state.closedByTime ? 'Closed' : state.statusName : 'Loading chain state';
+  const doResolve = async ()=>{
+    if (!canResolve || phase!=='idle') return;
+    if (!wallet) { onConnect?.(); return; }
+    setPhase('confirming');
+    try {
+      await onResolve?.(market.marketId);
+      await onRefresh?.();
+    } finally {
+      setPhase('idle');
+    }
+  };
+  const doClaim = async ()=>{
+    if (!hasClaim || phase!=='idle') return;
+    if (!wallet) { onConnect?.(); return; }
+    setPhase('confirming');
+    try {
+      await onClaim?.(market.marketId);
+      await onRefresh?.();
+    } finally {
+      setPhase('idle');
+    }
+  };
   const head = (
     <div className="min-w-0">
       <div className="flex items-center gap-2">
@@ -201,6 +227,35 @@ function MarketCard({ market, selection, onPick, lang, state }){
   return (
     <div className="rounded-2xl border border-white/8 bg-ink-900 p-4 transition-colors hover:border-white/15 sm:p-5">
       {head}
+      {canResolve && (
+        <div className="mt-4 rounded-xl border border-acid/25 bg-acid/10 p-3">
+          <div className="text-xs font-bold uppercase tracking-[0.16em] text-acid">Result ready</div>
+          <div className="mt-1 text-sm text-white/75">WorldCupViewer result: <span className="font-bold text-white">{state.viewerTeamName || state.viewerTeamId}</span></div>
+          <button
+            onClick={doResolve}
+            disabled={phase!=='idle'}
+            className="mt-3 h-10 w-full rounded-xl bg-acid font-bold uppercase tracking-wide text-ink-950 transition hover:bg-acid-600 disabled:cursor-not-allowed disabled:bg-acid/35 disabled:text-ink-950/45">
+            {phase==='confirming' ? 'Confirming…' : wallet ? 'Resolve market' : 'Connect to resolve'}
+          </button>
+        </div>
+      )}
+      {hasClaim && (
+        <div className="mt-4 rounded-xl border border-acid/30 bg-acid/12 p-3">
+          <div className="text-xs font-bold uppercase tracking-[0.16em] text-acid">Winning position</div>
+          <div className="mt-1 text-sm text-white/75">Claimable payout: <span className="font-mono font-bold text-white">{state.claimableBnb.toFixed(8)} BNB</span></div>
+          <button
+            onClick={doClaim}
+            disabled={phase!=='idle'}
+            className="mt-3 h-10 w-full rounded-xl bg-acid font-bold uppercase tracking-wide text-ink-950 transition hover:bg-acid-600 disabled:cursor-not-allowed disabled:bg-acid/35 disabled:text-ink-950/45">
+            {phase==='confirming' ? 'Confirming…' : 'Claim winnings'}
+          </button>
+        </div>
+      )}
+      {awaitingResult && (
+        <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.04] p-3 text-sm text-white/55">
+          Betting is closed. Waiting for the official WorldCupViewer result.
+        </div>
+      )}
       {body}
     </div>
   );
@@ -571,7 +626,7 @@ function MarketsPage({ wallet, onConnect, onBuy, onSell, onClaim, onResolve, pos
             {filtered.length===0
               ? <EmptyState onClear={()=>{ setQ(''); setTab('groups'); }}/>
               : filtered.map(m=>(
-                  <MarketCard key={m.id} market={m} state={marketStates[m.id]} selection={selection} onPick={onPick} lang={lang}/>
+                  <MarketCard key={m.id} market={m} state={marketStates[m.id]} selection={selection} onPick={onPick} lang={lang} wallet={wallet} onConnect={onConnect} onResolve={onResolve} onClaim={onClaim} onRefresh={refreshMarketStates}/>
                 ))}
           </div>
           {/* desktop ticket */}

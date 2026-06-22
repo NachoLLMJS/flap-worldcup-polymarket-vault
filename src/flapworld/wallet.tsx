@@ -12,7 +12,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { PrivyProvider, usePrivy, useWallets } from '@privy-io/react-auth';
 import { bsc } from 'viem/chains';
-import { createPublicClient, createWalletClient, custom, http, parseEther, formatEther, parseAbiItem } from 'viem';
+import { createPublicClient, createWalletClient, custom, http, parseEther, formatEther, parseAbiItem, isAddress } from 'viem';
 import { PRIVY_APP_ID, PRIVY_CLIENT_ID, BETTING_VAULT_ADDRESS, BSC_RPC_URL, BSC_CHAIN_ID, BETTING_VAULT_DEPLOY_BLOCK } from '../lib/env';
 import { pickBscWallet, pickTwitterProfile, type BscWalletLike } from '../features/wallet/walletHelpers';
 import { bettingAbi } from './abi';
@@ -212,6 +212,7 @@ type WalletApi = {
   disconnect: () => void;
   buyPosition: (p: { marketId:number; teamId:number; amount:number; key:string; outcomeId:string }) => Promise<void> | void;
   sellPosition: (positionId: string) => Promise<void> | void;
+  sendWalletBnb: (to: string, amount: string) => Promise<string> | string;
   claimMarket: (marketId: number) => Promise<void> | void;
   claimTaxRewards: () => Promise<void> | void;
   refreshTaxRewards: () => Promise<void> | void;
@@ -257,6 +258,17 @@ export function MockWalletProvider({ children }: { children: React.ReactNode }){
     });
   },[]);
 
+  const sendWalletBnb = useCallback((to: string, amount: string)=>{
+    const value = Number(amount);
+    if (!/^0x[a-fA-F0-9]{40}$/.test(to)) throw new Error('Enter a valid destination wallet');
+    if (!Number.isFinite(value) || value <= 0) throw new Error('Enter a valid BNB amount');
+    if (wallet && value > wallet.balance) throw new Error('Not enough BNB in wallet');
+    const hash = txHash();
+    setWallet((w: any)=> w ? { ...w, balance:+Math.max(0, w.balance-value).toFixed(6) } : w);
+    setActivity(a=>[{ id:'a'+(_aid++), type:'walletWithdraw', amount:value, to, ts:Date.now(), tx:hash }, ...a]);
+    return hash;
+  },[wallet]);
+
   const claimMarket = useCallback((marketId: number)=>{
     setActivity(a=>[{ id:'a'+(_aid++), type:'claim', marketId:'m'+marketId, amount:0, ts:Date.now(), tx:txHash() }, ...a]);
   },[]);
@@ -270,7 +282,7 @@ export function MockWalletProvider({ children }: { children: React.ReactNode }){
   const refreshTaxRewards = useCallback(()=>{},[]);
   const taxRewards = useMemo(()=>({ claimableBnb: 0, claimableWei: '0', currentEpoch: null, activeBets: 0, totalUserWageredBnb: 0, loading: false, error: null }),[]);
 
-  const api = useMemo<WalletApi>(()=>({ mode:'mock', wallet, positions, activity, connect, disconnect, buyPosition, sellPosition, claimMarket, claimTaxRewards, refreshTaxRewards, taxRewards, resolveMarket }),[wallet,positions,activity,connect,disconnect,buyPosition,sellPosition,claimMarket,claimTaxRewards,refreshTaxRewards,taxRewards,resolveMarket]);
+  const api = useMemo<WalletApi>(()=>({ mode:'mock', wallet, positions, activity, connect, disconnect, buyPosition, sellPosition, sendWalletBnb, claimMarket, claimTaxRewards, refreshTaxRewards, taxRewards, resolveMarket }),[wallet,positions,activity,connect,disconnect,buyPosition,sellPosition,sendWalletBnb,claimMarket,claimTaxRewards,refreshTaxRewards,taxRewards,resolveMarket]);
   return <WalletContext.Provider value={api}>{children}</WalletContext.Provider>;
 }
 
@@ -478,6 +490,7 @@ function LiveWalletProvider({ children }: { children: React.ReactNode }){
     const [account] = await client.getAddresses();
     await publicClient.simulateContract({ account, address: BETTING_VAULT_ADDRESS, abi: bettingAbi, functionName:'resolveMarket', args:[BigInt(marketId)] });
     const hash = await client.writeContract({ account, address: BETTING_VAULT_ADDRESS, abi: bettingAbi, functionName:'resolveMarket', args:[BigInt(marketId)] });
+    await publicClient.waitForTransactionReceipt({ hash });
     setActivity(a=>[{ id:'a'+(_aid++), type:'resolve', marketId:'m'+marketId, amount:0, ts:Date.now(), tx: shortAddr(hash) }, ...a]);
     refreshBalance();
   },[bscWallet, refreshBalance]);
@@ -488,6 +501,7 @@ function LiveWalletProvider({ children }: { children: React.ReactNode }){
     const [account] = await client.getAddresses();
     await publicClient.simulateContract({ account, address: BETTING_VAULT_ADDRESS, abi: bettingAbi, functionName:'claim', args:[BigInt(marketId)] });
     const hash = await client.writeContract({ account, address: BETTING_VAULT_ADDRESS, abi: bettingAbi, functionName:'claim', args:[BigInt(marketId)] });
+    await publicClient.waitForTransactionReceipt({ hash });
     setActivity(a=>[{ id:'a'+(_aid++), type:'claim', marketId:'m'+marketId, amount:0, ts:Date.now(), tx: shortAddr(hash) }, ...a]);
     refreshBalance();
   },[bscWallet, refreshBalance]);
@@ -503,7 +517,25 @@ function LiveWalletProvider({ children }: { children: React.ReactNode }){
     refreshBalance();
   },[bscWallet, refreshBalance, refreshTaxRewards, taxRewards.claimableBnb]);
 
-  const api = useMemo<WalletApi>(()=>({ mode:'live', wallet, positions, activity, connect, disconnect, buyPosition, sellPosition, claimMarket, claimTaxRewards, refreshTaxRewards, taxRewards, resolveMarket }),[wallet,positions,activity,connect,disconnect,buyPosition,sellPosition,claimMarket,claimTaxRewards,refreshTaxRewards,taxRewards,resolveMarket]);
+  const sendWalletBnb = useCallback(async (to: string, amount: string)=>{
+    const destination = String(to || '').trim();
+    if (!isAddress(destination)) throw new Error('Enter a valid destination wallet');
+    const value = parseEther(String(amount || '0'));
+    if (value <= 0n) throw new Error('Enter a valid BNB amount');
+    const client = await getWalletClient();
+    const [account] = await client.getAddresses();
+    const balanceWei = await publicClient.getBalance({ address: account });
+    // Keep a conservative gas buffer so users do not strand the tx by sending their whole balance.
+    const gasReserve = parseEther('0.0003');
+    if (value + gasReserve > balanceWei) throw new Error('Amount too high. Leave at least 0.0003 BNB for gas.');
+    const hash = await client.sendTransaction({ account, to: destination as `0x${string}`, value, chain: bsc });
+    await publicClient.waitForTransactionReceipt({ hash });
+    setActivity(a=>[{ id:'a'+(_aid++), type:'walletWithdraw', amount:Number(formatEther(value)), to:destination, ts:Date.now(), tx: shortAddr(hash) }, ...a]);
+    refreshBalance();
+    return hash;
+  },[bscWallet, refreshBalance]);
+
+  const api = useMemo<WalletApi>(()=>({ mode:'live', wallet, positions, activity, connect, disconnect, buyPosition, sellPosition, sendWalletBnb, claimMarket, claimTaxRewards, refreshTaxRewards, taxRewards, resolveMarket }),[wallet,positions,activity,connect,disconnect,buyPosition,sellPosition,sendWalletBnb,claimMarket,claimTaxRewards,refreshTaxRewards,taxRewards,resolveMarket]);
   return <WalletContext.Provider value={api}>{children}</WalletContext.Provider>;
 }
 

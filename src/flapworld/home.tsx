@@ -7,6 +7,15 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useT, marketTitle, teamName } from './i18n';
 import { Logo, LangToggle, ConnectButton, Btn, Icon, FlagChip } from './components';
+import {
+  BETTING_VAULT_ADDRESS,
+  FLAP_TOKEN_ADDRESS,
+  FLAP_VAULT_BEACON_ADDRESS,
+  FLAP_VAULT_FACTORY_ADDRESS,
+  FLAP_VAULT_IMPLEMENTATION_ADDRESS,
+  VAULT_ADDRESS,
+  WORLD_CUP_VIEWER_ADDRESS,
+} from '../lib/env';
 import { MATCHES, GROUP_MARKETS, TOURNAMENT_MARKET, ALL_MARKETS, TEAM, marketStatus, fmtPct, fmtBNB } from './data';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -474,18 +483,20 @@ function AboutPage({ setRoute }){
     { k:t2('Main wallet','主钱包'), v:'MetaMask / BNB wallets' },
     { k:t2('Markets','市场'), v:t2('World Cup 2026','2026 世界杯') },
     { k:t2('Leaderboard','排行榜'), v:t2('On-chain top bettors','链上投注排行榜') },
+    { k:t2('Factory','工厂'), v:t2('Audited production','已审计正式版') },
+    { k:t2('Token/Vault','代币/金库'), v:t2('Pending Flap launch','等待 Flap 发射') },
     { k:t2('Custody','托管'), v:t2('Non-custodial','非托管') },
   ];
   const productCards = [
     {
       n:'01',
-      title:t2('World Cup markets with real wallet signing','真实钱包签名的世界杯市场'),
-      body:t2('Users connect a BNB Chain wallet, choose a World Cup market and sign each position from their own wallet. The app never places a bet without a wallet confirmation.','用户连接 BNB Chain 钱包，选择世界杯市场，并从自己的钱包签名每个仓位。应用不会在没有钱包确认的情况下下注。'),
+      title:t2('Audited World Cup markets','已审计的世界杯市场'),
+      body:t2('Polyflap now uses the audited production contract set on BNB Chain: a Flap-compatible factory, beacon-backed vault implementation and auxiliary betting vault. The final POLYFLAP token and its Flap vault are still pending until the Flap launch creates them.','Polyflap 现在使用 BNB Chain 上已审计的正式合约：兼容 Flap 的工厂、Beacon 支持的金库实现，以及辅助投注金库。最终 POLYFLAP 代币及其 Flap 金库仍需等待 Flap 发射创建。'),
     },
     {
       n:'02',
-      title:t2('Wallet-first access','优先钱包登录'),
-      body:t2('The current flow is focused on MetaMask and other BNB-compatible wallets through Privy. Social login can stay optional, but wallet login is the primary path for the live product.','当前流程通过 Privy 重点支持 MetaMask 和其他兼容 BNB 的钱包。社交登录可以作为可选入口，但钱包登录是线上产品的主要路径。'),
+      title:t2('World Cup positions with real wallet signing','真实钱包签名的世界杯仓位'),
+      body:t2('Users connect a BNB Chain wallet, choose a World Cup market and sign each BNB-backed position from their own wallet. The app never places a bet without wallet confirmation.','用户连接 BNB Chain 钱包，选择世界杯市场，并从自己的钱包签名每个 BNB 支持的仓位。应用不会在没有钱包确认的情况下下注。'),
     },
     {
       n:'03',
@@ -495,7 +506,7 @@ function AboutPage({ setRoute }){
     {
       n:'04',
       title:t2('Public leaderboard','公开排行榜'),
-      body:t2('The Leaderboard ranks real wallets from BNB Chain contract reads. It shows top bettors, active bet count, latest market activity and the current reward epoch without needing a private database.','Leaderboard 通过 BNB Chain 合约读取真实钱包排名。它显示顶级投注者、活跃投注数量、最新市场活动和当前奖励周期，不需要私有数据库。'),
+      body:t2('The Leaderboard ranks real wallets from BNB Chain contract reads. It shows top bettors and market activity without needing a private database. Reward forwarding/claiming is disabled in the current audited package, so leaderboard data is informational.','Leaderboard 通过 BNB Chain 合约读取真实钱包排名。它显示顶级投注者和市场活动，不需要私有数据库。当前已审计版本禁用了奖励转发/领取，因此排行榜数据仅供信息展示。'),
     },
   ];
   const userFlow = [
@@ -518,7 +529,7 @@ function AboutPage({ setRoute }){
   ];
   const chapters = [
     { n:'01', t:t2('What Polyflap is now','现在的 Polyflap 是什么'), ps:[
-      t2('Polyflap is a wallet-first World Cup prediction market running on BNB Chain. It is built around markets, signed BNB positions, a user Portfolio and a public on-chain Leaderboard.','Polyflap 是运行在 BNB Chain 上、优先使用钱包的世界杯预测市场。它围绕市场、签名 BNB 仓位、用户 Portfolio 和公开链上 Leaderboard 构建。'),
+      t2('Polyflap is an audited, wallet-first World Cup prediction market running on BNB Chain. The production factory and auxiliary betting vault are deployed; the final POLYFLAP token and Flap vault will be added after the Flap launch creates them.','Polyflap 是运行在 BNB Chain 上、已审计、优先使用钱包的世界杯预测市场。正式工厂和辅助投注金库已部署；最终 POLYFLAP 代币和 Flap 金库将在 Flap 发射创建后加入。'),
       t2('The product should feel simple for normal football fans, but the important money movement remains verifiable through wallet signatures and public chain reads.','产品应让普通足球球迷也能轻松使用，同时关键资金流通过钱包签名和公开链上读取保持可验证。'),
     ] },
     { n:'02', t:t2('How users enter','用户如何进入'), ps:[
@@ -527,7 +538,7 @@ function AboutPage({ setRoute }){
     ] },
     { n:'03', t:t2('What users can do','用户可以做什么'), ps:[
       t2('Users can browse World Cup markets, place BNB-backed positions, monitor active positions, withdraw eligible open positions, and claim winning or refundable outcomes after settlement.','用户可以浏览世界杯市场、开立 BNB 支持的仓位、查看活跃仓位、撤回符合条件的开放仓位，并在结算后领取获胜或可退款结果。'),
-      t2('Portfolio is the private management area for the connected wallet. Leaderboard is the public area for top-bettor activity and reward-epoch visibility.','Portfolio 是连接钱包的私人管理区域。Leaderboard 是展示顶级投注者活动和奖励周期的公开区域。'),
+      t2('Portfolio is the private management area for the connected wallet. Leaderboard is the public area for top-bettor activity and market visibility. In the audited production package, token-tax reward forwarding and betting reward claims are intentionally disabled, so reward panels should remain hidden or zero until the product design changes.','Portfolio 是连接钱包的私人管理区域。Leaderboard 是展示顶级投注者活动和市场可见性的公开区域。在已审计正式版本中，代币税奖励转发和投注奖励领取被有意禁用，因此奖励面板应保持隐藏或为零，直到产品设计改变。'),
     ] },
     { n:'04', t:t2('How funds and records work','资金和记录如何运作'), ps:[
       t2('Polyflap is non-custodial: customers keep their keys, and betting actions are transactions they approve from their own wallet. The app itself is not a deposit account and does not hold customer keys.','Polyflap 是非托管产品：客户保留自己的私钥，投注操作是他们从自己钱包批准的交易。应用本身不是充值账户，也不持有客户私钥。'),
@@ -540,18 +551,29 @@ function AboutPage({ setRoute }){
   ];
   const roadmap = [
     {
-      step:t2('Stabilize wallet-first flow','稳定优先钱包流程'),
-      text:t2('Keep the live product focused on MetaMask/BNB wallet access, clear transaction states and reliable Portfolio reads.','让线上产品专注于 MetaMask/BNB 钱包入口、清晰交易状态和可靠的 Portfolio 读取。'),
+      step:t2('Finish Flap token launch','完成 Flap 代币发射'),
+      text:t2('When the real POLYFLAP token is launched through Flap, the final token and vault addresses will be added to the app and verified on-chain.','当真正的 POLYFLAP 代币通过 Flap 发射后，最终代币和金库地址会添加到应用并进行链上验证。'),
     },
     {
-      step:t2('Improve on-chain visibility','提升链上可见性'),
-      text:t2('Expand the Leaderboard and reward-epoch views around real contract data, keeping public stats easy to understand.','围绕真实合约数据扩展 Leaderboard 和奖励周期视图，让公开统计易于理解。'),
+      step:t2('Seed and open production markets','创建并开放正式市场'),
+      text:t2('After contract wiring is complete, World Cup markets can be seeded and opened with clear close times, settlement rules and portfolio actions.','合约连接完成后，可以创建并开放世界杯市场，包含清晰的关闭时间、结算规则和 Portfolio 操作。'),
     },
     {
-      step:t2('More market types later','之后添加更多市场类型'),
-      text:t2('After the World Cup flow is solid, Polyflap can add selected sports or event markets where rules, settlement and risk controls are clear.','世界杯流程稳定后，Polyflap 可以添加规则、结算和风险控制清晰的精选体育或事件市场。'),
+      step:t2('Low Risk badge after launch','上线后申请 Low Risk 标记'),
+      text:t2('Once the real token is live, Flap can apply the Low Risk badge to the launched token/vault flow.','真实代币上线后，Flap 可以为发射后的代币/金库流程添加 Low Risk 标记。'),
     },
   ];
+  const contractRows = [
+    ['Factory', FLAP_VAULT_FACTORY_ADDRESS],
+    ['Implementation', FLAP_VAULT_IMPLEMENTATION_ADDRESS],
+    ['Beacon', FLAP_VAULT_BEACON_ADDRESS],
+    ['Betting vault', BETTING_VAULT_ADDRESS],
+    ['WorldCupViewer', WORLD_CUP_VIEWER_ADDRESS],
+    ['POLYFLAP token', FLAP_TOKEN_ADDRESS || 'Pending Flap launch'],
+    ['Flap vault', VAULT_ADDRESS || 'Pending Flap launch'],
+  ];
+  const short = (v)=> typeof v === 'string' && v.startsWith('0x') ? `${v.slice(0,6)}…${v.slice(-4)}` : v;
+  const scan = (v)=> typeof v === 'string' && v.startsWith('0x') ? `https://bscscan.com/address/${v}` : undefined;
   return (
     <main className="bg-ink-950 pt-20">
       {/* hero */}
@@ -576,13 +598,31 @@ function AboutPage({ setRoute }){
 
       {/* spec sheet */}
       <section className="border-b border-white/8 bg-ink-950">
-        <div className="mx-auto grid max-w-[1320px] grid-cols-2 divide-x divide-y divide-white/8 sm:grid-cols-3 lg:grid-cols-6 lg:divide-y-0">
+        <div className="mx-auto grid max-w-[1320px] grid-cols-2 divide-x divide-y divide-white/8 sm:grid-cols-4 lg:grid-cols-8 lg:divide-y-0">
           {specs.map((s,i)=>(
             <Reveal key={i} delay={i*60} className="px-5 py-7">
               <div className="text-[11px] font-semibold uppercase tracking-wider text-white/40">{s.k}</div>
               <div className="font-mono mt-1.5 text-sm text-acid">{s.v}</div>
             </Reveal>
           ))}
+        </div>
+      </section>
+
+      {/* contract status */}
+      <section className="border-b border-white/8 bg-ink-950 py-12 sm:py-16">
+        <div className="mx-auto max-w-[1320px] px-5 sm:px-6">
+          <Reveal>
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-acid">{t2('Production contracts','正式合约')}</span>
+            <h2 className="font-display mt-3 text-4xl leading-[0.95] text-white sm:text-5xl">{t2('Audited factory is live. Token and vault are next.','已审计工厂已上线。代币和金库下一步。')}</h2>
+            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/50">{t2('These are the active BNB Chain contracts the app is wired to. The final POLYFLAP token and Flap vault stay pending until the real Flap launch creates them.','这些是应用当前连接的 BNB Chain 合约。最终 POLYFLAP 代币和 Flap 金库会保持待定，直到真实 Flap 发射创建它们。')}</p>
+          </Reveal>
+          <div className="mt-8 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+            {contractRows.map(([label,value])=>{
+              const href = scan(value);
+              const body = <><div className="text-[10px] uppercase tracking-wider text-white/35">{label}</div><div className="mt-1 font-mono text-sm text-acid">{short(value)}</div></>;
+              return href ? <a key={label} href={href} target="_blank" rel="noreferrer" className="rounded-2xl border border-white/8 bg-ink-900 p-4 transition hover:border-acid/40">{body}</a> : <div key={label} className="rounded-2xl border border-white/8 bg-ink-900 p-4">{body}</div>;
+            })}
+          </div>
         </div>
       </section>
 

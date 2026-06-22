@@ -48,7 +48,7 @@ function IntroVideo({ onDone }: { onDone: () => void }){
 function App(){
   const [showIntro, setShowIntro] = useState(true);
   const [route, setRoute] = useState<string>(()=> sessionStorage.getItem('fw_route') || 'home');
-  const { wallet, positions, activity, connect, disconnect, buyPosition, sellPosition, claimMarket, claimTaxRewards, taxRewards, refreshTaxRewards, resolveMarket } = useWallet();
+  const { wallet, positions, activity, connect, disconnect, buyPosition, sellPosition, sendWalletBnb, claimMarket, claimTaxRewards, taxRewards, refreshTaxRewards, resolveMarket } = useWallet();
 
   const go = useCallback((r: string)=>{
     setRoute(r);
@@ -63,7 +63,7 @@ function App(){
       {route==='home' && <HomePage setRoute={go} />}
       {route==='markets' && <MarketsPage wallet={wallet} onConnect={connect} positions={positions} onBuy={buyPosition} onSell={sellPosition} onClaim={claimMarket} onResolve={resolveMarket} />}
       {route==='leaderboard' && <LeaderboardPage setRoute={go} />}
-      {route==='portfolio' && <PortfolioPage wallet={wallet} onConnect={connect} onDisconnect={disconnect} positions={positions} activity={activity} onSell={sellPosition} taxRewards={taxRewards} onClaimTaxRewards={claimTaxRewards} onRefreshTaxRewards={refreshTaxRewards} setRoute={go} />}
+      {route==='portfolio' && <PortfolioPage wallet={wallet} onConnect={connect} onDisconnect={disconnect} positions={positions} activity={activity} onSell={sellPosition} onSendWalletBnb={sendWalletBnb} onResolve={resolveMarket} onClaim={claimMarket} taxRewards={taxRewards} onClaimTaxRewards={claimTaxRewards} onRefreshTaxRewards={refreshTaxRewards} setRoute={go} />}
       {route==='about' && <AboutPage setRoute={go} />}
     </>
   );

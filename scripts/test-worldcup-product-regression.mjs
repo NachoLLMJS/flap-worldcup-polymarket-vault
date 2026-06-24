@@ -70,6 +70,8 @@ assert.match(main, /withdrawUnlockTimestamp[\s\S]*WITHDRAW_COOLDOWN_SECONDS/, 'w
 assert.match(main, /userAddress/, 'persisted bet activity must be scoped to the connected wallet');
 assert.match(main, /marketFixtures|ALL_MARKETS/, 'web must expose the full WorldCupViewer market catalog, not a tiny preview');
 assert.match(main, /WorldCupViewer/, 'web must frame settlement as on-chain via WorldCupViewer');
+assert.match(main, /Date\.now\(\) >= localMarket\.closeTime/, 'buy path must refuse stale real-fixture matches before asking the wallet to sign');
+assert.match(main, /isOpenForBetting\s*=\s*\(s, m\)/, 'markets UI must combine on-chain state with local real fixture close time');
 
 // Stale dev/legacy framing must not reappear in the public client.
 assert.doesNotMatch(main, /Real integration status/i, 'client UI must not expose the dev integration-status section');

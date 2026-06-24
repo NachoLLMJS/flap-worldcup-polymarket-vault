@@ -23,7 +23,14 @@ const viewerAbi = parseAbi([
 ]);
 const readClient = createPublicClient({ chain: bsc, transport: http(BSC_RPC_URL || 'https://bsc-dataseed.binance.org') });
 const viewerAddress = WORLD_CUP_VIEWER_ADDRESS || '0x00036192958C2aaAF9F445d3Cdc2979995EA333e';
-const isOpenForBetting = (s)=> s && s.statusName === 'Open' && Math.floor(Date.now()/1000) < s.closeTime;
+const isOpenForBetting = (s, m)=> {
+  const nowMs = Date.now();
+  // The contract state is the final execution gate, but match fixtures also
+  // carry the real kickoff/close time. Keep the website stricter than a
+  // mis-timed on-chain market so stale fixtures cannot be bet from the UI.
+  if (m?.closeTime && nowMs >= m.closeTime) return false;
+  return s && s.statusName === 'Open' && Math.floor(nowMs/1000) < s.closeTime;
+};
 const canResolveState = (s)=> s && (s.statusName === 'Locked' || (s.statusName === 'Open' && Math.floor(Date.now()/1000) >= s.closeTime)) && Math.floor(Date.now()/1000) >= s.resolveAfter && s.viewerResolved && !s.resolved;
 function fmtDuration(ms){
   const s = Math.max(0, Math.ceil(ms/1000));
@@ -156,12 +163,13 @@ function MarketCard({ market, selection, onPick, lang, state, wallet, onConnect,
   // Unknown state should remain browsable/selectable; only a confirmed closed/resolved
   // on-chain state disables outcomes.
   const [phase, setPhase] = useState('idle');
-  const blocked = state ? !isOpenForBetting(state) : false;
+  const blocked = state ? !isOpenForBetting(state, market) : Date.now() >= market.closeTime;
   const canResolve = canResolveState(state);
   const hasClaim = !!state && state.claimableBnb > 0;
   const awaitingResult = state && blocked && !state.resolved && !state.cancelled && state.closedByTime && !state.viewerResolved;
   const isSel = (oid)=> selection && selection.marketId===market.id && selection.outcomeId===oid;
-  const statusLabel = state ? state.resolved ? `Resolved: ${state.viewerTeamName || teamName(state.winningTeamId, lang)}` : state.viewerResolved && state.closedByTime ? `Ready to resolve: ${state.viewerTeamName}` : state.closedByTime ? 'Closed' : state.statusName : 'Loading chain state';
+  const localClosed = Date.now() >= market.closeTime;
+  const statusLabel = state ? state.resolved ? `Resolved: ${state.viewerTeamName || teamName(state.winningTeamId, lang)}` : state.viewerResolved && state.closedByTime ? `Ready to resolve: ${state.viewerTeamName}` : (state.closedByTime || localClosed) ? 'Closed' : state.statusName : localClosed ? 'Closed' : 'Loading chain state';
   const doResolve = async ()=>{
     if (!canResolve || phase!=='idle') return;
     if (!wallet) { onConnect?.(); return; }
@@ -285,7 +293,7 @@ function TicketPanel({ market, outcome, wallet, onConnect, onBuy, onSell, onClai
   const amt = parseFloat(amount) || 0;
   const fee = amt * FEE_RATE;
   const net = amt - fee;
-  const marketOpen = isOpenForBetting(marketState);
+  const marketOpen = isOpenForBetting(marketState, market);
   const canResolve = canResolveState(marketState);
   const hasClaim = !!marketState && marketState.claimableBnb > 0;
   const insufficient = wallet && amt > wallet.balance + 1e-9;

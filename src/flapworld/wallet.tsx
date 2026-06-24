@@ -424,6 +424,8 @@ function LiveWalletProvider({ children }: { children: React.ReactNode }){
 
   const buyPosition = useCallback(async ({ marketId, teamId, amount, key, outcomeId }: any)=>{
     if (!BETTING_VAULT_ADDRESS) throw new Error('Betting vault not configured');
+    const localMarket = ALL_MARKETS.find((m)=> Number(m.marketId) === Number(marketId));
+    if (localMarket?.closeTime && Date.now() >= localMarket.closeTime) throw new Error('Betting is closed for this fixture');
     const client = await getWalletClient();
     const [account] = await client.getAddresses();
     // simulate first: a non-open / resolved market reverts BEFORE signing (no gas burned)

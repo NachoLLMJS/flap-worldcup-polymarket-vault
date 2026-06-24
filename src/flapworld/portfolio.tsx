@@ -435,37 +435,62 @@ function PfEmpty({ title, sub, cta, onCta }){
 /* ---------- tax rewards ---------- */
 function TaxRewardsCard({ taxRewards, onClaimTaxRewards, onRefreshTaxRewards }){
   const [phase, setPhase] = useState('idle');
-  const claimable = 0;
-  const canClaim = false;
-  const claim = async ()=>{};
+  const [claimErr, setClaimErr] = useState('');
+  const claimable = Number(taxRewards?.claimableBnb || 0);
+  const activeBets = Number(taxRewards?.activeBets || 0);
+  const bettingRewardsReceived = Number(taxRewards?.totalTaxRewardsReceivedBnb || 0);
+  const flapVaultBalance = Number(taxRewards?.flapVaultBalanceBnb || 0);
+  const canClaim = claimable > 0 && phase === 'idle';
+  const claim = async ()=>{
+    if (!canClaim) return;
+    setPhase('confirming');
+    setClaimErr('');
+    try {
+      await onClaimTaxRewards?.();
+      await onRefreshTaxRewards?.();
+      setPhase('idle');
+    } catch (err:any) {
+      setClaimErr(err?.shortMessage || err?.message || 'Could not claim tax rewards');
+      setPhase('idle');
+    }
+  };
+  const statusCopy = canClaim
+    ? 'You have claimable tax rewards. Claim sends a wallet transaction.'
+    : activeBets > 0
+      ? 'Wallet has active bets. Tax rewards become claimable only when this contract reports a positive claimable balance.'
+      : 'Place a bet and hold POLYFLAP to become eligible when tax rewards are available.';
   return (
-    <div className="mb-4 overflow-hidden rounded-2xl border border-acid/25 bg-ink-900 p-4">
+    <div className="rounded-3xl border border-acid/25 bg-ink-900 p-5 sm:p-6">
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
             <span className="text-acid"><Icon.bolt/></span>
             <h2 className="font-display text-xl text-white">Tax rewards</h2>
           </div>
-          <p className="mt-1 text-sm text-white/45">Disabled in the audited production package. Flap token/vault launch is pending, and no betting tax rewards are claimable from this contract version.</p>
+          <p className="mt-1 text-sm text-white/45">Live token and vault are configured. This panel reads the on-chain betting vault; eligible holders can claim here only when `claimableTaxRewards` is greater than zero.</p>
         </div>
-        <button onClick={onRefreshTaxRewards} disabled={taxRewards?.loading} className="rounded-lg bg-white/6 px-3 py-2 text-xs font-bold text-white/60 ring-1 ring-white/10 hover:text-acid">
+        <button onClick={onRefreshTaxRewards} disabled={taxRewards?.loading} className="rounded-lg bg-white/6 px-3 py-2 text-xs font-bold text-white/60 ring-1 ring-white/10 hover:text-acid disabled:cursor-wait disabled:opacity-50">
           {taxRewards?.loading ? 'Syncing…' : 'Refresh'}
         </button>
       </div>
       <div className="mt-4 grid gap-3 sm:grid-cols-4">
         <div className="rounded-xl bg-white/5 p-3"><div className="text-[10px] uppercase tracking-wider text-white/35">Claimable</div><div className="font-mono mt-1 text-2xl text-acid tnum">{claimable.toFixed(6)}</div><div className="text-xs text-white/35">BNB</div></div>
-        <div className="rounded-xl bg-white/5 p-3"><div className="text-[10px] uppercase tracking-wider text-white/35">Epoch</div><div className="font-mono mt-1 text-xl text-white tnum">{taxRewards?.previousEpoch ?? '—'}</div><div className="text-xs text-white/35">last closed</div></div>
-        <div className="rounded-xl bg-white/5 p-3"><div className="text-[10px] uppercase tracking-wider text-white/35">Active bets</div><div className="font-mono mt-1 text-xl text-white tnum">{taxRewards?.activeBets ?? 0}</div><div className="text-xs text-white/35">eligibility gate</div></div>
+        <div className="rounded-xl bg-white/5 p-3"><div className="text-[10px] uppercase tracking-wider text-white/35">Flap vault BNB</div><div className="font-mono mt-1 text-xl text-white tnum">{flapVaultBalance.toFixed(4)}</div><div className="text-xs text-white/35">vault balance</div></div>
+        <div className="rounded-xl bg-white/5 p-3"><div className="text-[10px] uppercase tracking-wider text-white/35">Active bets</div><div className="font-mono mt-1 text-xl text-white tnum">{activeBets}</div><div className="text-xs text-white/35">eligibility gate</div></div>
         <div className="rounded-xl bg-white/5 p-3"><div className="text-[10px] uppercase tracking-wider text-white/35">Volume</div><div className="font-mono mt-1 text-xl text-white tnum">{Number(taxRewards?.totalUserWageredBnb || 0).toFixed(4)}</div><div className="text-xs text-white/35">BNB wagered</div></div>
       </div>
-      {taxRewards?.error && <div className="mt-3 rounded-xl bg-down/10 px-3 py-2 text-sm text-down ring-1 ring-down/20">{taxRewards.error}</div>}
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        <div className="rounded-xl bg-white/[0.04] px-3 py-2 text-sm text-white/55">{statusCopy}</div>
+        <div className="rounded-xl bg-white/[0.04] px-3 py-2 text-sm text-white/55">Betting rewards received by claim contract: <span className="font-mono text-white">{bettingRewardsReceived.toFixed(6)} BNB</span></div>
+      </div>
+      {(taxRewards?.error || claimErr) && <div className="mt-3 rounded-xl bg-down/10 px-3 py-2 text-sm text-down ring-1 ring-down/20">{claimErr || taxRewards.error}</div>}
       <div className="mt-3 grid gap-2 font-mono text-[10px] text-white/35 sm:grid-cols-3">
         <a className="truncate rounded-lg bg-white/5 px-2 py-1.5 hover:text-acid" href={`https://bscscan.com/address/${VAULT_ADDRESS}`} target="_blank" rel="noreferrer">Flap vault {VAULT_ADDRESS ? VAULT_ADDRESS.slice(0,6)+'…'+VAULT_ADDRESS.slice(-4) : 'unset'}</a>
         <a className="truncate rounded-lg bg-white/5 px-2 py-1.5 hover:text-acid" href={`https://bscscan.com/address/${BETTING_VAULT_ADDRESS}`} target="_blank" rel="noreferrer">Betting vault {BETTING_VAULT_ADDRESS ? BETTING_VAULT_ADDRESS.slice(0,6)+'…'+BETTING_VAULT_ADDRESS.slice(-4) : 'unset'}</a>
         <a className="truncate rounded-lg bg-white/5 px-2 py-1.5 hover:text-acid" href={`https://bscscan.com/address/${FLAP_TOKEN_ADDRESS}`} target="_blank" rel="noreferrer">Token {FLAP_TOKEN_ADDRESS ? FLAP_TOKEN_ADDRESS.slice(0,6)+'…'+FLAP_TOKEN_ADDRESS.slice(-4) : 'unset'}</a>
       </div>
       <button onClick={claim} disabled={!canClaim} className={`mt-4 h-11 w-full rounded-xl font-bold transition ${canClaim?'bg-acid text-ink-950 hover:brightness-110':'bg-white/6 text-white/35 cursor-not-allowed'}`}>
-        {phase==='confirming' ? 'Confirm in wallet…' : 'Tax rewards disabled in audited package'}
+        {phase==='confirming' ? 'Confirm in wallet…' : canClaim ? `Claim ${claimable.toFixed(6)} BNB tax rewards` : 'No claimable tax rewards yet'}
       </button>
     </div>
   );

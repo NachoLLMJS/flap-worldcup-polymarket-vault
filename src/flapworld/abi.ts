@@ -99,6 +99,11 @@ export const bettingAbi = [
     outputs: [{ name: '', type: 'uint256' }],
   },
   {
+    type: 'function', name: 'totalTaxRewardsReceived', stateMutability: 'view',
+    inputs: [],
+    outputs: [{ name: '', type: 'uint256' }],
+  },
+  {
     type: 'function', name: 'getUserBettingStats', stateMutability: 'view',
     inputs: [{ name: 'user', type: 'address' }],
     outputs: [

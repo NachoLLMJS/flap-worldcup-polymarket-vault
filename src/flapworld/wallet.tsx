@@ -13,7 +13,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { PrivyProvider, usePrivy, useWallets } from '@privy-io/react-auth';
 import { bsc } from 'viem/chains';
 import { createPublicClient, createWalletClient, custom, http, parseEther, formatEther, parseAbiItem, isAddress } from 'viem';
-import { PRIVY_APP_ID, PRIVY_CLIENT_ID, BETTING_VAULT_ADDRESS, BSC_RPC_URL, BSC_CHAIN_ID, BETTING_VAULT_DEPLOY_BLOCK } from '../lib/env';
+import { PRIVY_APP_ID, PRIVY_CLIENT_ID, BETTING_VAULT_ADDRESS, BSC_RPC_URL, BSC_CHAIN_ID, BETTING_VAULT_DEPLOY_BLOCK, VAULT_ADDRESS } from '../lib/env';
 import { pickBscWallet, pickTwitterProfile, type BscWalletLike } from '../features/wallet/walletHelpers';
 import { bettingAbi } from './abi';
 import { readBetActivity, recordBetActivity } from '../features/betting/activity';
@@ -280,7 +280,7 @@ export function MockWalletProvider({ children }: { children: React.ReactNode }){
     setActivity(a=>[{ id:'a'+(_aid++), type:'taxClaim', amount:0, ts:Date.now(), tx:txHash() }, ...a]);
   },[]);
   const refreshTaxRewards = useCallback(()=>{},[]);
-  const taxRewards = useMemo(()=>({ claimableBnb: 0, claimableWei: '0', currentEpoch: null, activeBets: 0, totalUserWageredBnb: 0, loading: false, error: null }),[]);
+  const taxRewards = useMemo(()=>({ claimableBnb: 0, claimableWei: '0', currentEpoch: null, activeBets: 0, totalUserWageredBnb: 0, totalTaxRewardsReceivedBnb: 0, flapVaultBalanceBnb: 0, loading: false, error: null }),[]);
 
   const api = useMemo<WalletApi>(()=>({ mode:'mock', wallet, positions, activity, connect, disconnect, buyPosition, sellPosition, sendWalletBnb, claimMarket, claimTaxRewards, refreshTaxRewards, taxRewards, resolveMarket }),[wallet,positions,activity,connect,disconnect,buyPosition,sellPosition,sendWalletBnb,claimMarket,claimTaxRewards,refreshTaxRewards,taxRewards,resolveMarket]);
   return <WalletContext.Provider value={api}>{children}</WalletContext.Provider>;
@@ -300,6 +300,8 @@ function LiveWalletProvider({ children }: { children: React.ReactNode }){
     previousEpoch: null,
     activeBets: 0,
     totalUserWageredBnb: 0,
+    totalTaxRewardsReceivedBnb: 0,
+    flapVaultBalanceBnb: 0,
     loading: false,
     error: null,
   });
@@ -317,10 +319,12 @@ function LiveWalletProvider({ children }: { children: React.ReactNode }){
     setTaxRewards((r:any)=>({ ...r, loading: true, error: null }));
     try {
       const account = address as `0x${string}`;
-      const [claimableWei, currentEpoch, stats] = await Promise.all([
+      const [claimableWei, currentEpoch, stats, totalTaxRewardsReceived, flapVaultBalance] = await Promise.all([
         publicClient.readContract({ address: BETTING_VAULT_ADDRESS, abi: bettingAbi, functionName:'claimableTaxRewards', args:[account] }) as Promise<bigint>,
         publicClient.readContract({ address: BETTING_VAULT_ADDRESS, abi: bettingAbi, functionName:'currentEpoch' }) as Promise<bigint>,
         publicClient.readContract({ address: BETTING_VAULT_ADDRESS, abi: bettingAbi, functionName:'getUserBettingStats', args:[account] }) as Promise<any>,
+        publicClient.readContract({ address: BETTING_VAULT_ADDRESS, abi: bettingAbi, functionName:'totalTaxRewardsReceived' }) as Promise<bigint>,
+        VAULT_ADDRESS ? publicClient.getBalance({ address: VAULT_ADDRESS }) : Promise.resolve(0n),
       ]);
       setTaxRewards({
         claimableWei: claimableWei.toString(),
@@ -329,6 +333,8 @@ function LiveWalletProvider({ children }: { children: React.ReactNode }){
         previousEpoch: currentEpoch > 0n ? Number(currentEpoch - 1n) : null,
         totalUserWageredBnb: Number(formatEther(stats?.[0] || 0n)),
         activeBets: Number(stats?.[1] || 0n),
+        totalTaxRewardsReceivedBnb: Number(formatEther(totalTaxRewardsReceived || 0n)),
+        flapVaultBalanceBnb: Number(formatEther(flapVaultBalance || 0n)),
         loading: false,
         error: null,
       });
@@ -508,14 +514,17 @@ function LiveWalletProvider({ children }: { children: React.ReactNode }){
 
   const claimTaxRewards = useCallback(async ()=>{
     if (!BETTING_VAULT_ADDRESS) throw new Error('Betting vault not configured');
+    const claimableWei = BigInt(taxRewards.claimableWei || '0');
+    if (claimableWei <= 0n) throw new Error('No claimable tax rewards for this wallet yet');
     const client = await getWalletClient();
     const [account] = await client.getAddresses();
     await publicClient.simulateContract({ account, address: BETTING_VAULT_ADDRESS, abi: bettingAbi, functionName:'claimTaxRewards', args:[] });
     const hash = await client.writeContract({ account, address: BETTING_VAULT_ADDRESS, abi: bettingAbi, functionName:'claimTaxRewards', args:[] });
+    await publicClient.waitForTransactionReceipt({ hash });
     setActivity(a=>[{ id:'a'+(_aid++), type:'taxClaim', amount: taxRewards.claimableBnb || 0, ts:Date.now(), tx: shortAddr(hash) }, ...a]);
     await refreshTaxRewards();
     refreshBalance();
-  },[bscWallet, refreshBalance, refreshTaxRewards, taxRewards.claimableBnb]);
+  },[bscWallet, refreshBalance, refreshTaxRewards, taxRewards.claimableBnb, taxRewards.claimableWei]);
 
   const sendWalletBnb = useCallback(async (to: string, amount: string)=>{
     const destination = String(to || '').trim();

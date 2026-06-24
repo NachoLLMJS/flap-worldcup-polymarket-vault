@@ -484,14 +484,14 @@ function AboutPage({ setRoute }){
     { k:t2('Markets','市场'), v:t2('World Cup 2026','2026 世界杯') },
     { k:t2('Leaderboard','排行榜'), v:t2('On-chain top bettors','链上投注排行榜') },
     { k:t2('Factory','工厂'), v:t2('Audited production','已审计正式版') },
-    { k:t2('Token/Vault','代币/金库'), v:t2('Pending Flap launch','等待 Flap 发射') },
+    { k:t2('Token/Vault','代币/金库'), v:t2('Live on BNB Chain','已在 BNB Chain 上线') },
     { k:t2('Custody','托管'), v:t2('Non-custodial','非托管') },
   ];
   const productCards = [
     {
       n:'01',
       title:t2('Audited World Cup markets','已审计的世界杯市场'),
-      body:t2('Polyflap now uses the audited production contract set on BNB Chain: a Flap-compatible factory, beacon-backed vault implementation and auxiliary betting vault. The final POLYFLAP token and its Flap vault are still pending until the Flap launch creates them.','Polyflap 现在使用 BNB Chain 上已审计的正式合约：兼容 Flap 的工厂、Beacon 支持的金库实现，以及辅助投注金库。最终 POLYFLAP 代币及其 Flap 金库仍需等待 Flap 发射创建。'),
+      body:t2('Polyflap now uses the audited live contract set on BNB Chain: the POLYFLAP token, Flap vault clone, Flap-compatible factory, beacon-backed vault implementation and auxiliary betting vault.','Polyflap 现在使用 BNB Chain 上已审计的线上合约：POLYFLAP 代币、Flap 金库克隆、兼容 Flap 的工厂、Beacon 支持的金库实现，以及辅助投注金库。'),
     },
     {
       n:'02',
@@ -529,7 +529,7 @@ function AboutPage({ setRoute }){
   ];
   const chapters = [
     { n:'01', t:t2('What Polyflap is now','现在的 Polyflap 是什么'), ps:[
-      t2('Polyflap is an audited, wallet-first World Cup prediction market running on BNB Chain. The production factory and auxiliary betting vault are deployed; the final POLYFLAP token and Flap vault will be added after the Flap launch creates them.','Polyflap 是运行在 BNB Chain 上、已审计、优先使用钱包的世界杯预测市场。正式工厂和辅助投注金库已部署；最终 POLYFLAP 代币和 Flap 金库将在 Flap 发射创建后加入。'),
+      t2('Polyflap is an audited, wallet-first World Cup prediction market running on BNB Chain. The POLYFLAP token, Flap vault, production factory and auxiliary betting vault are deployed and configured.','Polyflap 是运行在 BNB Chain 上、已审计、优先使用钱包的世界杯预测市场。POLYFLAP 代币、Flap 金库、正式工厂和辅助投注金库均已部署并配置。'),
       t2('The product should feel simple for normal football fans, but the important money movement remains verifiable through wallet signatures and public chain reads.','产品应让普通足球球迷也能轻松使用，同时关键资金流通过钱包签名和公开链上读取保持可验证。'),
     ] },
     { n:'02', t:t2('How users enter','用户如何进入'), ps:[
@@ -569,8 +569,8 @@ function AboutPage({ setRoute }){
     ['Beacon', FLAP_VAULT_BEACON_ADDRESS],
     ['Betting vault', BETTING_VAULT_ADDRESS],
     ['WorldCupViewer', WORLD_CUP_VIEWER_ADDRESS],
-    ['POLYFLAP token', FLAP_TOKEN_ADDRESS || 'Pending Flap launch'],
-    ['Flap vault', VAULT_ADDRESS || 'Pending Flap launch'],
+    ['POLYFLAP token', FLAP_TOKEN_ADDRESS || 'Not configured'],
+    ['Flap vault', VAULT_ADDRESS || 'Not configured'],
   ];
   const short = (v)=> typeof v === 'string' && v.startsWith('0x') ? `${v.slice(0,6)}…${v.slice(-4)}` : v;
   const scan = (v)=> typeof v === 'string' && v.startsWith('0x') ? `https://bscscan.com/address/${v}` : undefined;

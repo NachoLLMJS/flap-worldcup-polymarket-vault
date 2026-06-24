@@ -14,7 +14,7 @@ This is a real BSC mainnet preview deployment of `WorldCupPolymarketVault`.
 
 ## Important limitation
 
-This was deployed with `taxToken = address(0)` because the real Flap tax token has not launched yet. Therefore:
+This historical preview was deployed with `taxToken = address(0)` before the real Flap tax token launched. Therefore:
 
 - `recoverNative(recipient, amountWei)` is usable by the Guardian for native BNB recovery.
 - `recoverTaxToken(recipient, amount)` is intentionally disabled by `tax token not configured` until a future deployment with the real tax token.

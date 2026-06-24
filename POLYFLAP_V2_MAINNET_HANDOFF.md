@@ -19,4 +19,8 @@ Important active addresses:
 - WorldCupViewer: `0x00036192958C2aaAF9F445d3Cdc2979995EA333e`
 - Dev/operator: `0x0358D3d32F4967FeB373325E20412F494071c5dA`
 
-Final token and final Flap vault clone remain pending until the Flap launch creates them.
+Final token and final Flap vault clone are live from the Flap launch:
+
+- POLYFLAP token: `0x45f9Aa71935DbCBF0D122283B52d6C421C6f7777`
+- Flap vault clone: `0x770171B5E6CDe9eFD9D0bAa7aed393395A2872e8`
+- setPolyflapToken tx: `0x8e440732f6cbdd742137c61b1b489c2e7e92aa1619937f39e4ef52674f1c5889`

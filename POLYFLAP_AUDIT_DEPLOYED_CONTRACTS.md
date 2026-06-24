@@ -2,7 +2,7 @@
 
 Network: BNB Smart Chain mainnet (chainId 56)
 
-These are the audited production contracts deployed for the Flap factory handoff. The final POLYFLAP token and final Flap vault clone are **not launched yet** and must remain empty/TBD in web placeholders until the Flap launch creates them.
+These are the audited production contracts deployed for the live Flap launch. The final POLYFLAP token and final Flap vault clone are now live and configured in the web placeholders.
 
 ## Active production contracts
 
@@ -17,13 +17,17 @@ These are the audited production contracts deployed for the Flap factory handoff
 | Guardian | `0x9e27098dcD8844bcc6287a557E0b4D09C86B8a4b` | n/a |
 | Fee wallet | `0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e` | n/a |
 
-## Pending final Flap launch values
-
-Leave these empty until the real Flap launch creates them:
+## Final Flap launch values
 
 ```env
-VITE_FLAP_TOKEN_ADDRESS=
-VITE_FLAP_VAULT_ADDRESS=
+VITE_FLAP_TOKEN_ADDRESS=0x45f9Aa71935DbCBF0D122283B52d6C421C6f7777
+VITE_FLAP_VAULT_ADDRESS=0x770171B5E6CDe9eFD9D0bAa7aed393395A2872e8
+```
+
+setPolyflapToken was executed on the betting vault and verified on-chain:
+
+```text
+0x8e440732f6cbdd742137c61b1b489c2e7e92aa1619937f39e4ef52674f1c5889
 ```
 
 ## Flap launch data
@@ -65,10 +69,10 @@ Local report:
 
 Verification result: PASS.
 
-## Launch-day TODO after Flap creates token/vault
+## Launch-day completion
 
-1. Fill `VITE_FLAP_TOKEN_ADDRESS`.
-2. Fill `VITE_FLAP_VAULT_ADDRESS`.
-3. If product design requires the betting contract to know the token address, call `setPolyflapToken(NEW_TOKEN_ADDRESS)` on `0x6013Cdc9A6300CE133B418283bBfe206B0aE858d` and verify readback.
-4. Rebuild/redeploy the frontend.
-5. Ask Flap for the Low Risk badge after the real token is live.
+1. `VITE_FLAP_TOKEN_ADDRESS` filled.
+2. `VITE_FLAP_VAULT_ADDRESS` filled.
+3. `setPolyflapToken` called on `0x6013Cdc9A6300CE133B418283bBfe206B0aE858d` and readback verified.
+4. Frontend rebuild/redeploy is ready from this repository.
+5. Next external step: ask Flap for the Low Risk badge now that the real token is live.

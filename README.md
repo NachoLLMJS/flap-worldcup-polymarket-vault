@@ -143,8 +143,8 @@ This repository contains both the customer-facing frontend and the Solidity work
 
 | Contract | Address |
 | --- | --- |
-| POLYFLAP token | `TBD after Flap launch` |
-| Flap vault clone | `TBD after Flap launch` |
+| POLYFLAP token | `0x45f9Aa71935DbCBF0D122283B52d6C421C6f7777` |
+| Flap vault clone | `0x770171B5E6CDe9eFD9D0bAa7aed393395A2872e8` |
 | WorldCupBettingVault production | `0x6013Cdc9A6300CE133B418283bBfe206B0aE858d` |
 | WorldCupPolymarketVault implementation production | `0x71FF865C9477DFd3D40e3AC21fcbcc8c24B64CC6` |
 | WorldCupPolymarketVaultBeacon production | `0x7eb082a4f8461f1Ede14D63155a5da9Da3145Ae1` |
@@ -154,7 +154,7 @@ This repository contains both the customer-facing frontend and the Solidity work
 | Guardian | `0x9e27098dcD8844bcc6287a557E0b4D09C86B8a4b` |
 | Fee wallet | `0x8e49F0C611F3AE5D651A2D92169C63Cd5a579e2e` |
 
-These are the final audited production contracts deployed for the Flap factory handoff. The final POLYFLAP token and Flap vault clone are intentionally empty/TBD because they will be created through Flap on launch day.
+These are the final audited production contracts deployed for the live Flap launch. The POLYFLAP token and Flap vault clone are now configured in the frontend environment.
 
 Flap factory to use for launch:
 

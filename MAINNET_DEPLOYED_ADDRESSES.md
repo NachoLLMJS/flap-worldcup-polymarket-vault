@@ -16,4 +16,8 @@ Production contracts:
 - Betting vault: `0x6013Cdc9A6300CE133B418283bBfe206B0aE858d`
 - WorldCupViewer: `0x00036192958C2aaAF9F445d3Cdc2979995EA333e`
 
-Token and final Flap vault are intentionally TBD/empty until the Flap launch creates them.
+Token and final Flap vault are live from the Flap launch:
+
+- POLYFLAP token: `0x45f9Aa71935DbCBF0D122283B52d6C421C6f7777`
+- Flap vault clone: `0x770171B5E6CDe9eFD9D0bAa7aed393395A2872e8`
+- setPolyflapToken tx: `0x8e440732f6cbdd742137c61b1b489c2e7e92aa1619937f39e4ef52674f1c5889`
